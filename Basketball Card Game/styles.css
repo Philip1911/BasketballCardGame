@@ -2495,9 +2495,16 @@ img {
 }
 
 .team-grid.players-mode {
-  grid-template-columns: repeat(auto-fit, minmax(var(--game-card-width), var(--game-card-width)));
-  justify-content: start;
+  grid-template-columns: repeat(auto-fill, var(--game-card-width));
+  justify-content: space-between;
   justify-items: start;
+  align-content: flex-start;
+  width: 100%;
+}
+
+.team-grid.players-mode .card-shell {
+  width: var(--game-card-width);
+  justify-self: start;
 }
 
 .team-card,
@@ -2928,26 +2935,26 @@ img {
 
 .detail-topbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: flex-start;
-  column-gap: 0.75rem;
+  column-gap: 1rem;
   row-gap: 0.5rem;
   justify-content: stretch;
   width: 100%;
 }
 
-.detail-topbar .secondary-btn {
+.detail-bulk-toggle,
+.detail-back-btn {
   align-self: start;
+}
+
+.detail-bulk-toggle {
   justify-self: end;
 }
 
-.detail-topbar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: flex-end;
-  gap: 0.55rem;
-  min-width: 0;
+.detail-back-btn {
+  justify-self: end;
+  margin-left: 0.45rem;
 }
 
 .detail-team-copy h3 {
@@ -3612,10 +3619,16 @@ img {
   display: block;
   position: relative;
   z-index: 2;
+  opacity: 0;
   transform-origin: center top;
+  transition: opacity 180ms ease;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
+}
+
+.player-art.image-ready img {
+  opacity: 1;
 }
 
 .player-art-fallback {
@@ -3631,6 +3644,10 @@ img {
   z-index: 1;
   opacity: 0;
   pointer-events: none;
+}
+
+.player-art:not(.image-ready):not(.image-fallback) .player-art-fallback {
+  opacity: 0.24;
 }
 
 .result-top .status-pill,
@@ -3656,7 +3673,8 @@ img {
   filter: grayscale(1) saturate(0.12) brightness(0.9) blur(1.05px);
 }
 
-.team-detail-shell .collection-card.missing {
+.team-detail-shell .collection-card.missing,
+.team-grid.players-mode .collection-card.missing {
   border-color: rgba(199, 210, 228, 0.24);
   background:
     linear-gradient(180deg, rgba(176, 185, 203, 0.26) 0%, rgba(118, 129, 150, 0.24) 52%, rgba(74, 83, 99, 0.28) 100%);
@@ -3665,29 +3683,34 @@ img {
     0 16px 28px rgba(2, 5, 12, 0.18);
 }
 
-.team-detail-shell .collection-card.missing .player-art {
+.team-detail-shell .collection-card.missing .player-art,
+.team-grid.players-mode .collection-card.missing .player-art {
   background:
     radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.18) 0%, transparent 34%),
     linear-gradient(180deg, rgba(211, 218, 230, 0.26) 0%, transparent 28%),
     linear-gradient(160deg, rgba(164, 174, 190, 0.84) 0%, rgba(118, 128, 146, 0.9) 100%);
 }
 
-.team-detail-shell .collection-card.missing .player-art::before {
+.team-detail-shell .collection-card.missing .player-art::before,
+.team-grid.players-mode .collection-card.missing .player-art::before {
   background: linear-gradient(180deg, transparent, rgba(17, 22, 32, 0.72));
 }
 
-.team-detail-shell .collection-card.missing .player-art-fallback {
+.team-detail-shell .collection-card.missing .player-art-fallback,
+.team-grid.players-mode .collection-card.missing .player-art-fallback {
   background:
     radial-gradient(circle at 50% 28%, rgba(244, 248, 255, 0.18) 0%, transparent 18%),
     linear-gradient(145deg, rgba(174, 182, 196, 0.82) 0%, rgba(121, 130, 147, 0.92) 100%);
 }
 
-.team-detail-shell .collection-card.missing .card-body {
+.team-detail-shell .collection-card.missing .card-body,
+.team-grid.players-mode .collection-card.missing .card-body {
   background: rgba(207, 214, 226, 0.34);
   border-color: rgba(255, 255, 255, 0.22);
 }
 
-.team-detail-shell .collection-card.legend-card.missing .card-body {
+.team-detail-shell .collection-card.legend-card.missing .card-body,
+.team-grid.players-mode .collection-card.legend-card.missing .card-body {
   background:
     linear-gradient(180deg, rgba(244, 246, 250, 0) 0%, rgba(231, 235, 241, 0.08) 24%, rgba(220, 226, 235, 0.58) 60%, rgba(210, 216, 226, 0.9) 84%, rgba(201, 208, 220, 0.98) 100%);
   border: 0;
@@ -3698,16 +3721,23 @@ img {
 .team-detail-shell .collection-card.missing .player-name,
 .team-detail-shell .collection-card.missing .card-team-name,
 .team-detail-shell .collection-card.missing .card-detail-row,
-.team-detail-shell .collection-card.missing .detail-pill-label {
+.team-detail-shell .collection-card.missing .detail-pill-label,
+.team-grid.players-mode .collection-card.missing .player-name,
+.team-grid.players-mode .collection-card.missing .card-team-name,
+.team-grid.players-mode .collection-card.missing .card-detail-row,
+.team-grid.players-mode .collection-card.missing .detail-pill-label {
   color: rgba(21, 31, 49, 0.82);
 }
 
 .team-detail-shell .collection-card.missing .card-team-mark,
-.team-detail-shell .collection-card.missing .card-team-logo {
+.team-detail-shell .collection-card.missing .card-team-logo,
+.team-grid.players-mode .collection-card.missing .card-team-mark,
+.team-grid.players-mode .collection-card.missing .card-team-logo {
   filter: grayscale(1) saturate(0.1) brightness(0.92);
 }
 
-.team-detail-shell .collection-card.missing::after {
+.team-detail-shell .collection-card.missing::after,
+.team-grid.players-mode .collection-card.missing::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -3718,7 +3748,8 @@ img {
     linear-gradient(180deg, rgba(8, 11, 18, 0.08), rgba(8, 11, 18, 0.18));
 }
 
-.team-detail-shell .collection-card.missing .status-pill.duplicate {
+.team-detail-shell .collection-card.missing .status-pill.duplicate,
+.team-grid.players-mode .collection-card.missing .status-pill.duplicate {
   background: rgba(35, 44, 60, 0.82);
   border-color: rgba(255, 255, 255, 0.14);
   color: #eef4ff;
@@ -4588,6 +4619,12 @@ img {
   border: 1px solid rgba(226, 93, 115, 0.16);
 }
 
+.mini-action-note.new {
+  color: #d9f7ff;
+  background: rgba(55, 164, 255, 0.12);
+  border: 1px solid rgba(55, 164, 255, 0.18);
+}
+
 .card-topbar {
   align-items: flex-start;
 }
@@ -4769,6 +4806,83 @@ img {
     linear-gradient(180deg, rgba(12, 19, 34, 0.98), rgba(8, 13, 24, 0.98));
 }
 
+.modal-close-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.pack-modal-close-icon {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 8;
+}
+
+.mobile-sheet-backdrop {
+  z-index: 130;
+}
+
+.mobile-sheet-shell {
+  width: min(560px, calc(100vw - 1rem));
+  max-height: calc(100vh - 1rem);
+  max-height: calc(100svh - 1rem);
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(55, 164, 255, 0.14), transparent 24%),
+    radial-gradient(circle at 16% 18%, rgba(255, 151, 82, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(12, 19, 34, 0.98), rgba(8, 13, 24, 0.98));
+}
+
+.mobile-sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.mobile-sheet-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.mobile-sheet-body {
+  display: grid;
+  gap: 0.8rem;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.2rem;
+}
+
+.mobile-sheet-footer {
+  display: flex;
+  justify-content: stretch;
+}
+
+.mobile-sheet-footer .action-btn {
+  width: 100%;
+}
+
+.mobile-sheet-body .filter-popover-panel,
+.mobile-sheet-body .bulk-sell-panel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.mobile-sheet-body .bulk-sell-summary,
+.mobile-sheet-body .bulk-sell-controls,
+.mobile-sheet-body .bulk-sell-filter-grid,
+.mobile-sheet-body .filter-popover-grid {
+  grid-template-columns: 1fr;
+}
+
 #packModalShell {
   --pack-modal-nav-gutter: 4.7rem;
 }
@@ -4933,11 +5047,9 @@ img {
 .team-picker-shell {
   width: min(980px, calc(100vw - 1.4rem));
   max-height: min(88vh, 900px);
-  max-height: min(92svh, 900px);
   padding: 1.1rem;
   display: grid;
   gap: 1rem;
-  overflow: hidden;
   background:
     radial-gradient(circle at top right, rgba(55, 164, 255, 0.16), transparent 28%),
     radial-gradient(circle at top left, rgba(157, 113, 255, 0.12), transparent 24%),
@@ -4951,19 +5063,17 @@ img {
 
 .team-picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 0.8rem;
   padding: 0.15rem 0.1rem 0.25rem;
   overflow: auto;
-  min-height: 0;
-  align-content: start;
 }
 
 .favorite-team-option {
   min-width: 0;
-  min-height: 104px;
-  padding: 0.7rem 0.55rem;
-  border-radius: 20px;
+  min-height: 132px;
+  padding: 0.85rem 0.7rem;
+  border-radius: 22px;
   border: 1px solid color-mix(in srgb, var(--team-primary, #6e85b7) 26%, rgba(255, 255, 255, 0.12));
   background:
     radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--team-secondary, #9ab8ff) 18%, rgba(255, 255, 255, 0.08)), transparent 34%),
@@ -4971,7 +5081,7 @@ img {
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
   text-align: center;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
@@ -4993,10 +5103,10 @@ img {
 }
 
 .favorite-team-option-logo {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-  padding: 0.5rem;
+  width: 74px;
+  height: 74px;
+  border-radius: 20px;
+  padding: 0.7rem;
   display: grid;
   place-items: center;
   background: rgba(255, 255, 255, 0.08);
@@ -5034,9 +5144,9 @@ img {
 }
 
 .favorite-team-option-name {
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  line-height: 1.12;
+  line-height: 1.16;
   color: #f4f8ff;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -5667,7 +5777,7 @@ img {
 
 .card-preview-shell {
   position: relative;
-  width: auto;
+  width: min(100%, 760px);
   padding: 0;
   display: grid;
   place-items: center;
@@ -5677,12 +5787,63 @@ img {
   backdrop-filter: none;
 }
 
+.card-preview-stage-shell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.card-preview-stage-shell.swipe-enabled {
+  touch-action: pan-y;
+}
+
+.card-preview-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 17, 29, 0.78);
+  color: #eff5ff;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  line-height: 1;
+  box-shadow: 0 14px 30px rgba(3, 8, 18, 0.28);
+  backdrop-filter: blur(14px);
+}
+
+.card-preview-nav.prev {
+  left: 0.6rem;
+}
+
+.card-preview-nav.next {
+  right: 0.6rem;
+}
+
+.card-preview-nav[hidden] {
+  display: none;
+}
+
 .card-preview-stage {
   display: grid;
   place-items: center;
+  justify-items: center;
   min-height: 0;
+  width: 100%;
   padding: 4.2rem 5rem 1rem;
   overflow: visible;
+  transition: transform 180ms cubic-bezier(0.2, 0.84, 0.2, 1), opacity 160ms ease;
+  transform: translate3d(var(--card-preview-swipe-x, 0), var(--card-preview-swipe-y, 0), 0) rotate(var(--card-preview-swipe-rotate, 0deg));
+  will-change: transform, opacity;
+}
+
+.card-preview-stage.is-swiping {
+  transition: none;
 }
 
 .card-preview-meta {
@@ -5737,6 +5898,251 @@ img {
 .pack-result-grid.loading-assets .flip-card.assets-pending {
   pointer-events: none;
   filter: saturate(0.94);
+}
+
+.pack-result-grid.mobile-pack-flow {
+  --mobile-pack-card-scale: 1.18;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 4.8rem);
+  gap: 0;
+}
+
+.pack-result-grid.mobile-pack-flow .card-shell {
+  justify-self: center;
+}
+
+.pack-result-grid.mobile-pack-overview-carousel {
+  --mobile-pack-overview-card-width: min(72vw, 220px);
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: stretch;
+  gap: 0.85rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0 0.35rem;
+  padding-inline: max(0.2rem, calc((100% - var(--mobile-pack-overview-card-width)) / 2));
+  scroll-padding-inline: max(0.2rem, calc((100% - var(--mobile-pack-overview-card-width)) / 2));
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.pack-result-grid.mobile-pack-overview-carousel > * {
+  scroll-snap-align: center;
+}
+
+.mobile-pack-overview-slide {
+  --game-card-width: var(--mobile-pack-overview-card-width);
+  flex: 0 0 var(--mobile-pack-overview-card-width);
+  width: var(--mobile-pack-overview-card-width);
+  display: grid;
+  align-content: start;
+}
+
+.mobile-pack-overview-card-shell {
+  width: 100%;
+  justify-self: stretch;
+}
+
+.mobile-pack-overview-card-shell .card-action-row {
+  min-height: 2rem;
+}
+
+.mobile-pack-overview-card-shell .pack-card-actions {
+  width: 100%;
+  justify-content: center;
+}
+
+.mobile-pack-overview-divider {
+  flex: 0 0 min(27vw, 92px);
+  width: min(27vw, 92px);
+  min-height: calc((var(--mobile-pack-overview-card-width) * var(--game-card-height-ratio)) + 2.5rem);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.55rem;
+  padding: 0.9rem 0.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at top, rgba(240, 196, 93, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(17, 27, 45, 0.96), rgba(9, 14, 26, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 14px 28px rgba(4, 10, 20, 0.24);
+  text-align: center;
+}
+
+.mobile-pack-overview-divider strong {
+  font-size: 1.45rem;
+  line-height: 1;
+  font-family: "Sora", "Aptos Display", sans-serif;
+}
+
+.mobile-pack-overview-divider span:last-child {
+  color: rgba(206, 219, 239, 0.78);
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.mobile-pack-stage {
+  position: relative;
+  width: min(100%, calc((var(--game-card-width) * var(--mobile-pack-card-scale)) + 4.2rem));
+  min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 4.4rem);
+  margin: 0 auto;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 1rem 1rem 1.35rem;
+}
+
+.mobile-pack-stack {
+  position: absolute;
+  inset: 0 0 2.1rem;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.mobile-pack-stack-card {
+  position: absolute;
+  width: var(--game-card-width);
+  height: var(--card-face-height);
+  border-radius: 22px;
+  overflow: hidden;
+  opacity: calc(0.92 - (var(--stack-depth, 1) * 0.18));
+  transform:
+    translateY(calc(var(--stack-depth, 1) * 10px))
+    rotate(var(--stack-rotation, 0deg))
+    scale(calc(var(--mobile-pack-card-scale) - (var(--stack-depth, 1) * 0.08)));
+  transform-origin: center center;
+  box-shadow:
+    0 18px 34px rgba(6, 10, 18, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.mobile-pack-stack-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.18), transparent 16%),
+    linear-gradient(180deg, rgba(255, 194, 145, 0.2), rgba(15, 20, 33, 0.16)),
+    linear-gradient(145deg, #f7994f, #cf5d21);
+  color: rgba(255, 249, 243, 0.96);
+}
+
+.mobile-pack-stack-face::before,
+.mobile-pack-stack-face::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  background: rgba(61, 23, 7, 0.88);
+}
+
+.mobile-pack-stack-face::before {
+  width: 120%;
+  height: 5px;
+  top: 50%;
+  left: -10%;
+}
+
+.mobile-pack-stack-face::after {
+  width: 5px;
+  height: 120%;
+  top: -10%;
+  left: 50%;
+}
+
+.mobile-pack-stack-face .card-back-mark {
+  width: 84px;
+  height: 84px;
+  font-size: 2rem;
+  border-width: 5px;
+}
+
+.mobile-pack-current-slot {
+  position: relative;
+  z-index: 2;
+  width: var(--game-card-width);
+  display: grid;
+  justify-items: center;
+  transition: transform 220ms cubic-bezier(0.2, 0.84, 0.2, 1), opacity 180ms ease, filter 200ms ease;
+  transform: translate3d(var(--mobile-swipe-x, 0), var(--mobile-swipe-y, 0), 0) rotate(var(--mobile-swipe-rotate, 0deg)) scale(var(--mobile-pack-card-scale));
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.mobile-pack-current-slot.is-revealed {
+  cursor: grab;
+}
+
+.mobile-pack-current-slot.mobile-pack-dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.mobile-pack-current-slot.mobile-pack-dismissing {
+  opacity: 0;
+  filter: blur(3px);
+}
+
+.mobile-pack-current-slot .card-shell {
+  width: var(--game-card-width);
+}
+
+.mobile-pack-current-slot .flip-card {
+  touch-action: pan-y;
+}
+
+.mobile-pack-flow .flip-card.pack-entry {
+  animation-delay: 0ms;
+}
+
+.mobile-pack-stage-footer {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.mobile-pack-stage-chip,
+.mobile-pack-stage-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.38rem 0.72rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  backdrop-filter: blur(12px);
+}
+
+.mobile-pack-stage-chip {
+  border: 1px solid rgba(232, 239, 249, 0.12);
+  background: rgba(17, 23, 36, 0.76);
+  color: rgba(224, 232, 246, 0.84);
+}
+
+.mobile-pack-stage-hint {
+  border: 1px solid rgba(255, 183, 124, 0.26);
+  background: rgba(245, 153, 79, 0.16);
+  color: #ffd9bd;
 }
 
 .flip-card {
@@ -6869,6 +7275,11 @@ img {
     --game-card-width: 162px;
   }
 
+  .hud-grid {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .brand-block {
     align-items: start;
   }
@@ -6881,32 +7292,52 @@ img {
     padding: 0.9rem;
   }
 
-  .team-picker-shell {
-    max-height: calc(100vh - 0.75rem);
-    max-height: calc(100svh - 0.75rem);
+  .mobile-sheet-shell {
+    width: min(100%, calc(100vw - 0.7rem));
+    max-height: calc(100vh - 0.7rem);
+    max-height: calc(100svh - 0.7rem);
     padding: 0.9rem;
+    gap: 0.8rem;
   }
 
-  .team-picker-grid {
-    grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
-    gap: 0.55rem;
+  .mobile-sheet-body {
+    padding-right: 0;
   }
 
-  .favorite-team-option {
-    min-height: 86px;
-    padding: 0.55rem 0.4rem;
-    border-radius: 18px;
+  .player-toolbar-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .favorite-team-option-logo {
-    width: 44px;
-    height: 44px;
-    padding: 0.35rem;
-    border-radius: 14px;
+  .player-toolbar-grid .collection-search-field,
+  .player-toolbar-grid .player-sort-field {
+    grid-column: 1 / -1;
   }
 
-  .favorite-team-option-name {
-    font-size: 0.72rem;
+  .player-toolbar-grid .toolbar-button-field .secondary-btn {
+    width: 100%;
+  }
+
+  .mobile-sheet-body .team-logo-filter-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .team-grid.players-mode {
+    justify-content: center;
+    justify-items: center;
+  }
+
+  .team-grid.players-mode .card-shell {
+    justify-self: center;
+  }
+
+  .pack-result-grid.mobile-pack-overview-carousel {
+    --mobile-pack-overview-card-width: min(76vw, 236px);
+    gap: 0.75rem;
+  }
+
+  .mobile-pack-overview-divider {
+    flex-basis: min(24vw, 88px);
+    width: min(24vw, 88px);
   }
 
   .pack-mode-tabs {
@@ -6929,6 +7360,28 @@ img {
     text-align: left;
   }
 
+  .pack-modal-close-icon {
+    display: inline-grid;
+    top: 0.8rem;
+    right: 0.8rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+  }
+
+  #closePackModal {
+    display: none;
+  }
+
+  #packModalShell .modal-actions {
+    padding-right: 2.85rem;
+    align-items: flex-start;
+  }
+
+  .modal-repeat-stack > * {
+    width: 100%;
+  }
+
   .profile-inline-controls {
     flex-direction: column;
     align-items: stretch;
@@ -6944,12 +7397,509 @@ img {
     width: 100%;
   }
 
+  .card-preview-shell {
+    width: min(100%, 430px);
+    gap: 0.55rem;
+  }
+
+  .card-preview-stage-shell {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "stage stage"
+      "prev next";
+    align-items: center;
+    row-gap: 0.7rem;
+  }
+
   .card-preview-stage {
-    padding: 2.5rem 1.2rem 0.7rem;
+    grid-area: stage;
+    padding: 2.5rem 0.45rem 0.7rem;
+  }
+
+  .card-preview-nav {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 132px;
+    height: auto;
+    min-height: 44px;
+    padding: 0.7rem 0.84rem;
+    border-radius: 16px;
+    font-size: 1.05rem;
+  }
+
+  .card-preview-nav.prev {
+    grid-area: prev;
+    left: auto;
+    justify-self: start;
+  }
+
+  .card-preview-nav.next {
+    grid-area: next;
+    right: auto;
+    justify-self: end;
   }
 
   .preview-card-shell {
     --preview-scale: 1.52;
+  }
+
+  .card-rarity-frame,
+  .legend-card .card-rarity-frame,
+  .blackmatter-card .card-rarity-frame,
+  .glass-showcase-card .card-rarity-frame {
+    inset: 0.06rem;
+  }
+
+  .card-rarity-text {
+    font-size: 3px;
+    letter-spacing: 0.54px;
+  }
+
+  .player-name,
+  .legend-card .player-name,
+  .blackmatter-card .player-name,
+  .glass-showcase-card .player-name {
+    font-size: 0.98rem;
+  }
+
+  .card-team-name,
+  .legend-card .card-team-name,
+  .blackmatter-card .card-team-name,
+  .glass-showcase-card .card-team-name {
+    font-size: 0.72rem;
+  }
+
+  .card-body {
+    gap: 0.18rem;
+    padding: 0.46rem 0.5rem 0.68rem;
+  }
+
+  .legend-card .card-body,
+  .blackmatter-card .card-body,
+  .glass-showcase-card .card-body {
+    gap: 0.14rem;
+    padding: 1rem 0.82rem 0.82rem;
+  }
+
+  .card-team-mark {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+
+  .card-team-line,
+  .legend-card .card-team-line,
+  .blackmatter-card .card-team-line,
+  .glass-showcase-card .card-team-line {
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 0.26rem;
+    min-height: 20px;
+  }
+
+  .rating-badge {
+    width: 2.28rem;
+  }
+
+  .rating-badge strong {
+    font-size: 1rem;
+  }
+
+  .rating-badge span {
+    font-size: 0.44rem;
+  }
+
+  .position-pill,
+  .jersey-pill,
+  .value-pill,
+  .legend-card .position-pill,
+  .legend-card .jersey-pill,
+  .legend-card .value-pill,
+  .blackmatter-card .position-pill,
+  .blackmatter-card .jersey-pill,
+  .blackmatter-card .value-pill,
+  .glass-showcase-card .position-pill,
+  .glass-showcase-card .jersey-pill,
+  .glass-showcase-card .value-pill {
+    font-size: 0.58rem;
+    gap: 0.14rem;
+  }
+
+  .detail-pill-label,
+  .legend-card .detail-pill-label {
+    font-size: 0.42rem;
+  }
+
+  .player-art-overlay .status-pill {
+    min-height: 18px;
+    padding: 0.16rem 0.34rem;
+    font-size: 0.48rem;
+  }
+}
+
+@media (max-width: 430px) {
+  :root {
+    --game-card-width: 140px;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    width: min(100% - 0.45rem, 1440px);
+    padding: 0.45rem 0 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .panel,
+  #profileView {
+    border-radius: 22px;
+  }
+
+  .workspace,
+  .topbar {
+    padding: 0.75rem;
+  }
+
+  .topbar {
+    gap: 0.75rem;
+  }
+
+  .brand-block {
+    align-items: flex-start;
+  }
+
+  .brand-copy {
+    min-width: 0;
+  }
+
+  .brand-ball {
+    width: 46px;
+    height: 46px;
+  }
+
+  .brand-copy h1 {
+    font-size: 1.22rem;
+  }
+
+  .nav-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 0.4rem;
+  }
+
+  .nav-tabs .tab-btn,
+  .pack-mode-tabs .tab-btn {
+    min-width: 0;
+    width: 100%;
+    padding: 0.72rem 0.4rem;
+    font-size: 0.82rem;
+  }
+
+  .topbar-side {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+
+  .hud-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .daily-menu-anchor {
+    width: 100%;
+  }
+
+  .daily-trigger {
+    width: 100%;
+    min-width: 0;
+    min-height: 60px;
+    padding: 0.68rem 0.8rem;
+  }
+
+  .daily-trigger strong {
+    font-size: 1.18rem;
+  }
+
+  .daily-popover {
+    width: min(100%, calc(100vw - 1rem));
+  }
+
+  .pack-mode-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .team-grid.players-mode,
+  .team-detail-shell .team-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+    justify-items: center;
+  }
+
+  .team-grid.players-mode .card-shell,
+  .team-detail-shell .team-cards .card-shell {
+    width: min(100%, var(--game-card-width));
+    justify-self: center;
+  }
+
+  .pack-store,
+  .pack-result-grid,
+  .team-grid.players-mode,
+  .team-detail-shell .team-cards,
+  .profile-editor-grid,
+  .profile-showcase-grid-steam {
+    gap: 0.65rem;
+  }
+
+  .pack-card {
+    padding: 0.58rem;
+  }
+
+  .pack-shot {
+    padding: 0.58rem;
+    border-radius: 18px;
+  }
+
+  .pack-card .action-btn {
+    padding: 0.7rem 0.75rem;
+    border-radius: 16px;
+    font-size: 0.84rem;
+  }
+
+  .team-detail-shell .team-cards {
+    padding: 0.82rem;
+    border-radius: 24px;
+  }
+
+  .modal-backdrop,
+  .card-preview-backdrop {
+    padding: 0.35rem;
+  }
+
+  .modal-shell,
+  .completion-shell,
+  .daily-reward-shell,
+  .team-picker-shell,
+  .profile-editor-shell,
+  .profile-achievements-shell {
+    width: calc(100vw - 0.5rem);
+    max-height: calc(100vh - 0.5rem);
+    max-height: calc(100svh - 0.5rem);
+    padding: 0.82rem;
+  }
+
+  #packModalShell {
+    --pack-modal-nav-gutter: 0.2rem;
+  }
+
+  #packModalShell .modal-head,
+  #packModalShell .modal-bottom-actions,
+  .reveal-set-progress-row,
+  .reveal-daily-progress-row {
+    padding-inline: 0.1rem;
+  }
+
+  .reveal-stage {
+    padding: 0.15rem 0.1rem 0.4rem;
+  }
+
+  .pack-result-grid.mobile-pack-flow {
+    --mobile-pack-card-scale: 1.28;
+    min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 3.85rem);
+  }
+
+  .pack-result-grid.mobile-pack-overview-carousel {
+    --mobile-pack-overview-card-width: min(74vw, 224px);
+    gap: 0.7rem;
+  }
+
+  .mobile-pack-overview-divider {
+    flex-basis: min(22vw, 78px);
+    width: min(22vw, 78px);
+    min-height: calc((var(--mobile-pack-overview-card-width) * var(--game-card-height-ratio)) + 2rem);
+    padding: 0.75rem 0.4rem;
+  }
+
+  .mobile-pack-stage {
+    width: min(100%, calc((var(--game-card-width) * var(--mobile-pack-card-scale)) + 1.25rem));
+    min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 3.55rem);
+    padding: 0.35rem 0 0.9rem;
+  }
+
+  .mobile-pack-stack-face .card-back-mark {
+    width: 72px;
+    height: 72px;
+    font-size: 1.72rem;
+  }
+
+  .mobile-pack-stage-footer {
+    gap: 0.4rem;
+  }
+
+  .mobile-pack-stage-chip,
+  .mobile-pack-stage-hint {
+    font-size: 0.7rem;
+    padding: 0.34rem 0.62rem;
+  }
+
+  .pack-modal-arrow {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    font-size: 1.6rem;
+  }
+
+  .pack-modal-arrow.prev {
+    left: 0.65rem;
+  }
+
+  .pack-modal-arrow.next {
+    right: 0.65rem;
+  }
+
+  .pack-modal-close-icon {
+    top: 0.65rem;
+    right: 0.65rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 13px;
+  }
+
+  .card-preview-stage {
+    padding: 1rem 0.4rem 0.3rem;
+  }
+
+  .card-preview-shell {
+    width: min(100%, 360px);
+  }
+
+  .preview-card-shell {
+    --preview-scale: 1.34;
+  }
+
+  .mobile-sheet-shell {
+    width: min(100%, calc(100vw - 0.45rem));
+    max-height: calc(100vh - 0.45rem);
+    max-height: calc(100svh - 0.45rem);
+    padding: 0.82rem;
+    border-radius: 24px;
+  }
+
+  .mobile-sheet-head {
+    gap: 0.7rem;
+  }
+
+  .mobile-sheet-head-actions {
+    gap: 0.42rem;
+  }
+
+  .mobile-sheet-body .team-logo-filter-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .card-rarity-frame,
+  .legend-card .card-rarity-frame,
+  .blackmatter-card .card-rarity-frame,
+  .glass-showcase-card .card-rarity-frame {
+    inset: 0.1rem;
+  }
+
+  .card-rarity-text {
+    font-size: 2.72px;
+    letter-spacing: 0.4px;
+  }
+
+  .player-name,
+  .legend-card .player-name,
+  .blackmatter-card .player-name,
+  .glass-showcase-card .player-name {
+    font-size: 0.88rem;
+    line-height: 1.04;
+  }
+
+  .card-team-name,
+  .legend-card .card-team-name,
+  .blackmatter-card .card-team-name,
+  .glass-showcase-card .card-team-name {
+    font-size: 0.64rem;
+  }
+
+  .card-body {
+    gap: 0.14rem;
+    padding: 0.4rem 0.44rem 0.6rem;
+  }
+
+  .legend-card .card-body,
+  .blackmatter-card .card-body,
+  .glass-showcase-card .card-body {
+    gap: 0.12rem;
+    padding: 0.9rem 0.72rem 0.72rem;
+  }
+
+  .card-team-mark {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+  }
+
+  .card-team-line,
+  .legend-card .card-team-line,
+  .blackmatter-card .card-team-line,
+  .glass-showcase-card .card-team-line {
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 0.22rem;
+    min-height: 18px;
+  }
+
+  .rating-badge {
+    width: 2rem;
+  }
+
+  .rating-badge strong {
+    font-size: 0.9rem;
+  }
+
+  .rating-badge span {
+    font-size: 0.4rem;
+  }
+
+  .position-pill,
+  .jersey-pill,
+  .value-pill,
+  .legend-card .position-pill,
+  .legend-card .jersey-pill,
+  .legend-card .value-pill,
+  .blackmatter-card .position-pill,
+  .blackmatter-card .jersey-pill,
+  .blackmatter-card .value-pill,
+  .glass-showcase-card .position-pill,
+  .glass-showcase-card .jersey-pill,
+  .glass-showcase-card .value-pill {
+    font-size: 0.52rem;
+    gap: 0.12rem;
+  }
+
+  .detail-pill-label,
+  .legend-card .detail-pill-label {
+    font-size: 0.38rem;
+  }
+
+  .player-art-overlay .status-pill {
+    min-height: 17px;
+    padding: 0.14rem 0.3rem;
+    font-size: 0.44rem;
+  }
+
+  .profile-editor-head {
+    flex-direction: column;
   }
 }
 
@@ -6994,14 +7944,14 @@ img {
 .profile-page {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
-  gap: 1rem;
+  gap: 0.9rem;
   align-items: start;
 }
 
 .profile-main-column,
 .profile-sidebar {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.75rem;
 }
 
 .profile-surface {
@@ -7024,7 +7974,13 @@ img {
 .profile-showcase-panel,
 .profile-badge-panel,
 .profile-achievement-summary-card {
-  padding: 1rem;
+  padding: 0.92rem;
+}
+
+.profile-showcase-panel,
+.profile-badge-panel {
+  display: grid;
+  gap: 0.72rem;
 }
 
 .profile-hero-top {
@@ -7154,15 +8110,16 @@ img {
 
 .profile-showcase-grid-steam {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, var(--game-card-width)));
-  justify-content: start;
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(var(--game-card-width), var(--game-card-width)));
+  justify-content: space-between;
+  gap: 0.82rem;
+  width: 100%;
 }
 
 .profile-showcase-slot-card {
   display: grid;
   justify-items: start;
-  gap: 0.55rem;
+  gap: 0.42rem;
 }
 
 .profile-showcase-slot-card .card-shell {
@@ -7182,8 +8139,8 @@ img {
   display: grid;
   align-content: center;
   justify-items: start;
-  gap: 0.38rem;
-  padding: 1rem;
+  gap: 0.3rem;
+  padding: 0.88rem;
   text-align: left;
   color: #edf4ff;
   appearance: none;
@@ -7201,13 +8158,13 @@ img {
 .profile-achievement-summary-card {
   width: 100%;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.58rem;
   text-align: left;
   appearance: none;
 }
 
 .profile-achievement-summary-card.inline {
-  padding: 0.95rem;
+  padding: 0.82rem 0.9rem;
 }
 
 .sidebar-head .section-copy {
@@ -7218,24 +8175,24 @@ img {
 .profile-sidebar-meta {
   display: flex;
   justify-content: space-between;
-  gap: 0.6rem;
+  gap: 0.45rem;
   color: rgba(218, 229, 244, 0.76);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 
 .profile-mini-badge-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.52rem;
+  gap: 0.4rem;
 }
 
 .profile-mini-badge-slot {
   min-width: 0;
-  min-height: 74px;
-  border-radius: 16px;
+  min-height: 66px;
+  border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.05);
-  padding: 0.22rem;
+  padding: 0.16rem;
   display: grid;
   align-content: stretch;
   appearance: none;
@@ -7273,7 +8230,7 @@ img {
   max-height: min(92vh, 980px);
   padding: 1rem;
   display: grid;
-  gap: 0.9rem;
+  gap: 0.72rem;
   background:
     linear-gradient(180deg, rgba(15, 24, 40, 0.96), rgba(8, 13, 25, 0.98));
 }
@@ -7305,13 +8262,13 @@ img {
 .profile-achievement-header-row {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) repeat(2, minmax(180px, 220px));
-  gap: 0.72rem;
+  gap: 0.58rem;
   align-items: end;
 }
 
 .profile-achievement-summary-card.compact-row {
-  padding: 0.85rem 0.95rem;
-  gap: 0.6rem;
+  padding: 0.74rem 0.84rem;
+  gap: 0.5rem;
 }
 
 .profile-achievement-filter-field {
@@ -7394,17 +8351,17 @@ img {
 .profile-badge-slot-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.7rem;
+  gap: 0.55rem;
 }
 
 .profile-badge-slot-picker {
   min-width: 0;
-  padding: 0.8rem;
-  border-radius: 20px;
+  padding: 0.68rem;
+  border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
   display: grid;
-  gap: 0.55rem;
+  gap: 0.42rem;
   text-align: left;
   appearance: none;
 }
@@ -7426,7 +8383,7 @@ img {
 .profile-badge-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 0.7rem;
+  gap: 0.58rem;
   overflow: auto;
 }
 
@@ -7453,7 +8410,7 @@ img {
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.62rem;
+  gap: 0.48rem;
   overflow: auto;
   padding-right: 0.2rem;
   align-content: start;
@@ -7461,9 +8418,9 @@ img {
 
 .profile-achievements-grid .achievement-row {
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
-  gap: 0.9rem;
+  gap: 0.72rem;
   align-items: start;
-  padding: 0.86rem 0.92rem;
+  padding: 0.74rem 0.82rem;
 }
 
 .achievement-row-badge {
@@ -7474,13 +8431,13 @@ img {
 .achievement-row-main {
   min-width: 0;
   display: grid;
-  gap: 0.62rem;
+  gap: 0.48rem;
 }
 
 .achievement-row-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.85rem;
+  gap: 0.68rem;
   align-items: start;
 }
 

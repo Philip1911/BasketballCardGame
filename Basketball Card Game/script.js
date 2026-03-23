@@ -37,27 +37,80 @@ const BLACK_MATTER_PLAYERS = {
   },
   "luka-doncic": {
     ability: 99,
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Luka%20Don%C4%8Di%C4%87%202021.jpg",
-    imagePosition: "center 12%",
-    imageScale: 1.06,
+    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/san-antonio-spurs-v-los-angeles-lakers-juan-ocampo.jpg",
+    imagePosition: "50% 16%",
+    imageScale: 1.08,
   },
   "nikola-jokic": {
     ability: 99,
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Nikola%20Jokic%20free%20throw%20%28cropped%29.jpg",
-    imagePosition: "center 16%",
-    imageScale: 1.05,
+    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/2/1-denver-nuggets-v-new-york-knicks-jesse-d-garrabrant.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.1,
   },
   "victor-wembanyama": {
     ability: 99,
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Victor%20Wembanyama%20San%20Antonio%20Spurs%202024.jpg",
-    imagePosition: "center 10%",
-    imageScale: 1.06,
+    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/14-victor-wembanyama-michael-gonzales.jpg",
+    imagePosition: "50% 14%",
+    imageScale: 1.08,
   },
   "giannis-antetokounmpo": {
     ability: 99,
     image: "https://commons.wikimedia.org/wiki/Special:FilePath/Giannis%20Antetokounmpo%20%2851664127127%29%2001.jpg",
     imagePosition: "center 12%",
     imageScale: 1.04,
+  },
+};
+
+const FULL_ART_GLASS_OVERRIDES = {
+  "anthony-edwards": {
+    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/1-utah-jazz-v-minnesota-timberwolves-david-sherman.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.08,
+  },
+  "joel-embiid": {
+    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/41-joel-embiid-jesse-d-garrabrant.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.1,
+  },
+  "tyrese-maxey": {
+    image: "https://nbcsports.brightspotcdn.com/dims4/default/c9e427f/2147483647/strip/true/crop/5460x3071%2B0%2B0/resize/1440x810%21/quality/90/?url=https%3A%2F%2Fnbc-sports-production-nbc-sports.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fc0%2F4d%2Fedbc590347e8a50f7f8f2c54f320%2Fhttps-delivery-gettyimages.com%2Fdownloads%2F2150619532",
+    imagePosition: "50% 18%",
+    imageScale: 1.08,
+  },
+  "jayson-tatum": {
+    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/20-jayson-tatum-nathaniel-s-butler.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.08,
+  },
+  "donovan-mitchell": {
+    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/9-donovan-mitchell-david-liam-kyle.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.08,
+  },
+  "cade-cunningham": {
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/1%20cade%20cunningham%202024.jpg",
+    imagePosition: "50% 16%",
+    imageScale: 1.08,
+  },
+  "jaylen-brown": {
+    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/37-jaylen-brown-brian-babineau.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.08,
+  },
+  "james-harden": {
+    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/10-james-harden-adam-pantozzi.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.08,
+  },
+  "kyrie-irving": {
+    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/2-kyrie-irving-jeff-haynes.jpg",
+    imagePosition: "50% 18%",
+    imageScale: 1.08,
+  },
+  "kevin-durant": {
+    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/1-kevin-durant-logan-riely.jpg",
+    imagePosition: "50% 16%",
+    imageScale: 1.08,
   },
 };
 
@@ -377,6 +430,7 @@ const collectionGroupById = Object.fromEntries(collectionGroups.map((group) => [
 const cardCatalog = teamSets.flatMap((team) => team.players.map((player) => {
   const playerSlug = slugify(player.name);
   const blackMatterOverride = BLACK_MATTER_PLAYERS[playerSlug] || null;
+  const fullArtGlassOverride = FULL_ART_GLASS_OVERRIDES[playerSlug] || null;
   const hiddenAbility = Number(blackMatterOverride?.ability || player.ability);
   const rarity = getRarity(hiddenAbility, team.id, player.name);
   const visualRarity = getVisualRarity(rarity);
@@ -395,9 +449,9 @@ const cardCatalog = teamSets.flatMap((team) => team.players.map((player) => {
     division: team.division,
     name: player.name,
     personId: player.personId,
-    image: blackMatterOverride?.image || player.image,
-    imagePosition: blackMatterOverride?.imagePosition || player.imagePosition || "",
-    imageScale: Number(blackMatterOverride?.imageScale || player.imageScale || 1),
+    image: blackMatterOverride?.image || fullArtGlassOverride?.image || player.image,
+    imagePosition: blackMatterOverride?.imagePosition || fullArtGlassOverride?.imagePosition || player.imagePosition || "",
+    imageScale: Number(blackMatterOverride?.imageScale || fullArtGlassOverride?.imageScale || player.imageScale || 1),
     position: player.position || "G-F",
     jersey: player.jersey || "--",
     ability: hiddenAbility,
@@ -1262,6 +1316,8 @@ let openingPack = null;
 let isPackModalOpen = false;
 let activePackPreview = null;
 let activeCardPreview = null;
+let cardPreviewSwipeState = null;
+let cardPreviewSuppressTapUntil = 0;
 let setCompletionCelebration = null;
 let dailyChallengeCelebration = null;
 let achievementCelebration = null;
@@ -1301,6 +1357,19 @@ let profileAchievementSort = "date-desc";
 let isProfileNameEditing = false;
 let profileNameDraft = "";
 const assetPreloadCache = new Map();
+const NBA_HEADSHOT_URL_PATTERN = /^(https:\/\/cdn\.nba\.com\/headshots\/nba\/latest\/)(1040x760|520x380|260x190)\/(\d+)\.png$/i;
+const PLAYER_IMAGE_SIZES = {
+  card: "(max-width: 430px) 148px, (max-width: 620px) 162px, (max-width: 820px) 178px, 204px",
+  preview: "(max-width: 430px) 240px, (max-width: 820px) 320px, 420px",
+};
+const MOBILE_PACK_REVEAL_BREAKPOINT_PX = 620;
+const MOBILE_PACK_SWIPE_THRESHOLD_PX = 96;
+const MOBILE_PACK_SWIPE_ROTATION_FACTOR = 0.055;
+const MOBILE_PACK_SWIPE_MAX_ROTATION_DEG = 14;
+const MOBILE_PACK_STACK_PREVIEW_COUNT = 3;
+const CARD_PREVIEW_SWIPE_THRESHOLD_PX = 72;
+const CARD_PREVIEW_SWIPE_ROTATION_FACTOR = 0.04;
+const CARD_PREVIEW_SWIPE_MAX_ROTATION_DEG = 12;
 
 const navTabsEl = document.getElementById("navTabs");
 const hudGridEl = document.getElementById("hudGrid");
@@ -1311,6 +1380,12 @@ const dailyChallengeTitleEl = document.getElementById("dailyChallengeTitle");
 const dailyChallengeSummaryEl = document.getElementById("dailyChallengeSummary");
 const dailyChallengeListEl = document.getElementById("dailyChallengeList");
 const dailyChallengeBonusEl = document.getElementById("dailyChallengeBonus");
+const dailyChallengeMobileModalEl = document.getElementById("dailyChallengeMobileModal");
+const dailyChallengeMobileTitleEl = document.getElementById("dailyChallengeMobileTitle");
+const dailyChallengeMobileSummaryEl = document.getElementById("dailyChallengeMobileSummary");
+const dailyChallengeMobileListEl = document.getElementById("dailyChallengeMobileList");
+const dailyChallengeMobileBonusEl = document.getElementById("dailyChallengeMobileBonus");
+const closeDailyChallengeMobileModalEl = document.getElementById("closeDailyChallengeMobileModal");
 const packSummaryEl = document.getElementById("packSummary");
 const packModeTabsEl = document.getElementById("packModeTabs");
 const storePacksSectionEl = document.getElementById("storePacksSection");
@@ -1332,6 +1407,7 @@ const resetGameEl = document.getElementById("resetGame");
 const packModalEl = document.getElementById("packModal");
 const packModalShellEl = document.getElementById("packModalShell");
 const closePackModalEl = document.getElementById("closePackModal");
+const closePackModalIconEl = document.getElementById("closePackModalIcon");
 const packModalPrevEl = document.getElementById("packModalPrev");
 const packModalNextEl = document.getElementById("packModalNext");
 const revealAllCardsEl = document.getElementById("revealAllCards");
@@ -1346,8 +1422,12 @@ const revealDailyProgressEl = document.getElementById("revealDailyProgress");
 const packRevealGridEl = document.getElementById("packRevealGrid");
 const modalBottomActionsEl = document.querySelector(".modal-bottom-actions");
 const cardPreviewModalEl = document.getElementById("cardPreviewModal");
+const cardPreviewStageShellEl = document.getElementById("cardPreviewStageShell");
+const cardPreviewPrevEl = document.getElementById("cardPreviewPrev");
+const cardPreviewNextEl = document.getElementById("cardPreviewNext");
 const cardPreviewStageEl = document.getElementById("cardPreviewStage");
 const cardPreviewMetaEl = document.getElementById("cardPreviewMeta");
+const cardPreviewHintEl = document.getElementById("cardPreviewHint");
 const setCompletionModalEl = document.getElementById("setCompletionModal");
 const setCompletionEyebrowEl = document.getElementById("setCompletionEyebrow");
 const setCompletionTitleEl = document.getElementById("setCompletionTitle");
@@ -1388,9 +1468,62 @@ const profileAchievementsSummaryEl = document.getElementById("profileAchievement
 const profileAchievementsToolbarEl = document.getElementById("profileAchievementsToolbar");
 const profileAchievementsGridEl = document.getElementById("profileAchievementsGrid");
 const closeProfileAchievementsModalEl = document.getElementById("closeProfileAchievementsModal");
+const playerControlsModalEl = document.getElementById("playerControlsModal");
+const playerControlsModalEyebrowEl = document.getElementById("playerControlsModalEyebrow");
+const playerControlsModalTitleEl = document.getElementById("playerControlsModalTitle");
+const playerControlsModalSubtitleEl = document.getElementById("playerControlsModalSubtitle");
+const playerControlsModalBodyEl = document.getElementById("playerControlsModalBody");
+const closePlayerControlsModalEl = document.getElementById("closePlayerControlsModal");
+const savePlayerControlsModalEl = document.getElementById("savePlayerControlsModal");
+const mobilePackRevealMedia = typeof window !== "undefined"
+  ? window.matchMedia(`(max-width: ${MOBILE_PACK_REVEAL_BREAKPOINT_PX}px)`)
+  : null;
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getNbaHeadshotVariantUrl(src, variant = "1040x760") {
+  const match = String(src || "").trim().match(NBA_HEADSHOT_URL_PATTERN);
+  if (!match) return "";
+  return `${match[1]}${variant}/${match[3]}.png`;
+}
+
+function getPlayerImageAsset(src, options = {}) {
+  const key = String(src || "").trim();
+  const mode = options.mode === "preview" ? "preview" : "card";
+  if (!key) {
+    return {
+      src: "",
+      srcset: "",
+      sizes: "",
+      fallbackSrc: "",
+      preloadSrc: "",
+    };
+  }
+
+  const full = getNbaHeadshotVariantUrl(key, "1040x760");
+  if (!full) {
+    return {
+      src: key,
+      srcset: "",
+      sizes: "",
+      fallbackSrc: "",
+      preloadSrc: key,
+    };
+  }
+
+  const thumb = getNbaHeadshotVariantUrl(key, "260x190");
+  const medium = getNbaHeadshotVariantUrl(key, "520x380");
+  const preferredSrc = mode === "preview" ? full : medium || full;
+
+  return {
+    src: preferredSrc,
+    srcset: `${thumb} 260w, ${medium} 520w, ${full} 1040w`,
+    sizes: PLAYER_IMAGE_SIZES[mode],
+    fallbackSrc: full,
+    preloadSrc: preferredSrc,
+  };
 }
 
 function preloadImageAsset(src) {
@@ -1432,7 +1565,8 @@ function preloadImageAsset(src) {
 function preloadPackAssets(results) {
   const assets = new Set();
   results.forEach((result) => {
-    if (result.image) assets.add(result.image);
+    const imageAsset = getPlayerImageAsset(result.image, { mode: "card" });
+    if (imageAsset.preloadSrc) assets.add(imageAsset.preloadSrc);
     const logoUrl = getTeamLogoUrl(result.teamId);
     if (logoUrl) assets.add(logoUrl);
   });
@@ -2499,45 +2633,236 @@ function formatPreviewDate(value) {
   });
 }
 
-function openCardPreview(cardId, options = {}) {
-  const card = cardsById[cardId];
-  if (!card) return;
-  activeCardPreview = {
-    cardId,
-    collectionMode: options.collectionMode === true,
-    owned: options.owned !== false,
+function getCardPreviewNavigationContext(cardId, options = {}) {
+  const explicitContext = options.navigationContext;
+  if (explicitContext?.type === "set" && Array.isArray(explicitContext.cardIds)) {
+    const cardIds = explicitContext.cardIds.filter((id) => Boolean(cardsById[id]));
+    const derivedIndex = cardIds.indexOf(cardId);
+    if (cardIds.length > 1 && derivedIndex !== -1) {
+      const requestedIndex = Number.isInteger(explicitContext.index) ? explicitContext.index : derivedIndex;
+      return {
+        type: "set",
+        teamId: explicitContext.teamId || activeCollectionTeam || "",
+        cardIds,
+        index: Math.max(0, Math.min(cardIds.length - 1, requestedIndex)),
+      };
+    }
+  }
+
+  if (options.collectionMode === true && activeCollectionTeam) {
+    const teamCards = cardsByTeam[activeCollectionTeam] || [];
+    const cardIds = teamCards.map((card) => card.id);
+    const index = cardIds.indexOf(cardId);
+    if (cardIds.length > 1 && index !== -1) {
+      return {
+        type: "set",
+        teamId: activeCollectionTeam,
+        cardIds,
+        index,
+      };
+    }
+  }
+
+  return null;
+}
+
+function getActiveCardPreviewNavigation(preview = activeCardPreview) {
+  const navigation = preview?.navigation;
+  if (!navigation || navigation.type !== "set" || !Array.isArray(navigation.cardIds)) return null;
+  const cardIds = navigation.cardIds.filter((id) => Boolean(cardsById[id]));
+  if (cardIds.length <= 1) return null;
+  const derivedIndex = cardIds.indexOf(preview.cardId);
+  const requestedIndex = Number.isInteger(navigation.index) ? navigation.index : derivedIndex;
+  const nextIndex = derivedIndex !== -1 ? derivedIndex : requestedIndex;
+  if (nextIndex < 0) return null;
+  return {
+    ...navigation,
+    cardIds,
+    index: Math.max(0, Math.min(cardIds.length - 1, nextIndex)),
   };
+}
+
+function resetCardPreviewSwipeState() {
+  cardPreviewSwipeState = null;
+  if (!cardPreviewStageShellEl || !cardPreviewStageEl) return;
+  cardPreviewStageShellEl.classList.remove("is-swiping");
+  cardPreviewStageEl.classList.remove("is-swiping");
+  cardPreviewStageEl.style.removeProperty("--card-preview-swipe-x");
+  cardPreviewStageEl.style.removeProperty("--card-preview-swipe-y");
+  cardPreviewStageEl.style.removeProperty("--card-preview-swipe-rotate");
+}
+
+function isCardPreviewCinematicCard(card = cardsById[activeCardPreview?.cardId]) {
+  return card?.rarityId === "legends" || card?.rarityId === "blackmatter";
+}
+
+function stopCardPreviewAmbientMotion() {
+  if (activeRarityFrameCard && cardPreviewStageEl?.contains(activeRarityFrameCard)) {
+    stopRarityFrameMotion(false);
+  }
+  const previewShell = cardPreviewStageEl?.querySelector(".preview-card-shell");
+  if (!previewShell) return;
+  stopPremiumHover(previewShell, true);
+  if (activePremiumHoverShell === previewShell) {
+    activePremiumHoverShell = null;
+  }
+}
+
+function syncCardPreviewAmbientMotion() {
+  stopCardPreviewAmbientMotion();
+  if (!activeCardPreview || !cardPreviewStageEl || cardPreviewModalEl.hidden || !isMobilePackRevealMode()) return;
+  const previewCard = cardPreviewStageEl.querySelector(cardHoverSelector);
+  if (previewCard) {
+    startRarityFrameMotion(previewCard);
+  }
+  const premiumShell = getPremiumHoverShell(previewCard);
+  if (!premiumShell) return;
+  if (activePremiumHoverShell && activePremiumHoverShell !== premiumShell) {
+    stopPremiumHover(activePremiumHoverShell, true);
+  }
+  setMobilePreviewCinematicState(premiumShell, false);
+}
+
+function setMobilePreviewCinematicState(shell, cinematic) {
+  if (!shell) return false;
+  const stateForShell = getPremiumHoverState(shell);
+  clearPremiumHoverTimer(stateForShell.enterTimer);
+  stateForShell.enterTimer = 0;
+  clearPremiumHoverTimer(stateForShell.exitTimer);
+  stateForShell.exitTimer = 0;
+  shell.classList.add("premium-hovering");
+  shell.classList.toggle("premium-cinematic", cinematic);
+  activePremiumHoverShell = shell;
+  return true;
+}
+
+function toggleMobilePreviewCinematic() {
+  if (!isMobilePackRevealMode() || cardPreviewModalEl.hidden || !cardPreviewStageEl) return false;
+  const previewCard = cardPreviewStageEl.querySelector(cardHoverSelector);
+  const premiumShell = getPremiumHoverShell(previewCard);
+  if (!premiumShell) return false;
+  return setMobilePreviewCinematicState(premiumShell, !premiumShell.classList.contains("premium-cinematic"));
+}
+
+function syncCardPreviewNavigationControls() {
+  const navigation = getActiveCardPreviewNavigation();
+  const hasNavigation = Boolean(navigation);
+  const isMobilePreview = isMobilePackRevealMode();
+  const supportsCinematic = isMobilePreview && isCardPreviewCinematicCard();
+  if (cardPreviewStageShellEl) {
+    cardPreviewStageShellEl.classList.toggle("has-navigation", hasNavigation);
+    cardPreviewStageShellEl.classList.toggle("swipe-enabled", hasNavigation && isMobilePreview);
+  }
+  if (cardPreviewPrevEl) {
+    cardPreviewPrevEl.hidden = !hasNavigation;
+    cardPreviewPrevEl.disabled = !hasNavigation || navigation.index <= 0;
+  }
+  if (cardPreviewNextEl) {
+    cardPreviewNextEl.hidden = !hasNavigation;
+    cardPreviewNextEl.disabled = !hasNavigation || navigation.index >= navigation.cardIds.length - 1;
+  }
+  if (cardPreviewHintEl) {
+    cardPreviewHintEl.textContent = hasNavigation
+      ? isMobilePreview
+        ? supportsCinematic
+          ? "Swipe or use the arrows to move through this set. Tap the card to toggle cinematic mode, or tap outside to close."
+          : "Swipe or use the arrows to move through this set. Tap outside the card to close."
+        : "Use the arrows to move through this set. Click anywhere outside the card to close."
+      : isMobilePreview
+        ? supportsCinematic
+          ? "Tap the card to toggle cinematic mode. Tap outside the card to close."
+          : "Tap outside the card to close."
+        : "Click anywhere outside the card to close.";
+  }
+}
+
+function renderActiveCardPreview() {
+  if (!activeCardPreview) return;
+  const card = cardsById[activeCardPreview.cardId];
+  if (!card) {
+    closeCardPreview();
+    return;
+  }
+
+  const navigation = getActiveCardPreviewNavigation(activeCardPreview);
+  activeCardPreview.navigation = navigation;
+
   const previewFooter = activeCardPreview.collectionMode
     ? buildCollectionCardFooter(card, { allowSell: false })
     : buildStaticValueFooter(card.sellPrice);
+  stopCardPreviewAmbientMotion();
   cardPreviewStageEl.innerHTML = buildCardFace(card, {
     collectionMode: activeCardPreview.collectionMode,
     owned: activeCardPreview.owned,
     showCollectionStatus: activeCardPreview.collectionMode,
     footerHtml: previewFooter,
+    previewMode: true,
     previewable: false,
     tiltEnabled: true,
     shellClass: "preview-card-shell",
   });
-  const totalPulls = Number(state.pullCounts?.[cardId] || 0);
-  const firstUnboxedAt = Number(state.firstPullAt?.[cardId] || 0);
+
+  const totalPulls = Number(state.pullCounts?.[activeCardPreview.cardId] || 0);
+  const firstUnboxedAt = Number(state.firstPullAt?.[activeCardPreview.cardId] || 0);
   const firstUnboxedText = firstUnboxedAt
     ? formatPreviewDate(firstUnboxedAt)
     : totalPulls > 0
       ? "Before tracking"
       : "Not unboxed yet";
-  cardPreviewMetaEl.innerHTML = `
-    <div class="card-preview-meta-line">First unboxed: ${escapeHtml(firstUnboxedText)}</div>
-    <div class="card-preview-meta-line">Unboxed ${escapeHtml(totalPulls.toLocaleString("en-US"))} ${totalPulls === 1 ? "time" : "times"}</div>
-  `;
+  const navigationTeam = navigation?.teamId ? teamById[navigation.teamId] : null;
+  const metaLines = [];
+  if (navigation) {
+    metaLines.push(`<div class="card-preview-meta-line">Set card ${navigation.index + 1}/${navigation.cardIds.length}${navigationTeam ? ` - ${escapeHtml(navigationTeam.name)}` : ""}</div>`);
+  }
+  metaLines.push(`<div class="card-preview-meta-line">First unboxed: ${escapeHtml(firstUnboxedText)}</div>`);
+  metaLines.push(`<div class="card-preview-meta-line">Unboxed ${escapeHtml(totalPulls.toLocaleString("en-US"))} ${totalPulls === 1 ? "time" : "times"}</div>`);
+  cardPreviewMetaEl.innerHTML = metaLines.join("");
+
+  resetCardPreviewSwipeState();
+  syncCardPreviewNavigationControls();
   cardPreviewModalEl.hidden = false;
+  syncCardPreviewAmbientMotion();
+}
+
+function stepCardPreview(offset) {
+  const navigation = getActiveCardPreviewNavigation();
+  if (!navigation || !offset || !activeCardPreview) return false;
+  const nextIndex = Math.max(0, Math.min(navigation.cardIds.length - 1, navigation.index + offset));
+  if (nextIndex === navigation.index) return false;
+  const nextCardId = navigation.cardIds[nextIndex];
+  openCardPreview(nextCardId, {
+    collectionMode: activeCardPreview.collectionMode,
+    owned: hasOwnedCard(nextCardId),
+    navigationContext: {
+      ...navigation,
+      index: nextIndex,
+    },
+  });
+  return true;
+}
+
+function openCardPreview(cardId, options = {}) {
+  if (!cardsById[cardId]) return;
+  activeCardPreview = {
+    cardId,
+    collectionMode: options.collectionMode === true,
+    owned: options.owned !== false,
+    navigation: getCardPreviewNavigationContext(cardId, options),
+  };
+  renderActiveCardPreview();
 }
 
 function closeCardPreview() {
+  resetCardPreviewSwipeState();
+  stopCardPreviewAmbientMotion();
   activeCardPreview = null;
   cardPreviewModalEl.hidden = true;
   cardPreviewStageEl.innerHTML = "";
   if (cardPreviewMetaEl) cardPreviewMetaEl.innerHTML = "";
+  if (cardPreviewHintEl) {
+    cardPreviewHintEl.textContent = "Click anywhere outside the card to close.";
+  }
+  syncCardPreviewNavigationControls();
 }
 
 function syncCollectionViewMeta() {
@@ -2604,6 +2929,10 @@ function getSectionIdForView(view) {
 
 function setActiveView(view) {
   activeView = view === "collection" || view === "sets" ? "collections" : view;
+  if (activeView !== "players") {
+    isPlayerFilterMenuOpen = false;
+    isPlayerBulkSellOpen = false;
+  }
   if (activeView === "collections" || activeView === "players") {
     setCollectionSection(activeView);
   }
@@ -2789,6 +3118,8 @@ function openPack(packId, options = {}) {
     outcome,
     flipped: Array.from({ length: outcome.results.length }, () => false),
     revealedCount: 0,
+    mobileRevealIndex: 0,
+    mobileSwipeLocked: false,
     assetsReady: false,
     preloadId,
     setProgress: outcome.setProgress.map((entry) => ({
@@ -2814,7 +3145,231 @@ function openPack(packId, options = {}) {
 
 function updateRevealProgress() {
   if (!openingPack) return;
+  if (isMobilePackRevealMode()) {
+    const currentIndex = getOpeningPackMobileIndex(openingPack);
+    revealProgressEl.textContent = `Card ${Math.min(currentIndex + 1, openingPack.outcome.results.length)} of ${openingPack.outcome.results.length}`;
+    return;
+  }
   revealProgressEl.textContent = `${openingPack.revealedCount} / ${openingPack.outcome.results.length} Revealed`;
+}
+
+function isMobilePackRevealMode() {
+  return Boolean(mobilePackRevealMedia?.matches);
+}
+
+function isCompactMobileUi() {
+  return isMobilePackRevealMode();
+}
+
+function getOpeningPackMobileIndex(packState = openingPack) {
+  if (!packState?.outcome?.results?.length) return 0;
+  const lastIndex = packState.outcome.results.length - 1;
+  const nextIndex = Math.max(0, Math.min(lastIndex, Number(packState.mobileRevealIndex) || 0));
+  packState.mobileRevealIndex = nextIndex;
+  return nextIndex;
+}
+
+function revealPackCardState(index, options = {}) {
+  if (!openingPack || openingPack.flipped[index]) return false;
+  const result = openingPack.outcome.results[index];
+  openingPack.flipped[index] = true;
+  openingPack.revealedCount += 1;
+  if (options.updateProgress !== false) updateRevealProgress();
+  if (options.showSetProgress !== false && result?.isNew) {
+    markRevealSetProgress(result.teamId);
+  }
+  return true;
+}
+
+function shouldShowMobilePackContinue(packState = openingPack) {
+  if (!packState || !isMobilePackRevealMode() || !packState.assetsReady) return false;
+  const currentIndex = getOpeningPackMobileIndex(packState);
+  const lastIndex = packState.outcome.results.length - 1;
+  return currentIndex === lastIndex && Boolean(packState.flipped[currentIndex]);
+}
+
+function getOpeningPackMobileHint(packState = openingPack) {
+  if (!packState) return "";
+  if (!packState.assetsReady) {
+    return "Loading player cards first so each reveal stays smooth.";
+  }
+  const currentIndex = getOpeningPackMobileIndex(packState);
+  if (!packState.flipped[currentIndex]) {
+    return "Tap the first card to reveal it.";
+  }
+  if (shouldShowMobilePackContinue(packState)) {
+    return "Tap continue to open the full pack overview.";
+  }
+  return "Swipe to move to the next revealed card.";
+}
+
+function buildMobilePackStackCard(depth) {
+  const rotation = depth % 2 === 0 ? 3 : -3;
+  return `
+    <div class="mobile-pack-stack-card" style="--stack-depth:${depth}; --stack-rotation:${rotation}deg;">
+      <div class="mobile-pack-stack-face">
+        <div class="card-back-mark">?</div>
+      </div>
+    </div>
+  `;
+}
+
+function buildMobilePackRevealStage(packState) {
+  const totalCards = packState.outcome.results.length;
+  const currentIndex = getOpeningPackMobileIndex(packState);
+  const currentResult = packState.outcome.results[currentIndex];
+  const flipped = Boolean(packState.flipped[currentIndex]);
+  const remainingCount = Math.max(0, totalCards - currentIndex - 1);
+  const stackCount = Math.min(MOBILE_PACK_STACK_PREVIEW_COUNT, remainingCount);
+  const stageStatus = shouldShowMobilePackContinue(packState)
+    ? "Ready for overview"
+    : remainingCount > 0
+    ? `${remainingCount} card${remainingCount === 1 ? "" : "s"} behind`
+    : "Last card";
+  const stageHint = !packState.assetsReady
+    ? "Loading cards..."
+    : !flipped
+      ? "Tap to reveal"
+      : shouldShowMobilePackContinue(packState)
+        ? "Continue to overview"
+        : "Swipe left or right";
+
+  return `
+    <div class="mobile-pack-stage">
+      <div class="mobile-pack-stack" aria-hidden="true">
+        ${Array.from({ length: stackCount }, (_, index) => buildMobilePackStackCard(index + 1)).join("")}
+      </div>
+      <div class="mobile-pack-current-slot ${flipped ? "is-revealed" : ""}" data-mobile-pack-current="${currentIndex}">
+        ${buildInteractiveRevealCard(currentResult, currentIndex, flipped, packState.assetsReady)}
+      </div>
+      <div class="mobile-pack-stage-footer">
+        <span class="mobile-pack-stage-chip">${escapeHtml(stageStatus)}</span>
+        <span class="mobile-pack-stage-hint">${escapeHtml(stageHint)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function advanceMobilePackReveal() {
+  if (!openingPack) return;
+  const currentIndex = getOpeningPackMobileIndex(openingPack);
+  if (currentIndex >= openingPack.outcome.results.length - 1) {
+    return;
+  }
+  const nextIndex = currentIndex + 1;
+  openingPack.mobileRevealIndex = nextIndex;
+  openingPack.mobileSwipeLocked = false;
+  if (nextIndex > 0) {
+    revealPackCardState(nextIndex, {
+      updateProgress: false,
+      showSetProgress: true,
+    });
+  }
+  renderPackArea();
+}
+
+function bindMobilePackSwipe(cardSlot, index) {
+  if (!cardSlot || cardSlot.dataset.mobileSwipeBound === "true") return;
+  cardSlot.dataset.mobileSwipeBound = "true";
+
+  let dragState = null;
+
+  const setSwipeTransform = (deltaX = 0, deltaY = 0) => {
+    const rotation = Math.max(
+      -MOBILE_PACK_SWIPE_MAX_ROTATION_DEG,
+      Math.min(MOBILE_PACK_SWIPE_MAX_ROTATION_DEG, deltaX * MOBILE_PACK_SWIPE_ROTATION_FACTOR),
+    );
+    cardSlot.style.setProperty("--mobile-swipe-x", `${deltaX}px`);
+    cardSlot.style.setProperty("--mobile-swipe-y", `${deltaY}px`);
+    cardSlot.style.setProperty("--mobile-swipe-rotate", `${rotation}deg`);
+  };
+
+  const clearSwipeTransform = () => {
+    cardSlot.classList.remove("mobile-pack-dragging");
+    setSwipeTransform(0, 0);
+    window.setTimeout(() => {
+      if (!cardSlot.isConnected || cardSlot.classList.contains("mobile-pack-dismissing")) return;
+      cardSlot.style.removeProperty("--mobile-swipe-x");
+      cardSlot.style.removeProperty("--mobile-swipe-y");
+      cardSlot.style.removeProperty("--mobile-swipe-rotate");
+    }, 220);
+  };
+
+  const releasePointer = (pointerId) => {
+    try {
+      if (cardSlot.hasPointerCapture?.(pointerId)) {
+        cardSlot.releasePointerCapture(pointerId);
+      }
+    } catch {
+      // Ignore release errors from already-cleared captures.
+    }
+  };
+
+  const completeSwipe = (deltaX) => {
+    if (!openingPack) return;
+    openingPack.mobileSwipeLocked = true;
+    cardSlot.classList.remove("mobile-pack-dragging");
+    cardSlot.classList.add("mobile-pack-dismissing");
+    const direction = deltaX < 0 ? -1 : 1;
+    const offscreenDistance = Math.max(Math.abs(deltaX), Math.min(window.innerWidth * 0.9, 420));
+    setSwipeTransform(direction * offscreenDistance, 0);
+    window.setTimeout(() => {
+      if (!openingPack) return;
+      advanceMobilePackReveal();
+    }, 220);
+  };
+
+  const finalizeDrag = (event) => {
+    if (!dragState || event.pointerId !== dragState.pointerId) return;
+    const { deltaX, dragging, pointerId } = dragState;
+    dragState = null;
+    releasePointer(pointerId);
+    if (!dragging) return;
+    if (Math.abs(deltaX) >= MOBILE_PACK_SWIPE_THRESHOLD_PX) {
+      completeSwipe(deltaX);
+      return;
+    }
+    clearSwipeTransform();
+  };
+
+  cardSlot.addEventListener("pointerdown", (event) => {
+    if (!openingPack || openingPack.mobileSwipeLocked || !openingPack.flipped[index]) return;
+    if (event.button !== undefined && event.button !== 0) return;
+    if (getOpeningPackMobileIndex(openingPack) !== index) return;
+    if (shouldShowMobilePackContinue(openingPack)) return;
+    dragState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      deltaX: 0,
+      deltaY: 0,
+      dragging: false,
+    };
+    cardSlot.setPointerCapture?.(event.pointerId);
+  });
+
+  cardSlot.addEventListener("pointermove", (event) => {
+    if (!dragState || event.pointerId !== dragState.pointerId) return;
+    dragState.deltaX = event.clientX - dragState.startX;
+    dragState.deltaY = event.clientY - dragState.startY;
+    if (!dragState.dragging) {
+      if (Math.abs(dragState.deltaX) < 10 && Math.abs(dragState.deltaY) < 10) return;
+      if (Math.abs(dragState.deltaX) <= Math.abs(dragState.deltaY)) {
+        releasePointer(dragState.pointerId);
+        dragState = null;
+        return;
+      }
+      dragState.dragging = true;
+      cardSlot.classList.add("mobile-pack-dragging");
+    }
+    event.preventDefault();
+    const driftY = Math.max(-18, Math.min(18, dragState.deltaY * 0.18));
+    setSwipeTransform(dragState.deltaX, driftY);
+  }, { passive: false });
+
+  cardSlot.addEventListener("pointerup", finalizeDrag);
+  cardSlot.addEventListener("pointercancel", finalizeDrag);
+  cardSlot.addEventListener("lostpointercapture", finalizeDrag);
 }
 
 function buildRevealSetProgressChip(entry, options = {}) {
@@ -3073,7 +3628,7 @@ function reopenCurrentPack() {
     return;
   }
   if (!state.lastPack) return;
-  const repeatPack = packById[state.lastPack.repeatableStorePackId];
+  const repeatPack = packById[state.lastPack.repeatableStorePackId || state.lastPack.packId];
   if (!repeatPack) return;
   openPack(repeatPack.id, {
     sourceType: "store",
@@ -3109,6 +3664,11 @@ function sellBulkDuplicates(cards, config) {
 
 function revealAllPackCards() {
   if (!openingPack || !openingPack.assetsReady) return;
+  if (shouldShowMobilePackContinue(openingPack)) {
+    finishOpeningPack();
+    return;
+  }
+  if (isMobilePackRevealMode()) return;
   revealAllCardsEl.disabled = true;
   const revealButtons = [...packRevealGridEl.querySelectorAll("[data-flip-index]")].filter((button) => button.getAttribute("aria-disabled") === "false");
   revealButtons.forEach((button, index) => {
@@ -3123,8 +3683,10 @@ function revealAllPackCards() {
 function flipPackCard(button, index) {
   if (!openingPack || !openingPack.assetsReady || openingPack.flipped[index]) return;
   const result = openingPack.outcome.results[index];
-  openingPack.flipped[index] = true;
-  openingPack.revealedCount += 1;
+  revealPackCardState(index, {
+    updateProgress: false,
+    showSetProgress: false,
+  });
   button.setAttribute("aria-disabled", "true");
   const isPremiumReveal = button.classList.contains("premium-reveal");
   const suspenseDelay = button.classList.contains("rarity-mythic")
@@ -3145,6 +3707,11 @@ function flipPackCard(button, index) {
     button.classList.remove("pre-reveal-charge");
     button.classList.add("flipped", "just-flipped", "is-revealed");
     updateRevealProgress();
+    if (isMobilePackRevealMode() && getOpeningPackMobileIndex(openingPack) === index) {
+      revealSubtitleEl.textContent = shouldShowMobilePackContinue(openingPack)
+        ? "Tap continue to open the full pack overview."
+        : "Swipe to move to the next revealed card.";
+    }
     if (result?.isNew) markRevealSetProgress(result.teamId);
   }, suspenseDelay);
 
@@ -3157,7 +3724,7 @@ function flipPackCard(button, index) {
 
   window.setTimeout(() => {
     button.classList.remove("just-flipped");
-    if (openingPack && openingPack.revealedCount === openingPack.outcome.results.length) {
+    if (openingPack && openingPack.revealedCount === openingPack.outcome.results.length && !isMobilePackRevealMode()) {
       finishOpeningPack();
     }
   }, settleDelay);
@@ -3242,23 +3809,68 @@ function getDailyRewardMeta(pack) {
     : countText;
 }
 
+function buildDailyChallengeItemsMarkup() {
+  return state.dailyChallenges.challenges.map((challenge) => `
+    <article class="daily-challenge-item ${challenge.completed ? "completed" : ""}">
+      <div class="daily-challenge-copy">
+        <strong>${escapeHtml(challenge.title)}</strong>
+        <span>${escapeHtml(challenge.rewardPack.name)} • ${escapeHtml(getDailyRewardMeta(challenge.rewardPack))}</span>
+      </div>
+      <div class="daily-challenge-progress">
+        <strong>${challenge.progress}/${challenge.target}</strong>
+        <span>${challenge.completed ? "Reward sent" : "In progress"}</span>
+      </div>
+    </article>
+  `).join("");
+}
+
+function buildDailyChallengeBonusMarkup(completed, total) {
+  const bonusProgress = `${completed}/${total}`;
+  return `
+    <div class="daily-bonus-copy">
+      <span class="eyebrow accent">Daily Bonus</span>
+      <strong>Complete all three dailies</strong>
+      <span>${escapeHtml(state.dailyChallenges.bonusRewardPack.name)} • ${escapeHtml(getDailyRewardMeta(state.dailyChallenges.bonusRewardPack))}</span>
+    </div>
+    <div class="daily-bonus-progress">
+      <strong>${bonusProgress}</strong>
+      <span>${state.dailyChallenges.bonusGranted ? "Bonus sent" : "Final reward"}</span>
+    </div>
+  `;
+}
+
+function closeDailyChallengesPanel() {
+  if (!isDailyChallengesOpen) return;
+  isDailyChallengesOpen = false;
+  renderDailyChallenges();
+}
+
 function renderDailyChallenges() {
   ensureDailyChallenges();
   if (!state.dailyChallenges) return;
 
   const completed = getCompletedDailyChallengeCount();
   const total = state.dailyChallenges.challenges.length;
+  const mobileMode = isCompactMobileUi();
+  const titleText = completed === total ? "All dailies cleared." : "Todayâ€™s challenges.";
+  const summaryText = `${completed}/${total}`;
+  const challengeMarkup = buildDailyChallengeItemsMarkup();
+  const bonusMarkup = buildDailyChallengeBonusMarkup(completed, total);
   if (dailyChallengeProgressEl) dailyChallengeProgressEl.textContent = `${completed}/${total}`;
-  if (dailyChallengeSummaryEl) dailyChallengeSummaryEl.textContent = `${completed}/${total}`;
+  if (dailyChallengeSummaryEl) dailyChallengeSummaryEl.textContent = summaryText;
   if (dailyChallengeTitleEl) {
     dailyChallengeTitleEl.textContent = completed === total ? "All dailies cleared." : "Today’s challenges.";
+  }
+  if (dailyChallengeTitleEl) {
+    dailyChallengeTitleEl.textContent = completed === total ? "All dailies cleared." : "Todays challenges.";
   }
   if (dailyChallengeTriggerEl) {
     dailyChallengeTriggerEl.classList.toggle("complete", completed === total);
     dailyChallengeTriggerEl.setAttribute("aria-expanded", isDailyChallengesOpen ? "true" : "false");
+    dailyChallengeTriggerEl.setAttribute("aria-controls", mobileMode ? "dailyChallengeMobileModal" : "dailyChallengePanel");
   }
   if (dailyChallengePanelEl) {
-    dailyChallengePanelEl.hidden = !isDailyChallengesOpen;
+    dailyChallengePanelEl.hidden = mobileMode || !isDailyChallengesOpen;
   }
   if (dailyChallengeListEl) {
     dailyChallengeListEl.innerHTML = state.dailyChallenges.challenges.map((challenge) => `
@@ -3288,6 +3900,29 @@ function renderDailyChallenges() {
         <span>${state.dailyChallenges.bonusGranted ? "Bonus sent" : "Final reward"}</span>
       </div>
     `;
+  }
+  if (dailyChallengeListEl) {
+    dailyChallengeListEl.innerHTML = challengeMarkup;
+  }
+  if (dailyChallengeBonusEl) {
+    dailyChallengeBonusEl.classList.toggle("completed", Boolean(state.dailyChallenges.bonusGranted));
+    dailyChallengeBonusEl.innerHTML = bonusMarkup;
+  }
+  if (dailyChallengeMobileModalEl) {
+    dailyChallengeMobileModalEl.hidden = !mobileMode || !isDailyChallengesOpen;
+  }
+  if (dailyChallengeMobileTitleEl) {
+    dailyChallengeMobileTitleEl.textContent = completed === total ? "All dailies cleared." : "Todays challenges.";
+  }
+  if (dailyChallengeMobileSummaryEl) {
+    dailyChallengeMobileSummaryEl.textContent = summaryText;
+  }
+  if (dailyChallengeMobileListEl) {
+    dailyChallengeMobileListEl.innerHTML = challengeMarkup;
+  }
+  if (dailyChallengeMobileBonusEl) {
+    dailyChallengeMobileBonusEl.classList.toggle("completed", Boolean(state.dailyChallenges.bonusGranted));
+    dailyChallengeMobileBonusEl.innerHTML = bonusMarkup;
   }
 }
 
@@ -3654,11 +4289,13 @@ function renderPackStore() {
 
 function buildPlayerArt(card, options = {}) {
   const lazy = options.lazy !== false;
+  const imageMode = options.imageMode === "preview" ? "preview" : "card";
   const overlayStart = options.overlayStart || "";
   const overlayEnd = options.overlayEnd || "";
   const overlayBottomEnd = options.overlayBottomEnd || "";
   const logoUrl = getTeamLogoUrl(card.teamId);
   const artGradientEnd = getTeamArtGradientEnd(card.teamColors.primary);
+  const imageAsset = getPlayerImageAsset(card.image, { mode: imageMode });
   const imageStyles = [];
   if (card.imagePosition) imageStyles.push(`object-position:${escapeHtml(card.imagePosition)}`);
   if (card.imageScale && Math.abs(card.imageScale - 1) > 0.001) imageStyles.push(`transform:scale(${card.imageScale.toFixed(3)})`);
@@ -3673,7 +4310,18 @@ function buildPlayerArt(card, options = {}) {
       <div class="player-art-core">
         <div class="player-art-bg"></div>
         <div class="player-art-fallback" aria-hidden="true"></div>
-        <img data-player-image loading="${lazy ? "lazy" : "eager"}" fetchpriority="${lazy ? "auto" : "high"}" decoding="async" src="${escapeHtml(card.image)}" alt="${escapeHtml(card.name)}"${imageStyles.length ? ` style="${imageStyles.join(";")}"` : ""}>
+        <img
+          data-player-image
+          loading="${lazy ? "lazy" : "eager"}"
+          fetchpriority="${lazy ? "auto" : "high"}"
+          decoding="async"
+          src="${escapeHtml(imageAsset.src || card.image)}"
+          ${imageAsset.srcset ? `srcset="${escapeHtml(imageAsset.srcset)}"` : ""}
+          ${imageAsset.sizes ? `sizes="${escapeHtml(imageAsset.sizes)}"` : ""}
+          ${imageAsset.fallbackSrc ? `data-player-image-fallback-src="${escapeHtml(imageAsset.fallbackSrc)}"` : ""}
+          alt="${escapeHtml(card.name)}"
+          ${imageStyles.length ? `style="${imageStyles.join(";")}"` : ""}
+        >
       </div>
     </div>
   `;
@@ -3814,6 +4462,7 @@ function buildCardFace(result, options = {}) {
   const owned = options.owned || false;
   const isMissing = collectionMode && !owned;
   const inlineFace = options.inlineFace || false;
+  const previewMode = options.previewMode === true;
   const showCollectionStatus = options.showCollectionStatus !== false;
   const footerHtml = options.footerHtml || "";
   const hideFooter = options.hideFooter || false;
@@ -3898,16 +4547,26 @@ function buildCardFace(result, options = {}) {
     </div>
   ` : "";
 
+  const rarityFrameLabel = isMissing
+    ? "Locked"
+    : result.rarityId === "legends"
+      ? "Legend"
+      : visualRarityLabel;
   const faceMarkup = `
     <div
       class="${collectionMode ? "collection-card" : "reveal-card"} ${inlineFace ? "" : tiltEnabled ? "tilt-card" : ""} ${raritySurfaceClass} ${variantCardClass} ${isMissing ? "missing" : ""}"
       ${previewable ? `data-preview-card-id="${escapeHtml(result.id)}" data-preview-collection-mode="${collectionMode ? "true" : "false"}" data-preview-owned="${owned ? "true" : "false"}"` : ""}
       style="--team-primary:${escapeHtml(result.teamColors.primary)}; --team-secondary:${escapeHtml(result.teamColors.secondary)}; --team-art-end:${getTeamArtGradientEnd(result.teamColors.primary)}; --rarity-line:${rarityColor}; --rarity-tint:${rarityTint}; --rarity-glow:${rarityGlow}; --card-text:${cardTheme.text}; --card-subtext:${cardTheme.subtext}; --card-panel:${cardTheme.panel}; --card-panel-border:${cardTheme.panelBorder}; --card-badge:${cardTheme.badge}; --card-badge-border:${cardTheme.badgeBorder}; --card-pattern-text:${isMissing ? "rgba(224, 230, 238, 0.9)" : isBlackMatter ? "rgba(247, 250, 255, 0.94)" : withAlpha(cardTheme.text, 0.8)}; --card-pattern-bg:${isMissing ? "rgba(214, 221, 231, 0.06)" : isBlackMatter ? "rgba(255, 255, 255, 0.04)" : withAlpha(visualRarityColor, 0.18)}; --card-pattern-line:${isMissing ? "rgba(208, 216, 228, 0.2)" : isBlackMatter ? "rgba(255, 255, 255, 0.12)" : withAlpha(visualRarityColor, 0.34)};"
     >
-      ${buildRarityFrame(isMissing ? "Locked" : visualRarityLabel)}
-      ${buildPlayerArt(result, { lazy: collectionMode, overlayStart: ratingBadge, overlayEnd: topStatus })}
+      ${buildRarityFrame(rarityFrameLabel)}
+      ${buildPlayerArt(result, {
+        lazy: collectionMode && !previewMode,
+        imageMode: previewMode ? "preview" : "card",
+        overlayStart: ratingBadge,
+        overlayEnd: topStatus,
+      })}
       <div class="card-body">
-        ${buildTeamBrand(result, { lazy: collectionMode })}
+        ${buildTeamBrand(result, { lazy: collectionMode && !previewMode })}
         <h4 class="player-name">${escapeHtml(result.name)}</h4>
         <div class="card-detail-row">
           <span class="position-pill"><span class="detail-pill-label">Pos</span>${escapeHtml(positionLabel)}</span>
@@ -3944,6 +4603,17 @@ function buildPackDuplicateFooter(result, index) {
       <button type="button" class="secondary-btn mini-action-btn sell" data-pack-duplicate-sell="${index}">Sell</button>
     </div>
   `;
+}
+
+function buildPackOverviewFooter(result, index) {
+  if (result.isNew) {
+    return `
+      <div class="card-action-buttons pack-card-actions">
+        <span class="mini-action-note new">New Pull</span>
+      </div>
+    `;
+  }
+  return buildPackDuplicateFooter(result, index);
 }
 
 function buildStaticValueFooter(value) {
@@ -4019,19 +4689,78 @@ function buildPackPreviewStage(pack, sourceType, previewIndex = 0) {
   `;
 }
 
+function comparePackOverviewEntries(left, right) {
+  return (Number(right.result.ability || 0) - Number(left.result.ability || 0))
+    || String(left.result.name || "").localeCompare(String(right.result.name || ""));
+}
+
+function buildMobilePackOverviewDivider(count) {
+  return `
+    <article class="mobile-pack-overview-divider" aria-hidden="true">
+      <span class="eyebrow accent">Duplicates</span>
+      <strong>${escapeHtml(String(count))}</strong>
+      <span>Swipe into the dupe stack.</span>
+    </article>
+  `;
+}
+
+function buildMobilePackOverviewCarousel(results = []) {
+  const rankedEntries = results.map((result, index) => ({
+    result,
+    sourceIndex: index,
+  }));
+  const newEntries = rankedEntries.filter((entry) => entry.result.isNew).sort(comparePackOverviewEntries);
+  const duplicateEntries = rankedEntries.filter((entry) => !entry.result.isNew).sort(comparePackOverviewEntries);
+  const slides = [
+    ...newEntries.map(({ result, sourceIndex }) => `
+      <article class="mobile-pack-overview-slide card-slide is-new">
+        ${buildCardFace(result, {
+          footerHtml: buildPackOverviewFooter(result, sourceIndex),
+          shellClass: "mobile-pack-overview-card-shell",
+        })}
+      </article>
+    `),
+    ...(newEntries.length && duplicateEntries.length ? [buildMobilePackOverviewDivider(duplicateEntries.length)] : []),
+    ...duplicateEntries.map(({ result, sourceIndex }) => `
+      <article class="mobile-pack-overview-slide card-slide is-duplicate">
+        ${buildCardFace(result, {
+          footerHtml: buildPackOverviewFooter(result, sourceIndex),
+          shellClass: "mobile-pack-overview-card-shell",
+        })}
+      </article>
+    `),
+  ];
+  return slides.join("");
+}
+
 function renderPackArea() {
   const previewContext = !openingPack ? getPackPreviewContext() : null;
   const isPreviewMode = Boolean(activePackPreview && previewContext);
   const hasRevealContent = Boolean(openingPack || state.lastPack || previewContext);
+  const isMobileOpeningPack = Boolean(openingPack) && isMobilePackRevealMode();
+  const isMobileResolvedPack = !openingPack && !isPreviewMode && Boolean(state.lastPack) && isMobilePackRevealMode();
+  const showMobilePackContinue = isMobileOpeningPack && shouldShowMobilePackContinue(openingPack);
+  const repeatablePackId = state.lastPack?.repeatableStorePackId || state.lastPack?.packId || null;
   packModalEl.hidden = !isPackModalOpen || !hasRevealContent;
   packRevealGridEl.classList.toggle("pack-preview-mode", isPreviewMode);
+  packRevealGridEl.classList.toggle("mobile-pack-flow", isMobileOpeningPack);
+  packRevealGridEl.classList.toggle("mobile-pack-overview-carousel", isMobileResolvedPack);
   closePackModalEl.disabled = Boolean(openingPack);
   closePackModalEl.textContent = openingPack ? "Finish Reveal First" : "Close";
-  revealAllCardsEl.hidden = !openingPack;
-  revealAllCardsEl.disabled = !openingPack || !openingPack.assetsReady || openingPack.revealedCount === openingPack.outcome.results.length;
+  if (closePackModalIconEl) {
+    closePackModalIconEl.disabled = Boolean(openingPack);
+    closePackModalIconEl.setAttribute("aria-label", openingPack ? "Finish reveal first" : "Close pack modal");
+  }
+  revealAllCardsEl.textContent = showMobilePackContinue ? "Continue" : "Skip Reveal";
+  revealAllCardsEl.hidden = !openingPack || (isMobileOpeningPack && !showMobilePackContinue);
+  revealAllCardsEl.disabled = !openingPack
+    || !openingPack.assetsReady
+    || (isMobileOpeningPack
+      ? !showMobilePackContinue
+      : openingPack.revealedCount === openingPack.outcome.results.length);
   const pendingDuplicates = getPendingDuplicateResults();
   const hasPendingDuplicates = pendingDuplicates.length > 0;
-  openAnotherPackEl.hidden = Boolean(openingPack) || (!isPreviewMode && !state.lastPack?.repeatableStorePackId);
+  openAnotherPackEl.hidden = Boolean(openingPack) || (!isPreviewMode && !repeatablePackId);
   if (isPreviewMode && previewContext) {
     const previewCanOpen = previewContext.sourceType === "saved"
       ? true
@@ -4041,7 +4770,7 @@ function renderPackArea() {
       ? "Open Pack"
       : `Open New Pack <span class="repeat-pack-cost">${previewContext.pack.cost === 0 ? "Free" : formatMoney(previewContext.pack.cost)}</span>`;
   } else if (!openingPack && state.lastPack) {
-    const repeatPack = packById[state.lastPack.repeatableStorePackId];
+    const repeatPack = packById[repeatablePackId];
     const canRepeatPack = Boolean(repeatPack) && state.money >= repeatPack.cost;
     openAnotherPackEl.disabled = !canRepeatPack;
     openAnotherPackEl.innerHTML = repeatPack
@@ -4070,7 +4799,7 @@ function renderPackArea() {
   sellAllDuplicatesEl.hidden = Boolean(openingPack) || isPreviewMode || !hasPendingDuplicates;
   sellAllDuplicatesEl.disabled = !hasPendingDuplicates;
   if (packModalPrevEl && packModalNextEl) {
-    const showNav = !openingPack && Boolean(previewContext);
+    const showNav = !openingPack && isPreviewMode;
     packModalPrevEl.hidden = !showNav;
     packModalNextEl.hidden = !showNav;
     if (showNav && previewContext) {
@@ -4091,16 +4820,27 @@ function renderPackArea() {
   }
 
   if (openingPack) {
+    const totalCards = openingPack.outcome.results.length;
+    const currentMobileIndex = isMobileOpeningPack ? getOpeningPackMobileIndex(openingPack) : 0;
     revealTitleEl.textContent = `Opening ${openingPack.packName}`;
-    revealSubtitleEl.textContent = openingPack.assetsReady
-      ? "Hover a card to sense its rarity glow, then click each card to flip it."
-      : "Loading player cards first so each reveal is instant.";
-    revealProgressEl.textContent = `${openingPack.revealedCount} / ${openingPack.outcome.results.length} Revealed`;
+    revealSubtitleEl.textContent = isMobileOpeningPack
+      ? getOpeningPackMobileHint(openingPack)
+      : openingPack.assetsReady
+        ? "Hover a card to sense its rarity glow, then click each card to flip it."
+        : "Loading player cards first so each reveal is instant.";
+    revealProgressEl.textContent = isMobileOpeningPack
+      ? `Card ${Math.min(currentMobileIndex + 1, totalCards)} of ${totalCards}`
+      : `${openingPack.revealedCount} / ${totalCards} Revealed`;
     packRevealGridEl.classList.toggle("loading-assets", !openingPack.assetsReady);
-    packRevealGridEl.innerHTML = openingPack.outcome.results.map((result, index) => buildInteractiveRevealCard(result, index, openingPack.flipped[index], openingPack.assetsReady)).join("");
-    packRevealGridEl.querySelectorAll("[data-flip-index]").forEach((button) => {
-      button.addEventListener("click", () => flipPackCard(button, Number(button.dataset.flipIndex)));
-    });
+    packRevealGridEl.innerHTML = isMobileOpeningPack
+      ? buildMobilePackRevealStage(openingPack)
+      : openingPack.outcome.results.map((result, index) => buildInteractiveRevealCard(result, index, openingPack.flipped[index], openingPack.assetsReady)).join("");
+    if (isMobileOpeningPack) {
+      const activeCardSlot = packRevealGridEl.querySelector("[data-mobile-pack-current]");
+      if (activeCardSlot) {
+        bindMobilePackSwipe(activeCardSlot, Number(activeCardSlot.dataset.mobilePackCurrent));
+      }
+    }
     renderRevealSetProgress();
     renderRevealDailyProgress();
     return;
@@ -4129,11 +4869,13 @@ function renderPackArea() {
   const completedSetText = lastPack.completedTeams.length ? ` Completed sets: ${lastPack.completedTeams.map((entry) => entry.teamName).join(", ")}.` : "";
   const completedCollectionText = lastPack.completedCollections?.length ? ` Completed collections: ${lastPack.completedCollections.map((entry) => entry.groupName).join(", ")}.` : "";
   revealTitleEl.textContent = `${lastPack.packName} Complete`;
-  revealSubtitleEl.textContent = `All cards revealed. ${newCards} new, ${duplicates} duplicate.${pendingDuplicateCount ? ` ${pendingDuplicateCount} duplicate cards can still be sold.` : ""}${completedSetText}${completedCollectionText}`;
+  revealSubtitleEl.textContent = `${isMobileResolvedPack ? "Swipe new pulls from highest to lowest first, then continue into duplicates. " : "All cards revealed. "}${newCards} new, ${duplicates} duplicate.${pendingDuplicateCount ? ` ${pendingDuplicateCount} duplicate cards can still be sold.` : ""}${completedSetText}${completedCollectionText}`;
   revealProgressEl.textContent = `${lastPack.results.length} / ${lastPack.results.length} Revealed`;
-  packRevealGridEl.innerHTML = lastPack.results.map((result, index) => buildCardFace(result, {
-    footerHtml: buildPackDuplicateFooter(result, index),
-  })).join("");
+  packRevealGridEl.innerHTML = isMobileResolvedPack
+    ? buildMobilePackOverviewCarousel(lastPack.results)
+    : lastPack.results.map((result, index) => buildCardFace(result, {
+      footerHtml: buildPackDuplicateFooter(result, index),
+    })).join("");
   renderRevealSetProgress();
   renderRevealDailyProgress();
 }
@@ -4449,6 +5191,118 @@ function buildTeamLogoFilterGroup(title, items, selectedValues, dataAttr) {
   `;
 }
 
+function buildPlayerFilterPanel(teamOptions, positionOptions) {
+  return `
+    <section class="filter-popover-panel player-filter-panel">
+      ${buildTeamLogoFilterGroup("Teams", teamOptions, playerCollectionTeamFilter, "player-team")}
+      <div class="filter-popover-grid player-filter-secondary-grid">
+        ${buildSelectableFilterGroup("Rarities", visibleRarityOptions, playerCollectionRarityFilter, "player-rarity")}
+        <section class="filter-popover-group">
+          <div class="filter-popover-head">
+            <span class="label">Position</span>
+            <button type="button" class="mini-link-btn" data-clear-position-filter>Clear</button>
+          </div>
+          <div class="filter-chip-grid">
+            <button type="button" class="filter-chip-btn ${playerCollectionPositionFilter === "all" ? "active" : ""}" data-position-filter="all">All</button>
+            ${positionOptions.map((position) => `
+              <button type="button" class="filter-chip-btn ${playerCollectionPositionFilter === position ? "active" : ""}" data-position-filter="${escapeHtml(position)}">${escapeHtml(position)}</button>
+            `).join("")}
+          </div>
+        </section>
+        <section class="filter-popover-group">
+          <div class="filter-popover-head">
+            <span class="label">Collection State</span>
+            ${playerCollectionShowLocked ? `<button type="button" class="mini-link-btn" data-player-show-locked-reset>Owned Only</button>` : ""}
+          </div>
+          <div class="filter-chip-grid">
+            <button type="button" class="filter-chip-btn ${!playerCollectionShowLocked ? "active" : ""}" data-player-show-locked="false">Owned Only</button>
+            <button type="button" class="filter-chip-btn ${playerCollectionShowLocked ? "active" : ""}" data-player-show-locked="true">Show Locked</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  `;
+}
+
+function bindPlayerFilterPanel(root, teamOptions) {
+  if (!root) return;
+  root.querySelectorAll("[data-filter-option='player-team']").forEach((button) => {
+    button.addEventListener("click", () => {
+      const value = button.dataset.filterValue;
+      const next = toggleFilterSelection(playerCollectionTeamFilter, value, teamOptions.map((team) => team.value));
+      setPlayerCollectionTeamFilter(next);
+    });
+  });
+  root.querySelectorAll("[data-filter-option='player-rarity']").forEach((button) => {
+    button.addEventListener("click", () => {
+      const value = button.dataset.filterValue;
+      const next = toggleFilterSelection(playerCollectionRarityFilter, value, visibleRarityOptions.map((tier) => tier.id));
+      setPlayerCollectionRarityFilter(next);
+    });
+  });
+  root.querySelector("[data-clear-filter-group='player-team']")?.addEventListener("click", () => {
+    setPlayerCollectionTeamFilter([]);
+  });
+  root.querySelector("[data-clear-filter-group='player-rarity']")?.addEventListener("click", () => {
+    setPlayerCollectionRarityFilter([]);
+  });
+  root.querySelectorAll("[data-position-filter]").forEach((button) => {
+    button.addEventListener("click", () => setPlayerCollectionPositionFilter(button.dataset.positionFilter));
+  });
+  root.querySelector("[data-clear-position-filter]")?.addEventListener("click", () => {
+    setPlayerCollectionPositionFilter("all");
+  });
+  root.querySelectorAll("[data-player-show-locked]").forEach((button) => {
+    button.addEventListener("click", () => {
+      setPlayerCollectionShowLocked(button.dataset.playerShowLocked === "true");
+    });
+  });
+  root.querySelector("[data-player-show-locked-reset]")?.addEventListener("click", () => {
+    setPlayerCollectionShowLocked(false);
+  });
+}
+
+function closePlayerControlsModal() {
+  if (!isPlayerFilterMenuOpen && !isPlayerBulkSellOpen) return;
+  isPlayerFilterMenuOpen = false;
+  isPlayerBulkSellOpen = false;
+  renderCollection();
+}
+
+function renderPlayerControlsModal(filteredCards, teamOptions, positionOptions) {
+  if (!playerControlsModalEl || !playerControlsModalBodyEl) return;
+  const mobileMode = isCompactMobileUi();
+  const activeMode = isPlayerBulkSellOpen ? "bulk" : isPlayerFilterMenuOpen ? "filters" : "";
+  const isOpen = Boolean(mobileMode && activeMode);
+  playerControlsModalEl.hidden = !isOpen;
+  if (!isOpen) {
+    playerControlsModalBodyEl.innerHTML = "";
+    return;
+  }
+
+  if (activeMode === "bulk") {
+    if (playerControlsModalEyebrowEl) playerControlsModalEyebrowEl.textContent = "Bulk Sell";
+    if (playerControlsModalTitleEl) playerControlsModalTitleEl.textContent = "Tune duplicate sell rules.";
+    if (playerControlsModalSubtitleEl) playerControlsModalSubtitleEl.textContent = "Adjust your duplicate filters, then save settings to return to Players.";
+    playerControlsModalBodyEl.innerHTML = buildBulkSellPanel(filteredCards, {
+      scopeLabel: "Current Filters",
+      title: "Bulk sell visible duplicates",
+      note: "Uses your current search and filters. Auto sell only affects duplicate copies.",
+      showTeamFilter: true,
+      showRarityFilter: true,
+      menuMode: true,
+    });
+    bindBulkSellPanel(playerControlsModalBodyEl.querySelector(".bulk-sell-panel"), filteredCards);
+    return;
+  }
+
+  if (playerControlsModalEyebrowEl) playerControlsModalEyebrowEl.textContent = "Player Filters";
+  if (playerControlsModalTitleEl) playerControlsModalTitleEl.textContent = "Refine your club browser.";
+  if (playerControlsModalSubtitleEl) playerControlsModalSubtitleEl.textContent = "Choose the cards you want to browse, then save settings to return to Players.";
+  playerControlsModalBodyEl.innerHTML = buildPlayerFilterPanel(teamOptions, positionOptions);
+  bindPlayerFilterPanel(playerControlsModalBodyEl, teamOptions);
+}
+
 function renderPlayerCollectionFilters(ownedCards) {
   const availableCards = playerCollectionShowLocked ? cardCatalog : ownedCards;
   const teamOptions = teamSets
@@ -4464,6 +5318,7 @@ function renderPlayerCollectionFilters(ownedCards) {
   const positionOptions = [...new Set(availableCards.map((card) => getPrimaryPosition(card.position)))].sort();
   const playerFilterCount = playerCollectionTeamFilter.length + playerCollectionRarityFilter.length + (playerCollectionPositionFilter === "all" ? 0 : 1) + (playerCollectionShowLocked ? 1 : 0);
   const filteredCards = getFilteredPlayerCards();
+  const mobileMode = isCompactMobileUi();
 
   collectionFiltersEl.innerHTML = `
     <div class="collection-tool-grid player-toolbar-grid">
@@ -4478,7 +5333,7 @@ function renderPlayerCollectionFilters(ownedCards) {
         >
       </label>
 
-      <label class="collection-field">
+      <label class="collection-field player-sort-field">
         <span class="label">Sort</span>
         <select data-player-sort>
           <option value="rating-desc" ${playerCollectionSort === "rating-desc" ? "selected" : ""}>Rating High-Low</option>
@@ -4492,47 +5347,18 @@ function renderPlayerCollectionFilters(ownedCards) {
       <div class="collection-field toolbar-button-field">
         <span class="label">Filters</span>
         <button type="button" class="secondary-btn toolbar-toggle-btn ${isPlayerFilterMenuOpen ? "active" : ""}" data-player-filter-toggle>
-          ${escapeHtml(getFilterButtonLabel("Filters", playerFilterCount))}
+          ${escapeHtml(getFilterButtonLabel(mobileMode ? "Open Filters" : "Filters", playerFilterCount))}
         </button>
       </div>
       <div class="collection-field toolbar-button-field">
         <span class="label">Bulk Sell</span>
         <button type="button" class="secondary-btn toolbar-toggle-btn ${isPlayerBulkSellOpen ? "active" : ""}" data-player-bulk-toggle>
-          Open Bulk Sell
+          ${mobileMode ? "Open Bulk Sell" : "Open Bulk Sell"}
         </button>
       </div>
     </div>
-    ${isPlayerFilterMenuOpen ? `
-      <section class="filter-popover-panel">
-        ${buildTeamLogoFilterGroup("Teams", teamOptions, playerCollectionTeamFilter, "player-team")}
-        <div class="filter-popover-grid player-filter-secondary-grid">
-          ${buildSelectableFilterGroup("Rarities", visibleRarityOptions, playerCollectionRarityFilter, "player-rarity")}
-          <section class="filter-popover-group">
-            <div class="filter-popover-head">
-              <span class="label">Position</span>
-              <button type="button" class="mini-link-btn" data-clear-position-filter>Clear</button>
-            </div>
-            <div class="filter-chip-grid">
-              <button type="button" class="filter-chip-btn ${playerCollectionPositionFilter === "all" ? "active" : ""}" data-position-filter="all">All</button>
-              ${positionOptions.map((position) => `
-                <button type="button" class="filter-chip-btn ${playerCollectionPositionFilter === position ? "active" : ""}" data-position-filter="${escapeHtml(position)}">${escapeHtml(position)}</button>
-              `).join("")}
-            </div>
-          </section>
-          <section class="filter-popover-group">
-            <div class="filter-popover-head">
-              <span class="label">Collection State</span>
-              ${playerCollectionShowLocked ? `<button type="button" class="mini-link-btn" data-player-show-locked-reset>Owned Only</button>` : ""}
-            </div>
-            <div class="filter-chip-grid">
-              <button type="button" class="filter-chip-btn ${!playerCollectionShowLocked ? "active" : ""}" data-player-show-locked="false">Owned Only</button>
-              <button type="button" class="filter-chip-btn ${playerCollectionShowLocked ? "active" : ""}" data-player-show-locked="true">Show Locked</button>
-            </div>
-          </section>
-        </div>
-      </section>
-    ` : ""}
-    ${isPlayerBulkSellOpen ? buildBulkSellPanel(filteredCards, {
+    ${!mobileMode && isPlayerFilterMenuOpen ? buildPlayerFilterPanel(teamOptions, positionOptions) : ""}
+    ${!mobileMode && isPlayerBulkSellOpen ? buildBulkSellPanel(filteredCards, {
       scopeLabel: "Current Filters",
       title: "Bulk sell visible duplicates",
       note: "Uses your current search and filters. Auto sell only affects duplicate copies.",
@@ -4551,41 +5377,13 @@ function renderPlayerCollectionFilters(ownedCards) {
   });
   collectionFiltersEl.querySelector("[data-player-filter-toggle]")?.addEventListener("click", togglePlayerFilterMenu);
   collectionFiltersEl.querySelector("[data-player-bulk-toggle]")?.addEventListener("click", togglePlayerBulkSellMenu);
-  collectionFiltersEl.querySelectorAll("[data-filter-option='player-team']").forEach((button) => {
-    button.addEventListener("click", () => {
-      const value = button.dataset.filterValue;
-      const next = toggleFilterSelection(playerCollectionTeamFilter, value, teamOptions.map((team) => team.value));
-      setPlayerCollectionTeamFilter(next);
-    });
-  });
-  collectionFiltersEl.querySelectorAll("[data-filter-option='player-rarity']").forEach((button) => {
-    button.addEventListener("click", () => {
-      const value = button.dataset.filterValue;
-      const next = toggleFilterSelection(playerCollectionRarityFilter, value, visibleRarityOptions.map((tier) => tier.id));
-      setPlayerCollectionRarityFilter(next);
-    });
-  });
-  collectionFiltersEl.querySelector("[data-clear-filter-group='player-team']")?.addEventListener("click", () => {
-    setPlayerCollectionTeamFilter([]);
-  });
-  collectionFiltersEl.querySelector("[data-clear-filter-group='player-rarity']")?.addEventListener("click", () => {
-    setPlayerCollectionRarityFilter([]);
-  });
-  collectionFiltersEl.querySelectorAll("[data-position-filter]").forEach((button) => {
-    button.addEventListener("click", () => setPlayerCollectionPositionFilter(button.dataset.positionFilter));
-  });
-  collectionFiltersEl.querySelector("[data-clear-position-filter]")?.addEventListener("click", () => {
-    setPlayerCollectionPositionFilter("all");
-  });
-  collectionFiltersEl.querySelectorAll("[data-player-show-locked]").forEach((button) => {
-    button.addEventListener("click", () => {
-      setPlayerCollectionShowLocked(button.dataset.playerShowLocked === "true");
-    });
-  });
-  collectionFiltersEl.querySelector("[data-player-show-locked-reset]")?.addEventListener("click", () => {
-    setPlayerCollectionShowLocked(false);
-  });
-  if (isPlayerBulkSellOpen) bindBulkSellPanel(collectionFiltersEl.querySelector(".bulk-sell-panel"), filteredCards);
+  if (!mobileMode && isPlayerFilterMenuOpen) {
+    bindPlayerFilterPanel(collectionFiltersEl, teamOptions);
+  }
+  if (!mobileMode && isPlayerBulkSellOpen) {
+    bindBulkSellPanel(collectionFiltersEl.querySelector(".bulk-sell-panel"), filteredCards);
+  }
+  renderPlayerControlsModal(filteredCards, teamOptions, positionOptions);
 }
 
 function buildBulkSellPanel(cards, options = {}) {
@@ -4886,10 +5684,8 @@ function renderCollection() {
               <h3>${escapeHtml(team.name)}</h3>
             </div>
           </div>
-          <div class="detail-topbar-actions">
-            <button type="button" class="secondary-btn toolbar-toggle-btn ${isSetBulkSellOpen ? "active" : ""}" id="toggleSetBulkSell">Bulk Sell</button>
-            <button type="button" class="secondary-btn" id="collectionBack">Back To ${escapeHtml(parentCollection?.shortName || "Collection")}</button>
-          </div>
+          <button type="button" class="secondary-btn toolbar-toggle-btn detail-bulk-toggle ${isSetBulkSellOpen ? "active" : ""}" id="toggleSetBulkSell">Bulk Sell</button>
+          <button type="button" class="secondary-btn detail-back-btn" id="collectionBack">Back To ${escapeHtml(parentCollection?.shortName || "Collection")}</button>
         </div>
         <div class="detail-meta-row">
           <div class="detail-progress-copy">Set progress: ${owned}/${teamCards.length}</div>
@@ -5972,10 +6768,32 @@ function renderAll() {
   renderStats();
 }
 
+function handleCompactLayoutViewportChange() {
+  if (isPackModalOpen && (openingPack || state.lastPack || activePackPreview)) {
+    renderPackArea();
+  }
+  if (activeView === "players" || activeView === "collections") {
+    renderCollection();
+  }
+  renderDailyChallenges();
+  if (activeCardPreview && !cardPreviewModalEl.hidden) {
+    renderActiveCardPreview();
+  }
+}
+
 document.addEventListener("error", (event) => {
   const target = event.target;
   if (!(target instanceof HTMLImageElement)) return;
   if (target.matches("[data-player-image]")) {
+    const fallbackSrc = String(target.dataset.playerImageFallbackSrc || "").trim();
+    const currentSrc = String(target.currentSrc || target.src || "").trim();
+    if (fallbackSrc && fallbackSrc !== currentSrc && target.dataset.playerImageRetried !== "true") {
+      target.dataset.playerImageRetried = "true";
+      target.removeAttribute("srcset");
+      target.removeAttribute("sizes");
+      target.src = fallbackSrc;
+      return;
+    }
     const shell = target.closest(".player-art");
     if (shell) shell.classList.add("image-fallback");
     return;
@@ -5983,6 +6801,16 @@ document.addEventListener("error", (event) => {
   if (target.matches("[data-team-logo]")) {
     target.remove();
   }
+}, true);
+
+document.addEventListener("load", (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLImageElement)) return;
+  if (!target.matches("[data-player-image]")) return;
+  const shell = target.closest(".player-art");
+  if (!shell) return;
+  shell.classList.remove("image-fallback");
+  shell.classList.add("image-ready");
 }, true);
 
 navTabsEl.addEventListener("click", (event) => {
@@ -6005,6 +6833,10 @@ dailyChallengeTriggerEl?.addEventListener("click", (event) => {
   isDailyChallengesOpen = !isDailyChallengesOpen;
   renderDailyChallenges();
 });
+closeDailyChallengeMobileModalEl?.addEventListener("click", closeDailyChallengesPanel);
+dailyChallengeMobileModalEl?.addEventListener("click", (event) => {
+  if (event.target === dailyChallengeMobileModalEl) closeDailyChallengesPanel();
+});
 
 document.addEventListener("click", (event) => {
   const jumpButton = event.target.closest("[data-jump-view]");
@@ -6013,11 +6845,10 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  if (!isDailyChallengesOpen) return;
+  if (!isDailyChallengesOpen || isCompactMobileUi()) return;
   const target = event.target;
   if (dailyChallengePanelEl?.contains(target) || dailyChallengeTriggerEl?.contains(target)) return;
-  isDailyChallengesOpen = false;
-  renderDailyChallenges();
+  closeDailyChallengesPanel();
 });
 
 packStoreEl.addEventListener("click", (event) => {
@@ -6061,9 +6892,103 @@ revealAllCardsEl.addEventListener("click", revealAllPackCards);
 openAnotherPackEl.addEventListener("click", reopenCurrentPack);
 sellAllDuplicatesEl.addEventListener("click", () => sellAllPendingDuplicates({ closeAfter: true }));
 closePackModalEl.addEventListener("click", closePackModal);
+closePackModalIconEl?.addEventListener("click", closePackModal);
+closePlayerControlsModalEl?.addEventListener("click", closePlayerControlsModal);
+savePlayerControlsModalEl?.addEventListener("click", closePlayerControlsModal);
+playerControlsModalEl?.addEventListener("click", (event) => {
+  if (event.target === playerControlsModalEl) closePlayerControlsModal();
+});
 resetGameEl.addEventListener("click", resetGame);
+if (mobilePackRevealMedia) {
+  if (typeof mobilePackRevealMedia.addEventListener === "function") {
+    mobilePackRevealMedia.addEventListener("change", handleCompactLayoutViewportChange);
+  } else if (typeof mobilePackRevealMedia.addListener === "function") {
+    mobilePackRevealMedia.addListener(handleCompactLayoutViewportChange);
+  }
+}
+
+cardPreviewPrevEl?.addEventListener("click", () => stepCardPreview(-1));
+cardPreviewNextEl?.addEventListener("click", () => stepCardPreview(1));
+
+cardPreviewStageShellEl?.addEventListener("pointerdown", (event) => {
+  if (!isMobilePackRevealMode() || cardPreviewModalEl.hidden || !getActiveCardPreviewNavigation()) return;
+  if (event.button !== undefined && event.button !== 0) return;
+  if (!event.target.closest("#cardPreviewStage") || event.target.closest(".card-preview-nav")) return;
+  cardPreviewSwipeState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    deltaX: 0,
+    deltaY: 0,
+    dragging: false,
+  };
+  cardPreviewStageShellEl.setPointerCapture?.(event.pointerId);
+});
+
+cardPreviewStageShellEl?.addEventListener("pointermove", (event) => {
+  if (!cardPreviewSwipeState || event.pointerId !== cardPreviewSwipeState.pointerId || !cardPreviewStageEl) return;
+  cardPreviewSwipeState.deltaX = event.clientX - cardPreviewSwipeState.startX;
+  cardPreviewSwipeState.deltaY = event.clientY - cardPreviewSwipeState.startY;
+  if (!cardPreviewSwipeState.dragging) {
+    if (Math.abs(cardPreviewSwipeState.deltaX) < 10 && Math.abs(cardPreviewSwipeState.deltaY) < 10) return;
+    if (Math.abs(cardPreviewSwipeState.deltaX) <= Math.abs(cardPreviewSwipeState.deltaY)) {
+      cardPreviewSwipeState = null;
+      return;
+    }
+    cardPreviewSwipeState.dragging = true;
+    cardPreviewStageShellEl.classList.add("is-swiping");
+    cardPreviewStageEl.classList.add("is-swiping");
+  }
+  event.preventDefault();
+  const driftY = Math.max(-18, Math.min(18, cardPreviewSwipeState.deltaY * 0.18));
+  const rotation = Math.max(
+    -CARD_PREVIEW_SWIPE_MAX_ROTATION_DEG,
+    Math.min(CARD_PREVIEW_SWIPE_MAX_ROTATION_DEG, cardPreviewSwipeState.deltaX * CARD_PREVIEW_SWIPE_ROTATION_FACTOR),
+  );
+  cardPreviewStageEl.style.setProperty("--card-preview-swipe-x", `${cardPreviewSwipeState.deltaX}px`);
+  cardPreviewStageEl.style.setProperty("--card-preview-swipe-y", `${driftY}px`);
+  cardPreviewStageEl.style.setProperty("--card-preview-swipe-rotate", `${rotation}deg`);
+}, { passive: false });
+
+function finalizeCardPreviewSwipe(event) {
+  if (!cardPreviewSwipeState || event.pointerId !== cardPreviewSwipeState.pointerId) return;
+  try {
+    if (cardPreviewStageShellEl?.hasPointerCapture?.(event.pointerId)) {
+      cardPreviewStageShellEl.releasePointerCapture(event.pointerId);
+    }
+  } catch {
+    // Ignore release errors from already-cleared captures.
+  }
+  const { deltaX, dragging } = cardPreviewSwipeState;
+  cardPreviewSwipeState = null;
+  if (!dragging) {
+    resetCardPreviewSwipeState();
+    return;
+  }
+  cardPreviewSuppressTapUntil = performance.now() + 260;
+  if (Math.abs(deltaX) >= CARD_PREVIEW_SWIPE_THRESHOLD_PX) {
+    const stepped = stepCardPreview(deltaX < 0 ? 1 : -1);
+    if (stepped) return;
+  }
+  resetCardPreviewSwipeState();
+}
+
+cardPreviewStageShellEl?.addEventListener("pointerup", finalizeCardPreviewSwipe);
+cardPreviewStageShellEl?.addEventListener("pointercancel", finalizeCardPreviewSwipe);
+cardPreviewStageShellEl?.addEventListener("lostpointercapture", finalizeCardPreviewSwipe);
+cardPreviewStageEl?.addEventListener("click", (event) => {
+  if (!isMobilePackRevealMode() || cardPreviewModalEl.hidden) return;
+  if (performance.now() < cardPreviewSuppressTapUntil) return;
+  if (!event.target.closest(".preview-card-shell")) return;
+  toggleMobilePreviewCinematic();
+});
 
 packRevealGridEl.addEventListener("click", (event) => {
+  const revealButton = event.target.closest("[data-flip-index]");
+  if (revealButton && openingPack) {
+    flipPackCard(revealButton, Number(revealButton.dataset.flipIndex));
+    return;
+  }
   const storePackButton = event.target.closest("[data-pack-id]");
   if (storePackButton && activePackPreview) {
     const previewContext = getPackPreviewContext(activePackPreview);
@@ -6339,8 +7264,11 @@ document.addEventListener("keydown", (event) => {
     return;
   }
   if (event.key === "Escape" && isDailyChallengesOpen) {
-    isDailyChallengesOpen = false;
-    renderDailyChallenges();
+    closeDailyChallengesPanel();
+    return;
+  }
+  if (event.key === "Escape" && (isPlayerFilterMenuOpen || isPlayerBulkSellOpen)) {
+    closePlayerControlsModal();
     return;
   }
   if (event.key === "Escape" && dailyChallengeCelebration) {
@@ -6367,6 +7295,18 @@ document.addEventListener("keydown", (event) => {
     closeProfileShowcaseModal();
     return;
   }
+  if (!cardPreviewModalEl.hidden && event.key === "ArrowLeft") {
+    if (stepCardPreview(-1)) {
+      event.preventDefault();
+      return;
+    }
+  }
+  if (!cardPreviewModalEl.hidden && event.key === "ArrowRight") {
+    if (stepCardPreview(1)) {
+      event.preventDefault();
+      return;
+    }
+  }
   if (event.key === "Escape" && !cardPreviewModalEl.hidden) {
     closeCardPreview();
     return;
@@ -6386,7 +7326,7 @@ const cardTiltSelector = ".tilt-card, .tilt-pack";
 const CARD_TILT_MAX = 15;
 const CARD_TILT_DEAD_ZONE = 0.28;
 const CARD_TILT_EXPONENT = 1.25;
-const PREMIUM_CINEMATIC_ENTER_MS = 2000;
+const PREMIUM_CINEMATIC_ENTER_MS = 1700;
 const PREMIUM_CINEMATIC_EXIT_MS = 750;
 const HOLD_ACTION_DURATION_MS = 2000;
 let activeTiltCard = null;
