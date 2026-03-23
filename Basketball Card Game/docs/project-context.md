@@ -1078,3 +1078,6 @@ If a visual effect hurts readability or makes the game harder to use, readabilit
 Additional standing rule:
 
 - when making changes, update this context file if the change adds a durable UX rule, rendering policy, or architectural assumption that future work should preserve
+- mobile pack overview carousels should enter with the first slide centered and use center-based snap behavior per slide
+- mobile carousels must not widen the surrounding modal or push unrelated header/footer/chip layout off-screen; horizontal overflow should stay locally contained
+- reveal set-progress chips above mobile pack carousels should compress into viewport-safe columns instead of forcing the modal wider than the phone screen

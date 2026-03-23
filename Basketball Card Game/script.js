@@ -1356,6 +1356,7 @@ let profileAchievementStatusFilter = "all";
 let profileAchievementSort = "date-desc";
 let isProfileNameEditing = false;
 let profileNameDraft = "";
+let mobilePackOverviewCenterFrame = 0;
 const assetPreloadCache = new Map();
 const NBA_HEADSHOT_URL_PATTERN = /^(https:\/\/cdn\.nba\.com\/headshots\/nba\/latest\/)(1040x760|520x380|260x190)\/(\d+)\.png$/i;
 const PLAYER_IMAGE_SIZES = {
@@ -4733,6 +4734,29 @@ function buildMobilePackOverviewCarousel(results = []) {
   return slides.join("");
 }
 
+function scheduleMobilePackOverviewCenter(force = false) {
+  if (!packRevealGridEl?.classList.contains("mobile-pack-overview-carousel") || !state.lastPack) return;
+  const centerTarget = packRevealGridEl.querySelector(".mobile-pack-overview-slide, .mobile-pack-overview-divider");
+  if (!centerTarget) return;
+  const overviewKey = `${state.lastPack.openedAt || 0}:${state.lastPack.results.length}`;
+  if (!force && packRevealGridEl.dataset.mobileOverviewCenteredKey === overviewKey) return;
+  packRevealGridEl.dataset.mobileOverviewCenteredKey = overviewKey;
+  if (mobilePackOverviewCenterFrame) {
+    window.cancelAnimationFrame(mobilePackOverviewCenterFrame);
+    mobilePackOverviewCenterFrame = 0;
+  }
+  mobilePackOverviewCenterFrame = window.requestAnimationFrame(() => {
+    mobilePackOverviewCenterFrame = window.requestAnimationFrame(() => {
+      mobilePackOverviewCenterFrame = 0;
+      if (!packRevealGridEl?.classList.contains("mobile-pack-overview-carousel")) return;
+      const firstSlide = packRevealGridEl.querySelector(".mobile-pack-overview-slide, .mobile-pack-overview-divider");
+      if (!firstSlide) return;
+      const targetLeft = Math.max(0, firstSlide.offsetLeft - Math.max(0, (packRevealGridEl.clientWidth - firstSlide.clientWidth) / 2));
+      packRevealGridEl.scrollLeft = targetLeft;
+    });
+  });
+}
+
 function renderPackArea() {
   const previewContext = !openingPack ? getPackPreviewContext() : null;
   const isPreviewMode = Boolean(activePackPreview && previewContext);
@@ -4745,6 +4769,9 @@ function renderPackArea() {
   packRevealGridEl.classList.toggle("pack-preview-mode", isPreviewMode);
   packRevealGridEl.classList.toggle("mobile-pack-flow", isMobileOpeningPack);
   packRevealGridEl.classList.toggle("mobile-pack-overview-carousel", isMobileResolvedPack);
+  if (!isMobileResolvedPack) {
+    packRevealGridEl.dataset.mobileOverviewCenteredKey = "";
+  }
   closePackModalEl.disabled = Boolean(openingPack);
   closePackModalEl.textContent = openingPack ? "Finish Reveal First" : "Close";
   if (closePackModalIconEl) {
@@ -4876,6 +4903,9 @@ function renderPackArea() {
     : lastPack.results.map((result, index) => buildCardFace(result, {
       footerHtml: buildPackDuplicateFooter(result, index),
     })).join("");
+  if (isMobileResolvedPack) {
+    scheduleMobilePackOverviewCenter();
+  }
   renderRevealSetProgress();
   renderRevealDailyProgress();
 }
@@ -6781,6 +6811,12 @@ function handleCompactLayoutViewportChange() {
   }
 }
 
+function handleWindowResize() {
+  if (isPackModalOpen && packRevealGridEl?.classList.contains("mobile-pack-overview-carousel")) {
+    scheduleMobilePackOverviewCenter(true);
+  }
+}
+
 document.addEventListener("error", (event) => {
   const target = event.target;
   if (!(target instanceof HTMLImageElement)) return;
@@ -6899,6 +6935,7 @@ playerControlsModalEl?.addEventListener("click", (event) => {
   if (event.target === playerControlsModalEl) closePlayerControlsModal();
 });
 resetGameEl.addEventListener("click", resetGame);
+window.addEventListener("resize", handleWindowResize, { passive: true });
 if (mobilePackRevealMedia) {
   if (typeof mobilePackRevealMedia.addEventListener === "function") {
     mobilePackRevealMedia.addEventListener("change", handleCompactLayoutViewportChange);

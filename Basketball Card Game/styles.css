@@ -4769,6 +4769,7 @@ img {
   display: grid;
   place-items: center;
   padding: 0.65rem;
+  overflow-x: hidden;
   background: rgba(5, 9, 18, 0.68);
   backdrop-filter: blur(14px);
 }
@@ -4800,6 +4801,7 @@ img {
   gap: 1.15rem;
   grid-template-rows: auto 1fr;
   position: relative;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at top right, rgba(55, 164, 255, 0.14), transparent 22%),
     radial-gradient(circle at 18% 18%, rgba(157, 113, 255, 0.1), transparent 24%),
@@ -5390,6 +5392,8 @@ img {
   justify-content: space-between;
   gap: 0.85rem;
   padding: 0 1.2rem 1.1rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 #packModalShell .modal-bottom-actions {
@@ -5438,6 +5442,7 @@ img {
   display: grid;
   gap: 0.48rem;
   min-width: min(320px, 100%);
+  max-width: 100%;
 }
 
 .modal-pack-meta[hidden] {
@@ -5448,11 +5453,13 @@ img {
   gap: 0.9rem 1.3rem;
   align-items: flex-start;
   padding-inline: calc(1.2rem + var(--pack-modal-nav-gutter));
+  min-width: 0;
 }
 
 #packModalShell .modal-head > :first-child {
   display: grid;
   gap: 0.22rem;
+  min-width: 0;
 }
 
 #packModalShell .modal-actions {
@@ -5518,6 +5525,10 @@ img {
   gap: 0.52rem;
   flex-wrap: wrap;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  position: relative;
+  z-index: 2;
   padding-inline: calc(1.2rem + var(--pack-modal-nav-gutter));
 }
 
@@ -5527,6 +5538,8 @@ img {
   gap: 0.42rem;
   flex-wrap: wrap;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
   padding-inline: calc(1.2rem + var(--pack-modal-nav-gutter));
 }
 
@@ -5879,6 +5892,8 @@ img {
   min-height: 0;
   padding: 1.2rem calc(1.2rem + var(--pack-modal-nav-gutter));
   max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .pack-result-grid {
@@ -5922,18 +5937,25 @@ img {
   align-items: flex-start;
   align-content: stretch;
   gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   padding-block: 0 0.35rem;
   padding-inline: max(0.2rem, calc((100% - var(--mobile-pack-overview-card-width)) / 2));
   scroll-padding-inline: max(0.2rem, calc((100% - var(--mobile-pack-overview-card-width)) / 2));
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
+  box-sizing: border-box;
 }
 
 .pack-result-grid.mobile-pack-overview-carousel > * {
   scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .mobile-pack-overview-slide {
@@ -7330,6 +7352,27 @@ img {
     justify-self: center;
   }
 
+  .reveal-set-progress-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.42rem;
+  }
+
+  .reveal-set-progress-chip {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    padding: 0.5rem 0.54rem 0.52rem;
+  }
+
+  .reveal-set-progress-name {
+    font-size: 0.76rem;
+  }
+
+  .reveal-set-progress-meta {
+    gap: 0.26rem;
+  }
+
   .pack-result-grid.mobile-pack-overview-carousel {
     --mobile-pack-overview-card-width: min(76vw, 236px);
     gap: 0.75rem;
@@ -7706,6 +7749,25 @@ img {
 
   .reveal-stage {
     padding: 0.15rem 0.1rem 0.4rem;
+  }
+
+  .reveal-set-progress-chip {
+    padding: 0.46rem 0.46rem 0.48rem;
+    border-radius: 14px;
+  }
+
+  .reveal-set-progress-logo {
+    width: 1.42rem;
+    height: 1.42rem;
+  }
+
+  .reveal-set-progress-name {
+    font-size: 0.7rem;
+  }
+
+  .reveal-set-progress-count,
+  .reveal-set-progress-tag {
+    font-size: 0.64rem;
   }
 
   .pack-result-grid.mobile-pack-flow {
