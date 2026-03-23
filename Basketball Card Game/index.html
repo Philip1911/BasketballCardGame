@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoops Card Club</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar panel">
+      <div class="brand-block">
+        <div class="brand-ball" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="brand-copy">
+          <span class="eyebrow">2025-26 NBA Card Chase</span>
+          <h1>Hoops Card Club</h1>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" id="navTabs" aria-label="Primary">
+        <button class="tab-btn active" data-view="packs">Packs</button>
+        <button class="tab-btn" data-view="collections">Collections</button>
+        <button class="tab-btn" data-view="players">Players</button>
+        <button class="tab-btn" data-view="profile">Profile</button>
+        <button class="tab-btn" data-view="stats">Stats</button>
+      </nav>
+
+      <div class="topbar-side">
+        <div class="daily-menu-anchor">
+          <button class="daily-trigger" id="dailyChallengeTrigger" type="button" aria-expanded="false" aria-controls="dailyChallengePanel">
+            <span class="daily-trigger-copy">
+              <span class="daily-trigger-label">Dailies</span>
+              <strong id="dailyChallengeProgress">0/3</strong>
+            </span>
+          </button>
+          <div class="daily-popover panel" id="dailyChallengePanel" hidden>
+            <div class="daily-popover-head">
+              <div class="section-copy">
+                <span class="eyebrow accent">Daily Challenges</span>
+                <h3 id="dailyChallengeTitle">Today&apos;s run.</h3>
+              </div>
+              <span class="reward-pill" id="dailyChallengeSummary">0/3</span>
+            </div>
+            <div class="daily-challenge-list" id="dailyChallengeList"></div>
+            <div class="daily-bonus-card" id="dailyChallengeBonus"></div>
+          </div>
+        </div>
+        <div class="hud-grid" id="hudGrid"></div>
+      </div>
+    </header>
+
+    <main class="workspace panel">
+      <section class="view active" id="packsView">
+        <div class="section-head">
+          <div class="section-copy">
+            <span class="eyebrow accent">Pack Store</span>
+            <h2>Open modern NBA packs.</h2>
+          </div>
+        </div>
+        <div class="pack-mode-tabs" id="packModeTabs">
+          <button class="tab-btn active" type="button" data-pack-section="store">Store</button>
+          <button class="tab-btn" type="button" data-pack-section="inventory">My Packs</button>
+        </div>
+        <section class="pack-subsection" id="storePacksSection">
+          <div class="pack-subhead">
+            <div class="section-copy">
+              <span class="eyebrow accent">Store Packs</span>
+              <h3>Buy new packs.</h3>
+            </div>
+          </div>
+          <div class="pack-store" id="packStore"></div>
+        </section>
+        <section class="pack-subsection" id="myPacksSection" hidden>
+          <div class="pack-subhead">
+            <div class="section-copy">
+              <span class="eyebrow accent">My Packs</span>
+              <h3>Saved reward packs.</h3>
+            </div>
+          </div>
+          <div class="pack-store pack-inventory" id="myPackStore"></div>
+        </section>
+      </section>
+
+      <section class="view" id="collectionView">
+        <div class="section-head">
+          <div class="section-copy">
+            <span class="eyebrow accent" id="collectionEyebrow">Collections</span>
+            <h2 id="collectionTitle">Choose a collection.</h2>
+            <p id="collectionIntro">Browse East, West, and Special collections, then open the sets inside each one.</p>
+          </div>
+        </div>
+        <div class="collection-actions" id="collectionActions"></div>
+        <div class="collection-filters" id="collectionFilters"></div>
+        <div class="summary-grid" id="collectionSummary"></div>
+        <div class="team-grid" id="teamGrid"></div>
+      </section>
+
+      <section class="view" id="statsView">
+        <div class="section-head">
+          <div class="section-copy">
+            <span class="eyebrow accent">Stats</span>
+            <h2>Lifetime numbers and save controls.</h2>
+            <p>Track your club history, pack totals, and duplicate sales.</p>
+          </div>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="stats-actions">
+          <button class="danger-btn" id="resetGame" type="button">Reset Save</button>
+        </div>
+      </section>
+
+      <section class="view" id="profileView">
+        <div class="profile-workspace" id="profileWorkspace"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="packModal" hidden>
+    <div class="modal-shell panel" id="packModalShell">
+      <button class="pack-modal-arrow prev" id="packModalPrev" type="button" aria-label="Previous pack">&lsaquo;</button>
+      <button class="pack-modal-arrow next" id="packModalNext" type="button" aria-label="Next pack">&rsaquo;</button>
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow accent">Pack Reveal</span>
+          <h3 id="revealTitle">Latest Reveal</h3>
+          <p class="pack-copy" id="revealSubtitle">Open a pack to begin.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="secondary-btn" id="sellAllDuplicates" type="button">Sell All Duplicates</button>
+          <span class="reward-pill" id="revealProgress">0 / 0 Revealed</span>
+          <button class="secondary-btn" id="closePackModal" type="button">Close</button>
+        </div>
+      </div>
+      <div class="reveal-set-progress-row" id="revealSetProgress" hidden></div>
+      <div class="reveal-daily-progress-row" id="revealDailyProgress" hidden></div>
+      <div class="reveal-stage">
+        <div class="pack-result-grid" id="packRevealGrid"></div>
+      </div>
+      <div class="modal-bottom-actions">
+        <div class="modal-repeat-stack">
+          <button class="action-btn" id="openAnotherPack" type="button">Open New Pack</button>
+          <div class="modal-pack-meta" id="modalPackMeta"></div>
+        </div>
+        <button class="secondary-btn" id="revealAllCards" type="button">Skip Reveal</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-preview-backdrop" id="cardPreviewModal" hidden>
+    <div class="card-preview-shell">
+      <div class="card-preview-stage" id="cardPreviewStage"></div>
+      <div class="card-preview-meta" id="cardPreviewMeta"></div>
+      <p class="card-preview-hint">Click anywhere outside the card to close.</p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop completion-backdrop" id="setCompletionModal" hidden>
+    <div class="completion-shell panel">
+      <div class="completion-head">
+        <div class="section-copy">
+          <span class="eyebrow accent" id="setCompletionEyebrow">Set Complete</span>
+          <h3 id="setCompletionTitle">Set Completed</h3>
+          <p class="pack-copy" id="setCompletionSubtitle">Your reward has been added to your balance.</p>
+        </div>
+        <span class="reward-pill completion-total-reward" id="setCompletionReward">0M Added</span>
+      </div>
+      <div class="completion-team-grid" id="setCompletionGrid"></div>
+      <div class="completion-actions">
+        <button class="secondary-btn" id="closeSetCompletionModal" type="button">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop daily-reward-backdrop" id="dailyRewardModal" hidden>
+    <div class="daily-reward-shell panel">
+      <div class="daily-reward-head">
+        <div class="section-copy">
+          <span class="eyebrow accent" id="dailyRewardEyebrow">Daily Complete</span>
+          <h3 id="dailyRewardTitle">Daily rewards claimed</h3>
+          <p class="pack-copy" id="dailyRewardSubtitle">Reward packs have been added to My Packs.</p>
+        </div>
+        <span class="reward-pill" id="dailyRewardSummary">1 Reward</span>
+      </div>
+      <div class="daily-reward-list" id="dailyRewardList"></div>
+      <div class="daily-reward-actions">
+        <button class="secondary-btn" id="closeDailyRewardModal" type="button">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop achievement-reward-backdrop" id="achievementRewardModal" hidden>
+    <div class="achievement-reward-shell panel">
+      <div class="daily-reward-head">
+        <div class="section-copy">
+          <span class="eyebrow accent" id="achievementRewardEyebrow">Achievement Complete</span>
+          <h3 id="achievementRewardTitle">Achievement rewards claimed</h3>
+          <p class="pack-copy" id="achievementRewardSubtitle">New reward packs and badges have been added to your profile.</p>
+        </div>
+        <span class="reward-pill" id="achievementRewardSummary">1 Reward</span>
+      </div>
+      <div class="achievement-reward-list" id="achievementRewardList"></div>
+      <div class="daily-reward-actions">
+        <button class="secondary-btn" id="closeAchievementRewardModal" type="button">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop team-picker-backdrop" id="favoriteTeamModal" hidden>
+    <div class="team-picker-shell panel">
+      <div class="team-picker-head">
+        <div class="section-copy">
+          <span class="eyebrow accent">Favorite Team</span>
+          <h3>Pick your squad.</h3>
+          <p class="pack-copy">Set your favorite team for profile flair and team-specific achievements. You can change this later on your profile.</p>
+        </div>
+      </div>
+      <div class="team-picker-grid" id="favoriteTeamGrid"></div>
+      <div class="team-picker-actions">
+        <button class="secondary-btn" id="favoriteTeamLater" type="button">Choose Later</button>
+        <button class="action-btn" id="favoriteTeamSave" type="button">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop profile-editor-backdrop" id="profileShowcaseModal" hidden>
+    <div class="profile-editor-shell panel">
+      <div class="profile-editor-head">
+        <div class="section-copy">
+          <span class="eyebrow accent">Featured Cards</span>
+          <h3 id="profileShowcaseModalTitle">Choose a featured card</h3>
+          <p class="pack-copy" id="profileShowcaseModalSubtitle">Pick a card to place in this showcase slot.</p>
+        </div>
+        <button class="secondary-btn" id="closeProfileShowcaseModal" type="button">Close</button>
+      </div>
+      <div class="profile-editor-toolbar" id="profileShowcaseToolbar"></div>
+      <div class="profile-editor-grid" id="profileShowcasePickerGrid"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop profile-editor-backdrop" id="profileBadgeModal" hidden>
+    <div class="profile-editor-shell panel badge-editor-shell">
+      <div class="profile-editor-head">
+        <div class="section-copy">
+          <span class="eyebrow accent">Badge Display</span>
+          <h3>Arrange highlighted badges</h3>
+          <p class="pack-copy">Choose a badge slot, then pick another earned badge to replace it. Used badges will swap positions.</p>
+        </div>
+        <button class="secondary-btn" id="closeProfileBadgeModal" type="button">Close</button>
+      </div>
+      <div class="profile-badge-slot-grid" id="profileBadgeSlotGrid"></div>
+      <div class="profile-badge-picker-grid" id="profileBadgePickerGrid"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop profile-achievements-backdrop" id="profileAchievementsModal" hidden>
+    <div class="profile-achievements-shell panel">
+      <div class="profile-editor-head">
+        <div class="section-copy">
+          <span class="eyebrow accent">Achievements</span>
+          <h3>Collection milestones</h3>
+          <p class="pack-copy">Track every milestone, reward tier, and unlock date.</p>
+        </div>
+        <button class="secondary-btn" id="closeProfileAchievementsModal" type="button">Close</button>
+      </div>
+      <div class="profile-achievements-summary" id="profileAchievementsSummary"></div>
+      <div class="profile-achievements-toolbar" id="profileAchievementsToolbar"></div>
+      <div class="profile-achievements-grid" id="profileAchievementsGrid"></div>
+    </div>
+  </div>
+
+  <script src="player-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
