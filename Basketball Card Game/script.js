@@ -3269,14 +3269,13 @@ function buildMobilePackStackCard(depth, options = {}) {
     assetsReady = true,
     isNextCard = false,
   } = options;
-  const rotation = depth % 2 === 0 ? 3 : -3;
   const stackClasses = [
     "mobile-pack-stack-card",
     result ? "has-card-content" : "",
     isNextCard ? "is-next-card" : "",
   ].filter(Boolean).join(" ");
   return `
-    <div class="${stackClasses}" style="--stack-depth:${depth}; --stack-rotation:${rotation}deg;">
+    <div class="${stackClasses}" style="--stack-depth:${depth};">
       ${result
         ? buildInteractiveRevealCard(result, index, flipped, assetsReady)
         : `
@@ -3373,7 +3372,7 @@ function bindMobilePackSwipe(cardSlot, index) {
     cardSlot.style.setProperty("--mobile-swipe-x", `${deltaX}px`);
     cardSlot.style.setProperty("--mobile-swipe-y", `${deltaY}px`);
     cardSlot.style.setProperty("--mobile-swipe-rotate", `${rotation}deg`);
-    stageEl?.style.setProperty("--mobile-pack-stack-progress", `${swipeProgress}`);
+    stageEl?.style.setProperty("--mobile-pack-next-card-opacity", swipeProgress.toFixed(3));
   };
 
   const clearSwipeTransform = () => {
@@ -3384,7 +3383,7 @@ function bindMobilePackSwipe(cardSlot, index) {
       cardSlot.style.removeProperty("--mobile-swipe-x");
       cardSlot.style.removeProperty("--mobile-swipe-y");
       cardSlot.style.removeProperty("--mobile-swipe-rotate");
-      stageEl?.style.removeProperty("--mobile-pack-stack-progress");
+      stageEl?.style.removeProperty("--mobile-pack-next-card-opacity");
     }, 220);
   };
 
@@ -4448,8 +4447,8 @@ const RARITY_FRAME_TAG_GAP = 16;
 const RARITY_FRAME_LOOP_SECONDS = 20;
 const RARITY_FRAME_VIEWBOX_WIDTH = 100;
 const RARITY_FRAME_VIEWBOX_HEIGHT = 140;
-const RARITY_FRAME_INSET = 4.25;
-const RARITY_FRAME_RADIUS = 9.75;
+const RARITY_FRAME_INSET = 2.15;
+const RARITY_FRAME_RADIUS = 12.2;
 const RARITY_FRAME_PATH_D = [
   `M${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)} ${RARITY_FRAME_INSET.toFixed(2)}`,
   `H${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,

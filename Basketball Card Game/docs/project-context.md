@@ -1103,3 +1103,8 @@ Additional standing rule:
 - mobile pack reveal cards should match the same visual card width as the mobile pack overview carousel, and the status/hint copy under the active card must sit in its own clearly separated row
 - after the first mobile pack card is revealed, the helper copy should switch from tap-to-reveal language to swipe-forward language
 - mobile pack opening should behave like one physical card stack: the real next card must already sit behind the active card and ease forward as the top card is swiped away
+- in that mobile pack stack, hidden cards must stay perfectly centered behind the front card at rest so the next pull is never visually spoiled before the top card starts moving
+- mobile pack stack visibility should be driven by swipe progress: at rest, neither the next card nor the deeper stack layers should be visible anywhere around or through the front card
+- mobile pack reveal cards need their own clean presentation rules: suppress extra pack glow/sheen in the stack, keep the rarity frame aligned to the outer border, and tighten internal typography/padding for the smaller reveal-card footprint
+- rarity-frame geometry itself matters: the text path should track a shallow inset with corner radius close to the actual card radius, otherwise mobile cards look visibly misaligned even if font sizes are reduced
+- mobile pack reveal should still prioritize readability after alignment fixes: rarity border text must remain legible, and the rating/status chrome plus player name should stay slightly larger with some edge breathing room
