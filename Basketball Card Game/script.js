@@ -3261,13 +3261,29 @@ function getOpeningPackMobileHint(packState = openingPack) {
   return "Swipe to move to the next revealed card.";
 }
 
-function buildMobilePackStackCard(depth) {
+function buildMobilePackStackCard(depth, options = {}) {
+  const {
+    result = null,
+    index = -1,
+    flipped = false,
+    assetsReady = true,
+    isNextCard = false,
+  } = options;
   const rotation = depth % 2 === 0 ? 3 : -3;
+  const stackClasses = [
+    "mobile-pack-stack-card",
+    result ? "has-card-content" : "",
+    isNextCard ? "is-next-card" : "",
+  ].filter(Boolean).join(" ");
   return `
-    <div class="mobile-pack-stack-card" style="--stack-depth:${depth}; --stack-rotation:${rotation}deg;">
-      <div class="mobile-pack-stack-face">
-        <div class="card-back-mark">?</div>
-      </div>
+    <div class="${stackClasses}" style="--stack-depth:${depth}; --stack-rotation:${rotation}deg;">
+      ${result
+        ? buildInteractiveRevealCard(result, index, flipped, assetsReady)
+        : `
+          <div class="mobile-pack-stack-face">
+            <div class="card-back-mark">?</div>
+          </div>
+        `}
     </div>
   `;
 }
@@ -3278,7 +3294,13 @@ function buildMobilePackRevealStage(packState) {
   const currentResult = packState.outcome.results[currentIndex];
   const flipped = Boolean(packState.flipped[currentIndex]);
   const remainingCount = Math.max(0, totalCards - currentIndex - 1);
-  const stackCount = Math.min(MOBILE_PACK_STACK_PREVIEW_COUNT, remainingCount);
+  const nextIndex = currentIndex + 1;
+  const hasNextCard = nextIndex < totalCards;
+  const trailingCount = Math.max(0, remainingCount - (hasNextCard ? 1 : 0));
+  const trailingPreviewCount = Math.min(
+    Math.max(0, MOBILE_PACK_STACK_PREVIEW_COUNT - (hasNextCard ? 1 : 0)),
+    trailingCount,
+  );
   const stageStatus = shouldShowMobilePackContinue(packState)
     ? "Ready for overview"
     : remainingCount > 0
@@ -3290,12 +3312,21 @@ function buildMobilePackRevealStage(packState) {
       ? "Tap to reveal"
       : shouldShowMobilePackContinue(packState)
         ? "Continue to overview"
-        : "Swipe left or right";
+        : "Swipe for next card";
 
   return `
     <div class="mobile-pack-stage">
       <div class="mobile-pack-stack" aria-hidden="true">
-        ${Array.from({ length: stackCount }, (_, index) => buildMobilePackStackCard(index + 1)).join("")}
+        ${hasNextCard
+          ? buildMobilePackStackCard(1, {
+            result: packState.outcome.results[nextIndex],
+            index: nextIndex,
+            flipped: flipped && packState.assetsReady,
+            assetsReady: packState.assetsReady,
+            isNextCard: true,
+          })
+          : ""}
+        ${Array.from({ length: trailingPreviewCount }, (_, index) => buildMobilePackStackCard(index + (hasNextCard ? 2 : 1))).join("")}
       </div>
       <div class="mobile-pack-current-slot ${flipped ? "is-revealed" : ""}" data-mobile-pack-current="${currentIndex}">
         ${buildInteractiveRevealCard(currentResult, currentIndex, flipped, packState.assetsReady)}
@@ -3331,15 +3362,18 @@ function bindMobilePackSwipe(cardSlot, index) {
   cardSlot.dataset.mobileSwipeBound = "true";
 
   let dragState = null;
+  const stageEl = cardSlot.closest(".mobile-pack-stage");
 
   const setSwipeTransform = (deltaX = 0, deltaY = 0) => {
     const rotation = Math.max(
       -MOBILE_PACK_SWIPE_MAX_ROTATION_DEG,
       Math.min(MOBILE_PACK_SWIPE_MAX_ROTATION_DEG, deltaX * MOBILE_PACK_SWIPE_ROTATION_FACTOR),
     );
+    const swipeProgress = Math.max(0, Math.min(1, Math.abs(deltaX) / MOBILE_PACK_SWIPE_THRESHOLD_PX));
     cardSlot.style.setProperty("--mobile-swipe-x", `${deltaX}px`);
     cardSlot.style.setProperty("--mobile-swipe-y", `${deltaY}px`);
     cardSlot.style.setProperty("--mobile-swipe-rotate", `${rotation}deg`);
+    stageEl?.style.setProperty("--mobile-pack-stack-progress", `${swipeProgress}`);
   };
 
   const clearSwipeTransform = () => {
@@ -3350,6 +3384,7 @@ function bindMobilePackSwipe(cardSlot, index) {
       cardSlot.style.removeProperty("--mobile-swipe-x");
       cardSlot.style.removeProperty("--mobile-swipe-y");
       cardSlot.style.removeProperty("--mobile-swipe-rotate");
+      stageEl?.style.removeProperty("--mobile-pack-stack-progress");
     }, 220);
   };
 
@@ -4794,9 +4829,9 @@ function buildMobilePackOverviewDuplicateGroup(duplicateEntries = []) {
   return `
     <section class="mobile-pack-overview-duplicate-group" aria-label="Duplicate cards">
       <div class="mobile-pack-overview-duplicate-label">
-        <span class="eyebrow accent">Duplicate</span>
-        <strong>${escapeHtml(String(duplicateEntries.length))}</strong>
-        <span>Cards</span>
+        <span class="eyebrow accent">Section</span>
+        <strong>Duplicate Cards</strong>
+        <span>${escapeHtml(String(duplicateEntries.length))} total</span>
       </div>
       <div class="mobile-pack-overview-duplicate-track">
         ${duplicateEntries.map(({ result, sourceIndex }) => `
@@ -4850,7 +4885,11 @@ function scheduleMobilePackOverviewCenter(force = false) {
       if (!packRevealGridEl?.classList.contains("mobile-pack-overview-carousel")) return;
       const firstSlide = packRevealGridEl.querySelector(".mobile-pack-overview-slide, .mobile-pack-overview-divider");
       if (!firstSlide) return;
-      const targetLeft = Math.max(0, firstSlide.offsetLeft - Math.max(0, (packRevealGridEl.clientWidth - firstSlide.clientWidth) / 2));
+      const gridRect = packRevealGridEl.getBoundingClientRect();
+      const slideRect = firstSlide.getBoundingClientRect();
+      const currentScrollLeft = packRevealGridEl.scrollLeft;
+      const slideCenterOffset = (slideRect.left - gridRect.left) + (slideRect.width / 2);
+      const targetLeft = Math.max(0, currentScrollLeft + slideCenterOffset - (packRevealGridEl.clientWidth / 2));
       packRevealGridEl.scrollLeft = targetLeft;
     });
   });

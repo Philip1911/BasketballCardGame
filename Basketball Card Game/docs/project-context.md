@@ -1099,3 +1099,7 @@ Additional standing rule:
 - mobile collection set detail should hide bulk-sell controls, keep a sticky close icon available, and allow wraparound previous/next navigation plus horizontal swipe through the current collection order
 - mobile pack reveal should reserve a separate hint row so guidance text never sits behind the active card, and the active card should use most of the remaining stage height
 - mobile pack overview should visually group duplicate cards inside a shared section with a left-side duplicate label, while keeping the carousel swipe behavior intact
+- mobile pack overview must still center the first actual card when it opens, even if the first visible section is the duplicate group rather than a new-card run
+- mobile pack reveal cards should match the same visual card width as the mobile pack overview carousel, and the status/hint copy under the active card must sit in its own clearly separated row
+- after the first mobile pack card is revealed, the helper copy should switch from tap-to-reveal language to swipe-forward language
+- mobile pack opening should behave like one physical card stack: the real next card must already sit behind the active card and ease forward as the top card is swiped away
