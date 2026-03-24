@@ -1081,3 +1081,5 @@ Additional standing rule:
 - mobile pack overview carousels should enter with the first slide centered and use center-based snap behavior per slide
 - mobile carousels must not widen the surrounding modal or push unrelated header/footer/chip layout off-screen; horizontal overflow should stay locally contained
 - reveal set-progress chips above mobile pack carousels should compress into viewport-safe columns instead of forcing the modal wider than the phone screen
+- mobile pack modals should use the available phone height, with the reveal stage owning the leftover vertical space instead of collapsing and letting cards overlap neighboring rows
+- on mobile, reveal set-progress chips should use a compact summary treatment: logo, team name, and count/change only; the horizontal progress track should stay hidden

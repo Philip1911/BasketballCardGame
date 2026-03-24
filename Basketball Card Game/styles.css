@@ -4887,6 +4887,36 @@ img {
 
 #packModalShell {
   --pack-modal-nav-gutter: 4.7rem;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "head"
+    "set"
+    "daily"
+    "stage"
+    "actions";
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+}
+
+#packModalShell > .modal-head {
+  grid-area: head;
+}
+
+#revealSetProgress {
+  grid-area: set;
+}
+
+#revealDailyProgress {
+  grid-area: daily;
+}
+
+#packModalShell > .reveal-stage {
+  grid-area: stage;
+  height: 100%;
+  min-height: 0;
+}
+
+#packModalShell > .modal-bottom-actions {
+  grid-area: actions;
 }
 
 .completion-shell {
@@ -7358,11 +7388,39 @@ img {
     gap: 0.42rem;
   }
 
+  #packModalShell {
+    height: calc(100vh - 0.7rem);
+    height: calc(100svh - 0.7rem);
+  }
+
+  #packModalShell > .reveal-stage {
+    display: grid;
+    align-content: center;
+  }
+
+  #packModalShell .modal-head {
+    gap: 0.72rem 1rem;
+  }
+
+  #packModalShell .pack-copy {
+    font-size: 0.92rem;
+    line-height: 1.42;
+  }
+
   .reveal-set-progress-chip {
     width: 100%;
     min-width: 0;
     max-width: none;
-    padding: 0.5rem 0.54rem 0.52rem;
+    padding: 0.42rem 0.5rem;
+  }
+
+  .reveal-set-progress-head {
+    gap: 0.34rem;
+  }
+
+  .reveal-set-progress-logo {
+    width: 1.48rem;
+    height: 1.48rem;
   }
 
   .reveal-set-progress-name {
@@ -7371,6 +7429,18 @@ img {
 
   .reveal-set-progress-meta {
     gap: 0.26rem;
+  }
+
+  .reveal-set-progress-count {
+    font-size: 0.72rem;
+  }
+
+  .reveal-set-progress-tag {
+    font-size: 0.58rem;
+  }
+
+  .reveal-set-progress-track {
+    display: none;
   }
 
   .pack-result-grid.mobile-pack-overview-carousel {
@@ -7738,6 +7808,8 @@ img {
 
   #packModalShell {
     --pack-modal-nav-gutter: 0.2rem;
+    height: calc(100vh - 0.5rem);
+    height: calc(100svh - 0.5rem);
   }
 
   #packModalShell .modal-head,
@@ -7752,7 +7824,7 @@ img {
   }
 
   .reveal-set-progress-chip {
-    padding: 0.46rem 0.46rem 0.48rem;
+    padding: 0.38rem 0.42rem;
     border-radius: 14px;
   }
 
@@ -7768,6 +7840,11 @@ img {
   .reveal-set-progress-count,
   .reveal-set-progress-tag {
     font-size: 0.64rem;
+  }
+
+  #packModalShell .pack-copy {
+    font-size: 0.86rem;
+    line-height: 1.36;
   }
 
   .pack-result-grid.mobile-pack-flow {
