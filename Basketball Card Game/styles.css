@@ -58,6 +58,10 @@ body {
     linear-gradient(180deg, #08111f 0%, #0b1423 52%, #08111a 100%);
 }
 
+body.mobile-pack-modal-open {
+  overflow: hidden;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -237,6 +241,70 @@ img {
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.55rem;
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+.mobile-modal-close-icon {
+  display: none;
+}
+
+.modal-head-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  flex-shrink: 0;
+}
+
+.mobile-nav-btn {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.22rem;
+  min-height: 58px;
+  padding: 0.48rem 0.18rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 28, 0.96));
+  color: rgba(210, 223, 245, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 8px 18px rgba(3, 8, 16, 0.16);
+}
+
+.mobile-nav-btn[aria-current="page"],
+.mobile-nav-btn.active {
+  border-color: rgba(93, 156, 255, 0.34);
+  background:
+    radial-gradient(circle at top center, rgba(55, 164, 255, 0.18), transparent 48%),
+    linear-gradient(180deg, rgba(22, 37, 63, 0.98), rgba(12, 19, 33, 0.98));
+  color: #f4f8ff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 26px rgba(6, 14, 28, 0.26);
+}
+
+.mobile-nav-icon {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+}
+
+.mobile-nav-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.mobile-nav-label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 .topbar-side {
@@ -2943,6 +3011,46 @@ img {
   width: 100%;
 }
 
+.detail-mobile-controls {
+  display: none;
+}
+
+.detail-mobile-close {
+  margin-left: auto;
+}
+
+.detail-set-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
+.detail-nav-pill {
+  min-width: min(100%, 190px);
+  display: grid;
+  justify-items: start;
+  gap: 0.12rem;
+  padding: 0.62rem 0.78rem;
+  border-radius: 16px;
+  text-align: left;
+}
+
+.detail-nav-pill span {
+  color: rgba(222, 232, 248, 0.68);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.detail-nav-pill strong {
+  color: #f4f8ff;
+  font-size: 0.86rem;
+  line-height: 1.1;
+}
+
 .detail-bulk-toggle,
 .detail-back-btn {
   align-self: start;
@@ -3117,6 +3225,9 @@ img {
   padding: 1.15rem;
   position: relative;
   overflow: hidden;
+  transform: translate3d(var(--collection-detail-swipe-x, 0px), 0, 0) rotate(var(--collection-detail-swipe-rotate, 0deg));
+  transition: transform 180ms cubic-bezier(0.2, 0.84, 0.2, 1);
+  will-change: transform;
   border-color: color-mix(in srgb, var(--team-primary, #6e85b7) 26%, rgba(255, 255, 255, 0.1));
   background:
     radial-gradient(circle at 10% 14%, color-mix(in srgb, var(--team-secondary, #9ab8ff) 16%, rgba(255, 255, 255, 0.06)), transparent 22%),
@@ -3130,6 +3241,10 @@ img {
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04),
     0 18px 46px rgba(3, 6, 14, 0.24);
+}
+
+.team-detail-shell.is-swiping {
+  transition: none;
 }
 
 .team-detail-shell::after {
@@ -3388,6 +3503,9 @@ img {
   width: 100%;
   height: 100%;
   display: block;
+  overflow: visible;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
 }
 
 .card-rarity-border,
@@ -3401,9 +3519,9 @@ img {
 
 .card-rarity-text {
   fill: var(--card-pattern-text, rgba(255, 255, 255, 0.78));
-  font-size: 3.3px;
+  font-size: clamp(2.24px, 0.36vw, 3.3px);
   font-weight: 800;
-  letter-spacing: 0.72px;
+  letter-spacing: clamp(0.16px, 0.1vw, 0.72px);
   text-transform: uppercase;
   dominant-baseline: middle;
   alignment-baseline: middle;
@@ -3411,6 +3529,11 @@ img {
 
 .card-rarity-text textPath {
   dominant-baseline: middle;
+}
+
+.card-rarity-text-path {
+  dominant-baseline: middle;
+  text-rendering: geometricPrecision;
 }
 
 .collection-card.missing .card-rarity-frame,
@@ -3845,7 +3968,7 @@ img {
 .legend-card .card-team-name {
   opacity: 0.88;
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: clamp(0.58rem, 0.5rem + 0.24vw, 0.78rem);
   line-height: 1.04;
 }
 
@@ -3882,7 +4005,7 @@ img {
 
 .legend-card .player-name {
   min-height: 0;
-  font-size: 1.06rem;
+  font-size: clamp(0.82rem, 0.7rem + 0.4vw, 1.06rem);
   line-height: 1.02;
   margin-bottom: 0;
   -webkit-line-clamp: 2;
@@ -3899,13 +4022,13 @@ img {
 }
 
 .legend-card .detail-pill-label {
-  font-size: 0.44rem;
+  font-size: clamp(0.34rem, 0.3rem + 0.12vw, 0.44rem);
 }
 
 .legend-card .position-pill,
 .legend-card .jersey-pill,
 .legend-card .value-pill {
-  font-size: 0.62rem;
+  font-size: clamp(0.52rem, 0.48rem + 0.1vw, 0.62rem);
 }
 
 .legend-card.card-tilting {
@@ -4007,7 +4130,7 @@ img {
 .blackmatter-card .card-team-name {
   opacity: 0.84;
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: clamp(0.58rem, 0.5rem + 0.24vw, 0.78rem);
   line-height: 1.04;
 }
 
@@ -4044,7 +4167,7 @@ img {
 
 .blackmatter-card .player-name {
   min-height: 0;
-  font-size: 1.06rem;
+  font-size: clamp(0.82rem, 0.7rem + 0.4vw, 1.06rem);
   line-height: 1.02;
   margin-bottom: 0;
   -webkit-line-clamp: 2;
@@ -4112,14 +4235,14 @@ img {
 }
 
 .blackmatter-card .detail-pill-label {
-  font-size: 0.44rem;
+  font-size: clamp(0.34rem, 0.3rem + 0.12vw, 0.44rem);
   color: rgba(227, 234, 247, 0.78);
 }
 
 .blackmatter-card .position-pill,
 .blackmatter-card .jersey-pill,
 .blackmatter-card .value-pill {
-  font-size: 0.62rem;
+  font-size: clamp(0.52rem, 0.48rem + 0.1vw, 0.62rem);
 }
 
 .glass-showcase-card {
@@ -4190,7 +4313,7 @@ img {
 .glass-showcase-card .card-team-name {
   opacity: 0.88;
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: clamp(0.58rem, 0.5rem + 0.24vw, 0.78rem);
   line-height: 1.04;
 }
 
@@ -4211,7 +4334,7 @@ img {
 
 .glass-showcase-card .player-name {
   min-height: 0;
-  font-size: 1.06rem;
+  font-size: clamp(0.82rem, 0.7rem + 0.4vw, 1.06rem);
   line-height: 1.02;
   margin-bottom: 0;
   -webkit-line-clamp: 2;
@@ -4263,14 +4386,14 @@ img {
 }
 
 .glass-showcase-card .detail-pill-label {
-  font-size: 0.44rem;
+  font-size: clamp(0.34rem, 0.3rem + 0.12vw, 0.44rem);
   color: rgba(228, 237, 249, 0.78);
 }
 
 .glass-showcase-card .position-pill,
 .glass-showcase-card .jersey-pill,
 .glass-showcase-card .value-pill {
-  font-size: 0.62rem;
+  font-size: clamp(0.52rem, 0.48rem + 0.1vw, 0.62rem);
 }
 
 .legend-card .player-art-overlay .status-pill.copy-count,
@@ -4355,8 +4478,8 @@ img {
 }
 
 .player-name {
-  font-size: 1.08rem;
-  line-height: 1.08;
+  font-size: clamp(0.82rem, 0.68rem + 0.42vw, 1.08rem);
+  line-height: 1.04;
   font-weight: 700;
   min-height: 2.1em;
   color: var(--card-text, var(--deep));
@@ -4423,7 +4546,7 @@ img {
 
 .card-team-name {
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: clamp(0.58rem, 0.5rem + 0.24vw, 0.78rem);
   line-height: 1.14;
   color: var(--card-subtext, var(--muted));
   white-space: normal;
@@ -4630,7 +4753,7 @@ img {
 }
 
 .rating-badge {
-  width: 2.55rem;
+  width: clamp(1.62rem, 1.16rem + 1.16vw, 2.55rem);
   aspect-ratio: 1;
   border-radius: 50%;
   display: flex;
@@ -4650,7 +4773,7 @@ img {
 
 .rating-badge strong {
   display: block;
-  font-size: 1.1rem;
+  font-size: clamp(0.68rem, 0.5rem + 0.52vw, 1.1rem);
   line-height: 0.9;
   letter-spacing: -0.02em;
 }
@@ -4658,7 +4781,7 @@ img {
 .rating-badge span {
   display: block;
   margin-top: 0;
-  font-size: 0.48rem;
+  font-size: clamp(0.28rem, 0.19rem + 0.24vw, 0.48rem);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4687,17 +4810,17 @@ img {
   border: 0;
   background: none;
   color: var(--card-text, var(--deep));
-  font-size: 0.63rem;
+  font-size: clamp(0.5rem, 0.45rem + 0.12vw, 0.63rem);
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  gap: 0.18rem;
+  gap: clamp(0.1rem, 0.08rem + 0.06vw, 0.18rem);
   white-space: nowrap;
   min-width: 0;
 }
 
 .detail-pill-label {
-  font-size: 0.46rem;
+  font-size: clamp(0.34rem, 0.3rem + 0.12vw, 0.46rem);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4737,13 +4860,13 @@ img {
 }
 
 .player-art-overlay .status-pill {
-  min-height: 20px;
+  min-height: clamp(13px, 1.2vw + 9px, 20px);
   max-width: 100%;
-  padding: 0.18rem 0.38rem;
-  font-size: 0.52rem;
+  padding: clamp(0.06rem, 0.04rem + 0.12vw, 0.18rem) clamp(0.2rem, 0.14rem + 0.24vw, 0.38rem);
+  font-size: clamp(0.31rem, 0.27rem + 0.12vw, 0.52rem);
   line-height: 1;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: clamp(0.02em, 0.015em + 0.02vw, 0.05em);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 18px rgba(17, 28, 45, 0.12);
   white-space: nowrap;
@@ -4765,7 +4888,7 @@ img {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 140;
   display: grid;
   place-items: center;
   padding: 0.65rem;
@@ -4777,7 +4900,7 @@ img {
 .card-preview-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: 160;
   display: grid;
   place-items: center;
   padding: 0.8rem;
@@ -4790,7 +4913,7 @@ img {
 }
 
 .completion-backdrop {
-  z-index: 55;
+  z-index: 155;
 }
 
 .modal-shell {
@@ -4822,7 +4945,7 @@ img {
 }
 
 .mobile-sheet-backdrop {
-  z-index: 130;
+  z-index: 230;
 }
 
 .mobile-sheet-shell {
@@ -4895,6 +5018,8 @@ img {
     "stage"
     "actions";
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 #packModalShell > .modal-head {
@@ -4913,6 +5038,8 @@ img {
   grid-area: stage;
   height: 100%;
   min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 #packModalShell > .modal-bottom-actions {
@@ -5034,7 +5161,7 @@ img {
 }
 
 .achievement-reward-backdrop {
-  z-index: 170;
+  z-index: 270;
 }
 
 .achievement-reward-shell {
@@ -5086,6 +5213,13 @@ img {
     radial-gradient(circle at top right, rgba(55, 164, 255, 0.16), transparent 28%),
     radial-gradient(circle at top left, rgba(157, 113, 255, 0.12), transparent 24%),
     linear-gradient(180deg, rgba(14, 22, 38, 0.98), rgba(9, 15, 28, 0.98));
+}
+
+.team-picker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.9rem;
 }
 
 .team-picker-head .section-copy {
@@ -5496,6 +5630,15 @@ img {
   row-gap: 0.55rem;
 }
 
+#packModalShell.mobile-pack-overview-compact .modal-head .eyebrow {
+  display: none;
+}
+
+#packModalShell.mobile-pack-overview-compact > .reveal-stage {
+  padding-top: 0.08rem;
+  padding-bottom: 0.18rem;
+}
+
 #openAnotherPack {
   background: linear-gradient(135deg, rgba(64, 138, 255, 0.24), rgba(36, 94, 210, 0.18));
   border-color: rgba(93, 156, 255, 0.32);
@@ -5741,6 +5884,15 @@ img {
   text-shadow: 0 0 12px color-mix(in srgb, var(--success) 26%, transparent);
 }
 
+.reveal-set-progress-tag-compact {
+  display: none;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--success) 84%, #efffed 16%);
+}
+
 .reveal-daily-progress-chip {
   min-width: 180px;
   max-width: 240px;
@@ -5891,24 +6043,26 @@ img {
 
 .card-preview-meta {
   display: grid;
-  gap: 0.22rem;
-  margin-top: 0.28rem;
+  gap: 0.28rem;
+  margin-top: clamp(0.75rem, 0.48rem + 0.9vw, 1.08rem);
   justify-items: center;
   text-align: center;
+  max-width: min(100%, 28rem);
 }
 
 .card-preview-meta-line {
   color: rgba(228, 237, 252, 0.84);
-  font-size: 0.82rem;
-  line-height: 1.34;
+  font-size: clamp(0.76rem, 0.72rem + 0.14vw, 0.88rem);
+  line-height: 1.4;
 }
 
 .card-preview-hint {
-  margin-top: 1rem;
-  font-size: 0.84rem;
+  margin-top: clamp(0.42rem, 0.16rem + 0.8vw, 0.92rem);
+  font-size: clamp(0.76rem, 0.72rem + 0.14vw, 0.84rem);
   line-height: 1.35;
   text-align: center;
   color: rgba(220, 231, 249, 0.72);
+  max-width: min(100%, 30rem);
 }
 
 .preview-card-shell {
@@ -6044,18 +6198,20 @@ img {
 
 .mobile-pack-stage {
   position: relative;
-  width: min(100%, calc((var(--game-card-width) * var(--mobile-pack-card-scale)) + 4.2rem));
-  min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 4.4rem);
+  width: min(100%, calc((var(--game-card-width) * var(--mobile-pack-card-scale)) + 2rem));
+  min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 3.1rem);
   margin: 0 auto;
   display: grid;
-  align-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: stretch;
   justify-items: center;
-  padding: 1rem 1rem 1.35rem;
+  gap: 0.55rem;
+  padding: 0.22rem 0 0.3rem;
 }
 
 .mobile-pack-stack {
   position: absolute;
-  inset: 0 0 2.1rem;
+  inset: 0;
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -6120,6 +6276,7 @@ img {
 }
 
 .mobile-pack-current-slot {
+  grid-row: 1;
   position: relative;
   z-index: 2;
   width: var(--game-card-width);
@@ -6158,16 +6315,15 @@ img {
 }
 
 .mobile-pack-stage-footer {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 100%;
+  grid-row: 2;
+  position: relative;
+  width: min(100%, 19rem);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.45rem;
+  z-index: 3;
 }
 
 .mobile-pack-stage-chip,
@@ -6195,6 +6351,68 @@ img {
   border: 1px solid rgba(255, 183, 124, 0.26);
   background: rgba(245, 153, 79, 0.16);
   color: #ffd9bd;
+}
+
+.mobile-pack-overview-duplicate-group {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: none;
+  min-height: calc((var(--mobile-pack-overview-card-width) * var(--game-card-height-ratio)) + 2.25rem);
+  display: flex;
+  align-items: stretch;
+  gap: 0.55rem;
+  padding: 0.5rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(226, 93, 115, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(17, 24, 39, 0.94), rgba(9, 14, 26, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 16px 30px rgba(4, 10, 20, 0.22);
+  box-sizing: border-box;
+}
+
+.mobile-pack-overview-duplicate-label {
+  flex: 0 0 min(18vw, 72px);
+  width: min(18vw, 72px);
+  min-height: 100%;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 0.28rem;
+  padding: 0.8rem 0.3rem 0.8rem 0.22rem;
+  text-align: left;
+}
+
+.mobile-pack-overview-duplicate-label .eyebrow {
+  font-size: 0.54rem;
+}
+
+.mobile-pack-overview-duplicate-label strong {
+  color: #f7dbe0;
+  font-family: "Sora", "Aptos Display", sans-serif;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.mobile-pack-overview-duplicate-label span:last-child {
+  color: rgba(221, 232, 248, 0.78);
+  font-size: 0.68rem;
+  line-height: 1.18;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mobile-pack-overview-duplicate-track {
+  display: flex;
+  align-items: stretch;
+  gap: inherit;
+}
+
+.mobile-pack-overview-duplicate-track > * {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .flip-card {
@@ -7181,8 +7399,15 @@ img {
     --game-card-width: 178px;
   }
 
+  body {
+    overflow-x: hidden;
+  }
+
   .app-shell {
     width: min(100% - 0.75rem, 1440px);
+    min-height: auto;
+    grid-template-rows: auto auto;
+    padding-bottom: calc(6.35rem + env(safe-area-inset-bottom, 0px));
   }
 
   .workspace,
@@ -7190,8 +7415,118 @@ img {
     padding: 0.9rem;
   }
 
+  .workspace {
+    overflow: visible;
+    min-height: auto;
+  }
+
+  .view,
+  #profileView {
+    height: auto;
+    overflow: visible;
+    padding-right: 0;
+  }
+
   .topbar-side {
     flex-wrap: wrap;
+  }
+
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    align-items: start;
+  }
+
+  .topbar .nav-tabs {
+    display: none;
+  }
+
+  .brand-block {
+    gap: 0.55rem;
+    min-width: 0;
+  }
+
+  .brand-copy .eyebrow {
+    display: none;
+  }
+
+  .brand-ball {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-copy h1 {
+    font-size: 1.04rem;
+    line-height: 1.02;
+  }
+
+  .topbar-side {
+    width: auto;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: 0.4rem;
+  }
+
+  .daily-menu-anchor {
+    width: auto;
+  }
+
+  .daily-trigger {
+    min-width: 82px;
+    min-height: 50px;
+    padding: 0.5rem 0.62rem;
+    border-radius: 15px;
+  }
+
+  .daily-trigger-label {
+    font-size: 0.54rem;
+  }
+
+  .daily-trigger strong {
+    font-size: 0.98rem;
+  }
+
+  .hud-grid {
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .hud-card {
+    min-width: 72px;
+    padding: 0.48rem 0.56rem;
+    border-radius: 16px;
+  }
+
+  .hud-card .label {
+    font-size: 0.52rem;
+  }
+
+  .hud-card .value {
+    margin-top: 0.12rem;
+    font-size: 0.88rem;
+  }
+
+  .mobile-bottom-nav {
+    position: fixed;
+    left: max(0.45rem, env(safe-area-inset-left, 0px));
+    right: max(0.45rem, env(safe-area-inset-right, 0px));
+    bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
+    z-index: 115;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding: 0.42rem;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      radial-gradient(circle at top center, rgba(55, 164, 255, 0.14), transparent 42%),
+      linear-gradient(180deg, rgba(12, 18, 31, 0.96), rgba(7, 12, 23, 0.98));
+    box-shadow:
+      0 24px 48px rgba(3, 8, 16, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
   }
 
   .daily-popover {
@@ -7383,9 +7718,13 @@ img {
   }
 
   .reveal-set-progress-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.42rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.28rem;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   #packModalShell {
@@ -7395,7 +7734,47 @@ img {
 
   #packModalShell > .reveal-stage {
     display: grid;
-    align-content: center;
+    align-content: stretch;
+    height: 100%;
+    min-height: 0;
+  }
+
+  #packModalShell > .reveal-stage > .pack-result-grid {
+    height: 100%;
+    min-height: 0;
+  }
+
+  #packModalShell.mobile-pack-modal-compact .modal-head {
+    gap: 0.26rem 0.7rem;
+    padding-top: 0.02rem;
+  }
+
+  #packModalShell.mobile-pack-modal-compact .modal-head .eyebrow {
+    display: none;
+  }
+
+  #packModalShell.mobile-pack-modal-compact .modal-head > :first-child {
+    gap: 0.04rem;
+  }
+
+  #packModalShell.mobile-pack-modal-compact #revealTitle {
+    font-size: 0.98rem;
+    line-height: 1.04;
+  }
+
+  #packModalShell.mobile-pack-modal-compact .modal-actions {
+    gap: 0.32rem;
+    row-gap: 0.32rem;
+    padding-right: 2.35rem;
+  }
+
+  #packModalShell.mobile-pack-modal-compact #sellAllDuplicates,
+  #packModalShell.mobile-pack-modal-compact #revealAllCards,
+  #packModalShell.mobile-pack-modal-compact #revealProgress {
+    min-height: 30px;
+    padding: 0.3rem 0.52rem;
+    border-radius: 11px;
+    font-size: 0.64rem;
   }
 
   #packModalShell .modal-head {
@@ -7407,50 +7786,186 @@ img {
     line-height: 1.42;
   }
 
+  #packModalShell.mobile-pack-overview-compact .modal-head {
+    gap: 0.32rem 0.72rem;
+    padding-top: 0.04rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact .modal-head > :first-child {
+    gap: 0.08rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact #revealTitle {
+    font-size: 1.02rem;
+    line-height: 1.04;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  #packModalShell.mobile-pack-overview-compact .modal-actions {
+    gap: 0.38rem;
+    row-gap: 0.38rem;
+    padding-right: 2.6rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact #sellAllDuplicates {
+    min-height: 32px;
+    padding: 0.34rem 0.58rem;
+    border-radius: 12px;
+    font-size: 0.68rem;
+  }
+
   .reveal-set-progress-chip {
-    width: 100%;
+    flex: 0 0 auto;
+    width: auto;
     min-width: 0;
     max-width: none;
-    padding: 0.42rem 0.5rem;
+    padding: 0.34rem 0.48rem;
+    border-radius: 12px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 8px 18px rgba(3, 7, 16, 0.16);
   }
 
   .reveal-set-progress-head {
-    gap: 0.34rem;
+    justify-content: flex-start;
+    gap: 0.38rem;
   }
 
   .reveal-set-progress-logo {
-    width: 1.48rem;
-    height: 1.48rem;
+    width: 1rem;
+    height: 1rem;
+    background: none;
+    box-shadow: none;
+  }
+
+  .reveal-set-progress-logo::after {
+    display: none;
+  }
+
+  .reveal-set-progress-logo.fallback-only::before {
+    font-size: 0.38rem;
+    letter-spacing: 0.04em;
   }
 
   .reveal-set-progress-name {
-    font-size: 0.76rem;
+    display: none;
   }
 
   .reveal-set-progress-meta {
-    gap: 0.26rem;
+    gap: 0.22rem;
+    justify-content: flex-start;
   }
 
   .reveal-set-progress-count {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
 
   .reveal-set-progress-tag {
-    font-size: 0.58rem;
+    display: none;
   }
 
   .reveal-set-progress-track {
     display: none;
   }
 
+  .reveal-set-progress-tag-compact {
+    display: inline-flex;
+  }
+
+  .pack-result-grid.mobile-pack-flow {
+    --mobile-pack-card-scale: 1.24;
+    min-height: 0;
+    height: 100%;
+    align-self: stretch;
+    align-content: center;
+  }
+
+  .mobile-pack-stage {
+    width: min(100%, calc((var(--game-card-width) * var(--mobile-pack-card-scale)) + 1.3rem));
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    padding: 0.12rem 0 0.22rem;
+  }
+
+  .mobile-pack-current-slot {
+    align-self: center;
+  }
+
+  .mobile-pack-current-slot .flip-card {
+    touch-action: none;
+  }
+
   .pack-result-grid.mobile-pack-overview-carousel {
-    --mobile-pack-overview-card-width: min(76vw, 236px);
-    gap: 0.75rem;
+    --mobile-pack-overview-card-width: min(67vw, 204px);
+    gap: 0.58rem;
+    height: 100%;
+    min-height: 0;
+    align-items: center;
+    padding-block: 0;
+    touch-action: pan-x;
+    overscroll-behavior-y: contain;
+  }
+
+  .mobile-pack-overview-duplicate-group {
+    gap: 0.42rem;
+    padding: 0.42rem;
+    border-radius: 24px;
+  }
+
+  .mobile-pack-overview-duplicate-label {
+    flex-basis: min(17vw, 60px);
+    width: min(17vw, 60px);
+    padding: 0.68rem 0.22rem 0.68rem 0.12rem;
+  }
+
+  .mobile-pack-overview-duplicate-label strong {
+    font-size: 0.96rem;
+  }
+
+  .mobile-pack-overview-duplicate-label span:last-child {
+    font-size: 0.58rem;
   }
 
   .mobile-pack-overview-divider {
-    flex-basis: min(24vw, 88px);
-    width: min(24vw, 88px);
+    flex-basis: min(19vw, 68px);
+    width: min(19vw, 68px);
+  }
+
+  .mobile-pack-overview-card-shell .card-action-row {
+    min-height: 1.72rem;
+    padding: 0 0.08rem 0.04rem;
+  }
+
+  .mobile-pack-overview-card-shell .card-action-chip,
+  .mobile-pack-overview-card-shell .mini-action-note {
+    min-height: 24px;
+    padding: 0.22rem 0.44rem;
+    font-size: 0.58rem;
+  }
+
+  .mobile-pack-overview-card-shell .mini-action-btn {
+    min-height: 27px;
+    padding: 0.32rem 0.5rem;
+    font-size: 0.6rem;
+    border-radius: 10px;
+  }
+
+  #packModalShell.mobile-pack-overview-compact > .modal-bottom-actions {
+    gap: 0.52rem;
+    padding-bottom: 0.24rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact .modal-repeat-stack {
+    gap: 0.34rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact #openAnotherPack {
+    padding: 0.68rem 0.88rem;
+    font-size: 0.88rem;
   }
 
   .pack-mode-tabs {
@@ -7511,8 +8026,8 @@ img {
   }
 
   .card-preview-shell {
-    width: min(100%, 430px);
-    gap: 0.55rem;
+    width: min(100%, 440px);
+    gap: 0.82rem;
   }
 
   .card-preview-stage-shell {
@@ -7526,7 +8041,7 @@ img {
 
   .card-preview-stage {
     grid-area: stage;
-    padding: 2.5rem 0.45rem 0.7rem;
+    padding: 1.7rem 0.24rem 0.16rem;
   }
 
   .card-preview-nav {
@@ -7554,45 +8069,47 @@ img {
   }
 
   .preview-card-shell {
-    --preview-scale: 1.52;
+    --preview-scale: 1.64;
   }
 
   .card-rarity-frame,
   .legend-card .card-rarity-frame,
   .blackmatter-card .card-rarity-frame,
   .glass-showcase-card .card-rarity-frame {
-    inset: 0.06rem;
+    inset: 0.12rem;
   }
 
   .card-rarity-text {
-    font-size: 3px;
-    letter-spacing: 0.54px;
+    font-size: 2.5px;
+    font-weight: 700;
+    letter-spacing: 0.24px;
   }
 
   .player-name,
   .legend-card .player-name,
   .blackmatter-card .player-name,
   .glass-showcase-card .player-name {
-    font-size: 0.98rem;
+    font-size: 0.9rem;
+    line-height: 1.02;
   }
 
   .card-team-name,
   .legend-card .card-team-name,
   .blackmatter-card .card-team-name,
   .glass-showcase-card .card-team-name {
-    font-size: 0.72rem;
+    font-size: 0.62rem;
   }
 
   .card-body {
     gap: 0.18rem;
-    padding: 0.46rem 0.5rem 0.68rem;
+    padding: 0.42rem 0.44rem 0.62rem;
   }
 
   .legend-card .card-body,
   .blackmatter-card .card-body,
   .glass-showcase-card .card-body {
     gap: 0.14rem;
-    padding: 1rem 0.82rem 0.82rem;
+    padding: 0.92rem 0.72rem 0.72rem;
   }
 
   .card-team-mark {
@@ -7611,15 +8128,18 @@ img {
   }
 
   .rating-badge {
-    width: 2.28rem;
+    width: 1.88rem;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 8px 18px rgba(8, 12, 20, 0.22);
   }
 
   .rating-badge strong {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
   .rating-badge span {
-    font-size: 0.44rem;
+    font-size: 0.34rem;
   }
 
   .position-pill,
@@ -7639,14 +8159,34 @@ img {
   }
 
   .detail-pill-label,
-  .legend-card .detail-pill-label {
-    font-size: 0.42rem;
+  .legend-card .detail-pill-label,
+  .blackmatter-card .detail-pill-label,
+  .glass-showcase-card .detail-pill-label {
+    font-size: 0.38rem;
+  }
+
+  .player-art-overlay {
+    top: 0.26rem;
+  }
+
+  .player-art-overlay.start {
+    left: 0.26rem;
+  }
+
+  .player-art-overlay.end {
+    right: 0.26rem;
+  }
+
+  .player-art-overlay.bottom-end {
+    right: 0.26rem;
+    bottom: 0.26rem;
   }
 
   .player-art-overlay .status-pill {
-    min-height: 18px;
-    padding: 0.16rem 0.34rem;
-    font-size: 0.48rem;
+    min-height: 14px;
+    padding: 0.08rem 0.24rem;
+    font-size: 0.36rem;
+    letter-spacing: 0.03em;
   }
 }
 
@@ -7676,7 +8216,13 @@ img {
   }
 
   .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.75rem;
+    align-items: start;
+  }
+
+  .topbar .nav-tabs {
+    display: none;
   }
 
   .brand-block {
@@ -7688,54 +8234,84 @@ img {
   }
 
   .brand-ball {
-    width: 46px;
-    height: 46px;
+    width: 34px;
+    height: 34px;
   }
 
   .brand-copy h1 {
-    font-size: 1.22rem;
-  }
-
-  .nav-tabs {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    width: 100%;
-    gap: 0.4rem;
-  }
-
-  .nav-tabs .tab-btn,
-  .pack-mode-tabs .tab-btn {
-    min-width: 0;
-    width: 100%;
-    padding: 0.72rem 0.4rem;
-    font-size: 0.82rem;
+    font-size: 0.98rem;
   }
 
   .topbar-side {
-    width: 100%;
-    flex-direction: column;
+    width: auto;
+    flex-direction: row;
     align-items: stretch;
-    gap: 0.55rem;
-  }
-
-  .hud-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
+    gap: 0.3rem;
   }
 
   .daily-menu-anchor {
-    width: 100%;
+    width: auto;
   }
 
   .daily-trigger {
-    width: 100%;
+    width: auto;
     min-width: 0;
-    min-height: 60px;
-    padding: 0.68rem 0.8rem;
+    min-height: 44px;
+    padding: 0.42rem 0.5rem;
+    border-radius: 13px;
+  }
+
+  .daily-trigger-label {
+    font-size: 0.48rem;
   }
 
   .daily-trigger strong {
-    font-size: 1.18rem;
+    font-size: 0.86rem;
+  }
+
+  .hud-grid {
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.26rem;
+  }
+
+  .hud-card {
+    min-width: 64px;
+    padding: 0.4rem 0.42rem;
+    border-radius: 14px;
+  }
+
+  .hud-card .label {
+    font-size: 0.46rem;
+  }
+
+  .hud-card .value {
+    margin-top: 0.08rem;
+    font-size: 0.76rem;
+  }
+
+  .mobile-bottom-nav {
+    left: max(0.3rem, env(safe-area-inset-left, 0px));
+    right: max(0.3rem, env(safe-area-inset-right, 0px));
+    bottom: max(0.3rem, env(safe-area-inset-bottom, 0px));
+    gap: 0.28rem;
+    padding: 0.32rem;
+    border-radius: 20px;
+  }
+
+  .mobile-nav-btn {
+    min-height: 54px;
+    padding: 0.42rem 0.12rem;
+    border-radius: 15px;
+  }
+
+  .mobile-nav-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .mobile-nav-label {
+    font-size: 0.52rem;
   }
 
   .daily-popover {
@@ -7789,6 +8365,56 @@ img {
     border-radius: 24px;
   }
 
+  .team-detail-shell {
+    padding-top: 0.88rem;
+    overflow: visible;
+  }
+
+  .detail-mobile-controls {
+    display: flex;
+    position: sticky;
+    top: calc(0.18rem + env(safe-area-inset-top, 0px));
+    z-index: 12;
+    margin-bottom: 0.42rem;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  .detail-mobile-close {
+    pointer-events: auto;
+  }
+
+  .detail-topbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail-back-btn,
+  .detail-bulk-toggle {
+    display: none;
+  }
+
+  .detail-set-switcher {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .detail-nav-pill {
+    min-width: 0;
+    width: 100%;
+    padding: 0.56rem 0.64rem;
+    border-radius: 14px;
+  }
+
+  .detail-nav-pill strong {
+    font-size: 0.74rem;
+  }
+
+  .team-detail-shell,
+  .team-detail-shell .team-cards {
+    touch-action: pan-y;
+  }
+
   .modal-backdrop,
   .card-preview-backdrop {
     padding: 0.35rem;
@@ -7804,6 +8430,49 @@ img {
     max-height: calc(100vh - 0.5rem);
     max-height: calc(100svh - 0.5rem);
     padding: 0.82rem;
+  }
+
+  .mobile-modal-close-icon {
+    display: inline-grid;
+  }
+
+  .profile-modal-close-btn {
+    display: none;
+  }
+
+  .modal-head-actions {
+    margin-left: auto;
+  }
+
+  .team-picker-shell,
+  .profile-editor-shell,
+  .profile-achievements-shell {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    align-content: start;
+  }
+
+  .profile-achievements-shell {
+    grid-template-rows: auto;
+  }
+
+  .team-picker-head,
+  .profile-editor-head {
+    position: sticky;
+    top: -0.82rem;
+    z-index: 6;
+    margin: -0.82rem -0.82rem 0;
+    padding: 0.82rem 0.82rem 0.76rem;
+    background:
+      linear-gradient(180deg, rgba(15, 24, 40, 0.98), rgba(11, 18, 31, 0.94) 72%, rgba(11, 18, 31, 0));
+  }
+
+  .team-picker-grid,
+  .profile-editor-grid,
+  .profile-badge-picker-grid,
+  .profile-achievements-grid {
+    overflow: visible;
+    padding-right: 0;
   }
 
   #packModalShell {
@@ -7823,23 +8492,42 @@ img {
     padding: 0.15rem 0.1rem 0.4rem;
   }
 
+  #packModalShell.mobile-pack-modal-compact .modal-head {
+    gap: 0.18rem 0.48rem;
+  }
+
+  #packModalShell.mobile-pack-modal-compact #revealTitle {
+    font-size: 0.88rem;
+    line-height: 1.02;
+  }
+
+  #packModalShell.mobile-pack-modal-compact .modal-actions {
+    gap: 0.24rem;
+    row-gap: 0.24rem;
+    padding-right: 2.1rem;
+  }
+
+  #packModalShell.mobile-pack-modal-compact #sellAllDuplicates,
+  #packModalShell.mobile-pack-modal-compact #revealAllCards,
+  #packModalShell.mobile-pack-modal-compact #revealProgress {
+    min-height: 28px;
+    padding: 0.26rem 0.42rem;
+    font-size: 0.58rem;
+  }
+
   .reveal-set-progress-chip {
-    padding: 0.38rem 0.42rem;
-    border-radius: 14px;
+    padding: 0.32rem 0.4rem;
+    border-radius: 11px;
   }
 
   .reveal-set-progress-logo {
-    width: 1.42rem;
-    height: 1.42rem;
-  }
-
-  .reveal-set-progress-name {
-    font-size: 0.7rem;
+    width: 0.92rem;
+    height: 0.92rem;
   }
 
   .reveal-set-progress-count,
-  .reveal-set-progress-tag {
-    font-size: 0.64rem;
+  .reveal-set-progress-tag-compact {
+    font-size: 0.58rem;
   }
 
   #packModalShell .pack-copy {
@@ -7848,26 +8536,64 @@ img {
   }
 
   .pack-result-grid.mobile-pack-flow {
-    --mobile-pack-card-scale: 1.28;
-    min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 3.85rem);
+    --mobile-pack-card-scale: 1.16;
+    min-height: 0;
+    height: 100%;
   }
 
   .pack-result-grid.mobile-pack-overview-carousel {
-    --mobile-pack-overview-card-width: min(74vw, 224px);
-    gap: 0.7rem;
+    --mobile-pack-overview-card-width: min(64vw, 188px);
+    gap: 0.5rem;
+    padding-inline: max(0.08rem, calc((100% - var(--mobile-pack-overview-card-width)) / 2));
+    scroll-padding-inline: max(0.08rem, calc((100% - var(--mobile-pack-overview-card-width)) / 2));
+  }
+
+  .mobile-pack-overview-duplicate-group {
+    gap: 0.34rem;
+    padding: 0.34rem;
+    border-radius: 21px;
+  }
+
+  .mobile-pack-overview-duplicate-label {
+    flex-basis: min(16vw, 52px);
+    width: min(16vw, 52px);
+    padding: 0.56rem 0.16rem 0.56rem 0.08rem;
+  }
+
+  .mobile-pack-overview-duplicate-label .eyebrow {
+    font-size: 0.46rem;
+  }
+
+  .mobile-pack-overview-duplicate-label strong {
+    font-size: 0.82rem;
+  }
+
+  .mobile-pack-overview-duplicate-label span:last-child {
+    font-size: 0.52rem;
   }
 
   .mobile-pack-overview-divider {
-    flex-basis: min(22vw, 78px);
-    width: min(22vw, 78px);
+    flex-basis: min(17vw, 58px);
+    width: min(17vw, 58px);
     min-height: calc((var(--mobile-pack-overview-card-width) * var(--game-card-height-ratio)) + 2rem);
-    padding: 0.75rem 0.4rem;
+    padding: 0.55rem 0.28rem;
+  }
+
+  .mobile-pack-overview-divider strong {
+    font-size: 0.9rem;
+  }
+
+  .mobile-pack-overview-divider span:last-child {
+    font-size: 0.62rem;
+    line-height: 1.2;
   }
 
   .mobile-pack-stage {
-    width: min(100%, calc((var(--game-card-width) * var(--mobile-pack-card-scale)) + 1.25rem));
-    min-height: calc((var(--card-face-height) * var(--mobile-pack-card-scale)) + 3.55rem);
-    padding: 0.35rem 0 0.9rem;
+    width: min(100%, calc((var(--game-card-width) * var(--mobile-pack-card-scale)) + 1rem));
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    padding: 0.08rem 0 0.16rem;
   }
 
   .mobile-pack-stack-face .card-back-mark {
@@ -7882,8 +8608,39 @@ img {
 
   .mobile-pack-stage-chip,
   .mobile-pack-stage-hint {
-    font-size: 0.7rem;
-    padding: 0.34rem 0.62rem;
+    font-size: 0.64rem;
+    padding: 0.28rem 0.52rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact .modal-head {
+    gap: 0.28rem 0.6rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact #revealTitle {
+    font-size: 0.92rem;
+    line-height: 1.04;
+  }
+
+  #packModalShell.mobile-pack-overview-compact .modal-actions {
+    gap: 0.32rem;
+    row-gap: 0.32rem;
+    padding-right: 2.35rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact #sellAllDuplicates {
+    min-height: 30px;
+    padding: 0.3rem 0.48rem;
+    font-size: 0.62rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact > .modal-bottom-actions {
+    gap: 0.42rem;
+    padding-bottom: 0.16rem;
+  }
+
+  #packModalShell.mobile-pack-overview-compact #openAnotherPack {
+    padding: 0.62rem 0.78rem;
+    font-size: 0.82rem;
   }
 
   .pack-modal-arrow {
@@ -7913,15 +8670,15 @@ img {
   }
 
   .card-preview-stage {
-    padding: 1rem 0.4rem 0.3rem;
+    padding: 0.9rem 0.16rem 0.08rem;
   }
 
   .card-preview-shell {
-    width: min(100%, 360px);
+    width: min(100%, 372px);
   }
 
   .preview-card-shell {
-    --preview-scale: 1.34;
+    --preview-scale: 1.48;
   }
 
   .mobile-sheet-shell {
@@ -7948,19 +8705,20 @@ img {
   .legend-card .card-rarity-frame,
   .blackmatter-card .card-rarity-frame,
   .glass-showcase-card .card-rarity-frame {
-    inset: 0.1rem;
+    inset: 0.16rem;
   }
 
   .card-rarity-text {
-    font-size: 2.72px;
-    letter-spacing: 0.4px;
+    font-size: 2.12px;
+    font-weight: 700;
+    letter-spacing: 0.16px;
   }
 
   .player-name,
   .legend-card .player-name,
   .blackmatter-card .player-name,
   .glass-showcase-card .player-name {
-    font-size: 0.88rem;
+    font-size: 0.78rem;
     line-height: 1.04;
   }
 
@@ -7968,19 +8726,19 @@ img {
   .legend-card .card-team-name,
   .blackmatter-card .card-team-name,
   .glass-showcase-card .card-team-name {
-    font-size: 0.64rem;
+    font-size: 0.56rem;
   }
 
   .card-body {
     gap: 0.14rem;
-    padding: 0.4rem 0.44rem 0.6rem;
+    padding: 0.34rem 0.38rem 0.52rem;
   }
 
   .legend-card .card-body,
   .blackmatter-card .card-body,
   .glass-showcase-card .card-body {
     gap: 0.12rem;
-    padding: 0.9rem 0.72rem 0.72rem;
+    padding: 0.82rem 0.62rem 0.62rem;
   }
 
   .card-team-mark {
@@ -7999,15 +8757,15 @@ img {
   }
 
   .rating-badge {
-    width: 2rem;
+    width: 1.62rem;
   }
 
   .rating-badge strong {
-    font-size: 0.9rem;
+    font-size: 0.68rem;
   }
 
   .rating-badge span {
-    font-size: 0.4rem;
+    font-size: 0.28rem;
   }
 
   .position-pill,
@@ -8027,18 +8785,39 @@ img {
   }
 
   .detail-pill-label,
-  .legend-card .detail-pill-label {
-    font-size: 0.38rem;
+  .legend-card .detail-pill-label,
+  .blackmatter-card .detail-pill-label,
+  .glass-showcase-card .detail-pill-label {
+    font-size: 0.34rem;
+  }
+
+  .player-art-overlay {
+    top: 0.22rem;
+  }
+
+  .player-art-overlay.start {
+    left: 0.22rem;
+  }
+
+  .player-art-overlay.end {
+    right: 0.22rem;
+  }
+
+  .player-art-overlay.bottom-end {
+    right: 0.22rem;
+    bottom: 0.22rem;
   }
 
   .player-art-overlay .status-pill {
-    min-height: 17px;
-    padding: 0.14rem 0.3rem;
-    font-size: 0.44rem;
+    min-height: 13px;
+    padding: 0.06rem 0.2rem;
+    font-size: 0.31rem;
+    letter-spacing: 0.02em;
   }
 
   .profile-editor-head {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
   }
 }
 
@@ -8062,6 +8841,12 @@ img {
   background:
     radial-gradient(circle at top left, color-mix(in srgb, var(--profile-secondary, #8ec8ff) 18%, transparent), transparent 34%),
     linear-gradient(135deg, color-mix(in srgb, var(--profile-primary, #214177) 68%, rgba(8, 14, 25, 0.94)) 0%, rgba(8, 13, 24, 0.88) 48%, color-mix(in srgb, var(--profile-secondary, #8ec8ff) 18%, rgba(8, 13, 24, 0.92)) 100%);
+}
+
+@media (max-width: 820px) {
+  #profileView {
+    overflow: visible;
+  }
 }
 
 #profileView::after {
@@ -8360,7 +9145,7 @@ img {
 
 .profile-editor-backdrop,
 .profile-achievements-backdrop {
-  z-index: 182;
+  z-index: 282;
 }
 
 .profile-editor-shell,

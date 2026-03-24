@@ -1083,3 +1083,19 @@ Additional standing rule:
 - reveal set-progress chips above mobile pack carousels should compress into viewport-safe columns instead of forcing the modal wider than the phone screen
 - mobile pack modals should use the available phone height, with the reveal stage owning the leftover vertical space instead of collapsing and letting cards overlap neighboring rows
 - on mobile, reveal set-progress chips should use a compact summary treatment: logo, team name, and count/change only; the horizontal progress track should stay hidden
+- when multiple mobile reveal set-progress chips are present, they should stay in a single compact horizontal row so they do not steal vertical space from the active card
+- mobile reveal set-progress chips should avoid logo halos/frames and favor tiny clean chips showing only logo plus count/change
+- mobile pack overview should use a compact header with shortened status copy and smaller cards than the live reveal stage, so the full card stays visible inside the remaining vertical space
+- on mobile, main browsing should feel like one continuous page scroll; avoid nested `workspace`/`view` scroll containers for players, collections, and similar primary views
+- mobile primary navigation should live in a fixed bottom bar with icon-led category buttons, while the desktop top nav stays desktop-only
+- mobile pack modals should lock out internal free-scrolling; interaction inside them should reduce to tap + horizontal reveal swipe, or horizontal carousel swipe in pack overview
+- mobile card chrome must scale down with card size: rarity border text spacing, rating badge, and `Need`/duplicate tags should all shrink enough that they stop dominating the player art or breaking the frame corners
+- mobile card preview should favor a larger centered card with clear breathing room before the metadata block underneath, instead of compressing the preview card to fit extra chrome
+- responsive card typography must cover every special treatment too, especially `Legends`, `Black Matter`, and `Glass Showcase`, so their names, detail labels, badges, and border text stay proportional on both mobile and desktop
+- rarity border tags should follow the centerline of the visible border and keep a smooth loop through rounded corners, especially on mobile-sized cards
+- in card preview, cinematic mode must not interrupt or pause the rarity border motion; premium hover/cinematic effects should layer on top of the ongoing border animation
+- the mobile bottom nav should stay above normal page chrome, but every real modal or full-screen picker must still layer above it
+- mobile profile pickers should use one shell-level scroll with a persistent top-right close icon instead of nested scroll regions
+- mobile collection set detail should hide bulk-sell controls, keep a sticky close icon available, and allow wraparound previous/next navigation plus horizontal swipe through the current collection order
+- mobile pack reveal should reserve a separate hint row so guidance text never sits behind the active card, and the active card should use most of the remaining stage height
+- mobile pack overview should visually group duplicate cards inside a shared section with a left-side duplicate label, while keeping the carousel swipe behavior intact

@@ -1318,6 +1318,8 @@ let activePackPreview = null;
 let activeCardPreview = null;
 let cardPreviewSwipeState = null;
 let cardPreviewSuppressTapUntil = 0;
+let collectionDetailSwipeState = null;
+let collectionDetailSuppressClickUntil = 0;
 let setCompletionCelebration = null;
 let dailyChallengeCelebration = null;
 let achievementCelebration = null;
@@ -1371,8 +1373,12 @@ const MOBILE_PACK_STACK_PREVIEW_COUNT = 3;
 const CARD_PREVIEW_SWIPE_THRESHOLD_PX = 72;
 const CARD_PREVIEW_SWIPE_ROTATION_FACTOR = 0.04;
 const CARD_PREVIEW_SWIPE_MAX_ROTATION_DEG = 12;
+const COLLECTION_DETAIL_SWIPE_THRESHOLD_PX = 74;
+const COLLECTION_DETAIL_SWIPE_ROTATION_FACTOR = 0.018;
+const COLLECTION_DETAIL_SWIPE_MAX_ROTATION_DEG = 6;
 
 const navTabsEl = document.getElementById("navTabs");
+const mobileBottomNavEl = document.getElementById("mobileBottomNav");
 const hudGridEl = document.getElementById("hudGrid");
 const dailyChallengeTriggerEl = document.getElementById("dailyChallengeTrigger");
 const dailyChallengeProgressEl = document.getElementById("dailyChallengeProgress");
@@ -1452,6 +1458,7 @@ const achievementRewardListEl = document.getElementById("achievementRewardList")
 const closeAchievementRewardModalEl = document.getElementById("closeAchievementRewardModal");
 const favoriteTeamModalEl = document.getElementById("favoriteTeamModal");
 const favoriteTeamGridEl = document.getElementById("favoriteTeamGrid");
+const closeFavoriteTeamModalIconEl = document.getElementById("closeFavoriteTeamModalIcon");
 const favoriteTeamLaterEl = document.getElementById("favoriteTeamLater");
 const favoriteTeamSaveEl = document.getElementById("favoriteTeamSave");
 const profileShowcaseModalEl = document.getElementById("profileShowcaseModal");
@@ -1460,15 +1467,18 @@ const profileShowcaseModalSubtitleEl = document.getElementById("profileShowcaseM
 const profileShowcaseToolbarEl = document.getElementById("profileShowcaseToolbar");
 const profileShowcasePickerGridEl = document.getElementById("profileShowcasePickerGrid");
 const closeProfileShowcaseModalEl = document.getElementById("closeProfileShowcaseModal");
+const closeProfileShowcaseModalIconEl = document.getElementById("closeProfileShowcaseModalIcon");
 const profileBadgeModalEl = document.getElementById("profileBadgeModal");
 const profileBadgeSlotGridEl = document.getElementById("profileBadgeSlotGrid");
 const profileBadgePickerGridEl = document.getElementById("profileBadgePickerGrid");
 const closeProfileBadgeModalEl = document.getElementById("closeProfileBadgeModal");
+const closeProfileBadgeModalIconEl = document.getElementById("closeProfileBadgeModalIcon");
 const profileAchievementsModalEl = document.getElementById("profileAchievementsModal");
 const profileAchievementsSummaryEl = document.getElementById("profileAchievementsSummary");
 const profileAchievementsToolbarEl = document.getElementById("profileAchievementsToolbar");
 const profileAchievementsGridEl = document.getElementById("profileAchievementsGrid");
 const closeProfileAchievementsModalEl = document.getElementById("closeProfileAchievementsModal");
+const closeProfileAchievementsModalIconEl = document.getElementById("closeProfileAchievementsModalIcon");
 const playerControlsModalEl = document.getElementById("playerControlsModal");
 const playerControlsModalEyebrowEl = document.getElementById("playerControlsModalEyebrow");
 const playerControlsModalTitleEl = document.getElementById("playerControlsModalTitle");
@@ -2362,17 +2372,54 @@ function closeCollectionGroup() {
 }
 
 function openCollectionTeam(teamId) {
+  const team = teamById[teamId];
+  if (!team) return;
   collectionSection = "collections";
-  activeCollectionGroup = teamById[teamId]?.conference || activeCollectionGroup;
-  activeCollectionTeam = teamId;
+  activeCollectionGroup = team.conference || activeCollectionGroup;
+  activeCollectionTeam = team.id;
   isSetBulkSellOpen = false;
   renderCollection();
+  if (isCompactMobileUi()) {
+    requestAnimationFrame(() => {
+      teamGridEl?.querySelector(".team-detail-shell")?.scrollIntoView({
+        block: "start",
+        inline: "nearest",
+        behavior: "auto",
+      });
+    });
+  }
 }
 
 function closeCollectionTeam() {
   activeCollectionTeam = null;
   isSetBulkSellOpen = false;
   renderCollection();
+}
+
+function getCollectionTeamNavigation(teamId = activeCollectionTeam) {
+  const team = teamById[teamId];
+  if (!team) return null;
+  const groupId = activeCollectionGroup || team.conference;
+  const teams = sortCollectionTeams(getTeamsForCollectionGroup(groupId));
+  const index = teams.findIndex((entry) => entry.id === team.id);
+  if (index < 0 || !teams.length) return null;
+  const previousIndex = (index - 1 + teams.length) % teams.length;
+  const nextIndex = (index + 1) % teams.length;
+  return {
+    teams,
+    index,
+    previousTeam: teams[previousIndex],
+    nextTeam: teams[nextIndex],
+  };
+}
+
+function stepCollectionTeam(direction = 1) {
+  const navigation = getCollectionTeamNavigation();
+  if (!navigation || navigation.teams.length < 2) return false;
+  const nextTeam = direction < 0 ? navigation.previousTeam : navigation.nextTeam;
+  if (!nextTeam) return false;
+  openCollectionTeam(nextTeam.id);
+  return true;
 }
 
 function setCollectionSort(sort) {
@@ -2701,10 +2748,11 @@ function stopCardPreviewAmbientMotion() {
   if (activeRarityFrameCard && cardPreviewStageEl?.contains(activeRarityFrameCard)) {
     stopRarityFrameMotion(false);
   }
-  const previewShell = cardPreviewStageEl?.querySelector(".preview-card-shell");
-  if (!previewShell) return;
-  stopPremiumHover(previewShell, true);
-  if (activePremiumHoverShell === previewShell) {
+  const previewCard = cardPreviewStageEl?.querySelector(cardHoverSelector);
+  const premiumShell = getPremiumHoverShell(previewCard) || activePremiumHoverShell;
+  if (!premiumShell) return;
+  stopPremiumHover(premiumShell, true);
+  if (activePremiumHoverShell === premiumShell) {
     activePremiumHoverShell = null;
   }
 }
@@ -2726,6 +2774,10 @@ function syncCardPreviewAmbientMotion() {
 
 function setMobilePreviewCinematicState(shell, cinematic) {
   if (!shell) return false;
+  const previewCard = shell.querySelector(cardHoverSelector) || shell.closest(cardHoverSelector);
+  if (previewCard) {
+    startRarityFrameMotion(previewCard);
+  }
   const stateForShell = getPremiumHoverState(shell);
   clearPremiumHoverTimer(stateForShell.enterTimer);
   stateForShell.enterTimer = 0;
@@ -2943,6 +2995,11 @@ function setActiveView(view) {
   });
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.classList.toggle("active", button.dataset.view === activeView);
+    if (button.dataset.view === activeView) {
+      button.setAttribute("aria-current", "page");
+    } else {
+      button.removeAttribute("aria-current");
+    }
   });
   if (activeView === "collections" || activeView === "players") renderCollection();
 }
@@ -3390,6 +3447,11 @@ function buildRevealSetProgressChip(entry, options = {}) {
     : gained > 0
       ? `+${gained}`
       : "";
+  const compactProgressTag = gained > 0
+    ? `+${gained}`
+    : currentOwned >= entry.total
+      ? "Done"
+      : "";
 
   return `
     <article
@@ -3406,6 +3468,7 @@ function buildRevealSetProgressChip(entry, options = {}) {
         <div class="reveal-set-progress-meta">
           <span class="reveal-set-progress-count">${currentOwned}/${entry.total}</span>
           ${progressTag ? `<span class="reveal-set-progress-tag">${escapeHtml(progressTag)}</span>` : ""}
+          ${compactProgressTag ? `<span class="reveal-set-progress-tag-compact">${escapeHtml(compactProgressTag)}</span>` : ""}
         </div>
       </div>
       <div class="reveal-set-progress-track">
@@ -4348,11 +4411,30 @@ const RARITY_FRAME_PATH_LENGTH = RARITY_FRAME_LOOP_LENGTH * 2;
 const RARITY_FRAME_TAG_CHAR_WIDTH = 2.05;
 const RARITY_FRAME_TAG_GAP = 16;
 const RARITY_FRAME_LOOP_SECONDS = 20;
-const RARITY_FRAME_PATH_D = "M11 2.25 H89 Q97.75 2.25 97.75 11 V129 Q97.75 137.75 89 137.75 H11 Q2.25 137.75 2.25 129 V11 Q2.25 2.25 11 2.25 Z";
+const RARITY_FRAME_VIEWBOX_WIDTH = 100;
+const RARITY_FRAME_VIEWBOX_HEIGHT = 140;
+const RARITY_FRAME_INSET = 4.25;
+const RARITY_FRAME_RADIUS = 9.75;
+const RARITY_FRAME_PATH_D = [
+  `M${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)} ${RARITY_FRAME_INSET.toFixed(2)}`,
+  `H${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,
+  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET).toFixed(2)} ${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)}`,
+  `V${(RARITY_FRAME_VIEWBOX_HEIGHT - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,
+  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)} ${(RARITY_FRAME_VIEWBOX_HEIGHT - RARITY_FRAME_INSET).toFixed(2)}`,
+  `H${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)}`,
+  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${RARITY_FRAME_INSET.toFixed(2)} ${(RARITY_FRAME_VIEWBOX_HEIGHT - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,
+  `V${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)}`,
+  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)} ${RARITY_FRAME_INSET.toFixed(2)}`,
+  "Z",
+].join(" ");
 const RARITY_FRAME_DOUBLE_PATH_D = `${RARITY_FRAME_PATH_D} ${RARITY_FRAME_PATH_D}`;
 
 function getRarityFrameSlotCount(label) {
-  const slotWidth = Math.max(24, (label.length * RARITY_FRAME_TAG_CHAR_WIDTH) + RARITY_FRAME_TAG_GAP);
+  const compactViewport = typeof window !== "undefined" && window.matchMedia("(max-width: 620px)").matches;
+  const slotWidth = Math.max(
+    24,
+    ((label.length * RARITY_FRAME_TAG_CHAR_WIDTH) + RARITY_FRAME_TAG_GAP) * (compactViewport ? 1.24 : 1),
+  );
   return Math.max(10, Math.floor(RARITY_FRAME_LOOP_LENGTH / slotWidth));
 }
 
@@ -4368,6 +4450,8 @@ function buildRarityFrame(label) {
         <textPath
           class="card-rarity-text-path"
           href="#${frameId}"
+          method="align"
+          spacing="auto"
           startOffset="${baseOffset}"
           data-base-offset="${baseOffset}"
         >${escapeHtml(text)}</textPath>
@@ -4705,6 +4789,29 @@ function buildMobilePackOverviewDivider(count) {
   `;
 }
 
+function buildMobilePackOverviewDuplicateGroup(duplicateEntries = []) {
+  if (!duplicateEntries.length) return "";
+  return `
+    <section class="mobile-pack-overview-duplicate-group" aria-label="Duplicate cards">
+      <div class="mobile-pack-overview-duplicate-label">
+        <span class="eyebrow accent">Duplicate</span>
+        <strong>${escapeHtml(String(duplicateEntries.length))}</strong>
+        <span>Cards</span>
+      </div>
+      <div class="mobile-pack-overview-duplicate-track">
+        ${duplicateEntries.map(({ result, sourceIndex }) => `
+          <article class="mobile-pack-overview-slide card-slide is-duplicate">
+            ${buildCardFace(result, {
+              footerHtml: buildPackOverviewFooter(result, sourceIndex),
+              shellClass: "mobile-pack-overview-card-shell",
+            })}
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
 function buildMobilePackOverviewCarousel(results = []) {
   const rankedEntries = results.map((result, index) => ({
     result,
@@ -4721,15 +4828,7 @@ function buildMobilePackOverviewCarousel(results = []) {
         })}
       </article>
     `),
-    ...(newEntries.length && duplicateEntries.length ? [buildMobilePackOverviewDivider(duplicateEntries.length)] : []),
-    ...duplicateEntries.map(({ result, sourceIndex }) => `
-      <article class="mobile-pack-overview-slide card-slide is-duplicate">
-        ${buildCardFace(result, {
-          footerHtml: buildPackOverviewFooter(result, sourceIndex),
-          shellClass: "mobile-pack-overview-card-shell",
-        })}
-      </article>
-    `),
+    ...(duplicateEntries.length ? [buildMobilePackOverviewDuplicateGroup(duplicateEntries)] : []),
   ];
   return slides.join("");
 }
@@ -4766,12 +4865,17 @@ function renderPackArea() {
   const showMobilePackContinue = isMobileOpeningPack && shouldShowMobilePackContinue(openingPack);
   const repeatablePackId = state.lastPack?.repeatableStorePackId || state.lastPack?.packId || null;
   packModalEl.hidden = !isPackModalOpen || !hasRevealContent;
+  document.body.classList.toggle("mobile-pack-modal-open", Boolean(isPackModalOpen && hasRevealContent && isMobilePackRevealMode()));
+  packModalShellEl?.classList.toggle("mobile-pack-modal-compact", isMobileOpeningPack || isMobileResolvedPack);
+  packModalShellEl?.classList.toggle("mobile-pack-overview-compact", isMobileResolvedPack);
   packRevealGridEl.classList.toggle("pack-preview-mode", isPreviewMode);
   packRevealGridEl.classList.toggle("mobile-pack-flow", isMobileOpeningPack);
   packRevealGridEl.classList.toggle("mobile-pack-overview-carousel", isMobileResolvedPack);
   if (!isMobileResolvedPack) {
     packRevealGridEl.dataset.mobileOverviewCenteredKey = "";
   }
+  revealSubtitleEl.hidden = false;
+  revealProgressEl.hidden = false;
   closePackModalEl.disabled = Boolean(openingPack);
   closePackModalEl.textContent = openingPack ? "Finish Reveal First" : "Close";
   if (closePackModalIconEl) {
@@ -4855,6 +4959,7 @@ function renderPackArea() {
       : openingPack.assetsReady
         ? "Hover a card to sense its rarity glow, then click each card to flip it."
         : "Loading player cards first so each reveal is instant.";
+    revealSubtitleEl.hidden = isMobileOpeningPack;
     revealProgressEl.textContent = isMobileOpeningPack
       ? `Card ${Math.min(currentMobileIndex + 1, totalCards)} of ${totalCards}`
       : `${openingPack.revealedCount} / ${totalCards} Revealed`;
@@ -4895,9 +5000,15 @@ function renderPackArea() {
   const pendingDuplicateCount = getPendingDuplicateResults().length;
   const completedSetText = lastPack.completedTeams.length ? ` Completed sets: ${lastPack.completedTeams.map((entry) => entry.teamName).join(", ")}.` : "";
   const completedCollectionText = lastPack.completedCollections?.length ? ` Completed collections: ${lastPack.completedCollections.map((entry) => entry.groupName).join(", ")}.` : "";
-  revealTitleEl.textContent = `${lastPack.packName} Complete`;
-  revealSubtitleEl.textContent = `${isMobileResolvedPack ? "Swipe new pulls from highest to lowest first, then continue into duplicates. " : "All cards revealed. "}${newCards} new, ${duplicates} duplicate.${pendingDuplicateCount ? ` ${pendingDuplicateCount} duplicate cards can still be sold.` : ""}${completedSetText}${completedCollectionText}`;
+  revealTitleEl.textContent = isMobileResolvedPack
+    ? `${lastPack.packName} - ${newCards} New - ${duplicates} Dupes`
+    : `${lastPack.packName} Complete`;
+  revealSubtitleEl.textContent = isMobileResolvedPack
+    ? ""
+    : `${isMobileResolvedPack ? "Swipe new pulls from highest to lowest first, then continue into duplicates. " : "All cards revealed. "}${newCards} new, ${duplicates} duplicate.${pendingDuplicateCount ? ` ${pendingDuplicateCount} duplicate cards can still be sold.` : ""}${completedSetText}${completedCollectionText}`;
+  revealSubtitleEl.hidden = isMobileResolvedPack;
   revealProgressEl.textContent = `${lastPack.results.length} / ${lastPack.results.length} Revealed`;
+  revealProgressEl.hidden = isMobileResolvedPack;
   packRevealGridEl.innerHTML = isMobileResolvedPack
     ? buildMobilePackOverviewCarousel(lastPack.results)
     : lastPack.results.map((result, index) => buildCardFace(result, {
@@ -5677,6 +5788,9 @@ function renderCollection() {
 
   const team = teamById[activeCollectionTeam];
   const parentCollection = collectionGroupById[activeCollectionGroup || team.conference];
+  const mobileDetailMode = isCompactMobileUi();
+  const collectionNavigation = getCollectionTeamNavigation(team.id);
+  const canStepCollectionTeams = Boolean(collectionNavigation && collectionNavigation.teams.length > 1);
   const teamCards = cardsByTeam[team.id];
   const owned = teamCards.filter((card) => hasOwnedCard(card.id)).length;
   const progress = Math.round((owned / teamCards.length) * 100);
@@ -5697,7 +5811,8 @@ function renderCollection() {
   teamGridEl.className = "team-grid detail-mode";
   teamGridEl.innerHTML = `
     <section
-      class="team-detail-shell"
+      class="team-detail-shell ${mobileDetailMode ? "mobile-detail-mode" : ""}"
+      data-collection-team-id="${escapeHtml(team.id)}"
       style="
         --team-primary:${team.colors.primary};
         --team-secondary:${team.colors.secondary};
@@ -5705,6 +5820,9 @@ function renderCollection() {
         --team-secondary-soft:${withAlpha(team.colors.secondary, 0.12)};
       "
     >
+      <div class="detail-mobile-controls">
+        <button type="button" class="icon-btn modal-close-icon detail-mobile-close" data-detail-close aria-label="Close set view">&times;</button>
+      </div>
       <div class="detail-head">
         <div class="detail-topbar">
           <div class="detail-team-head">
@@ -5714,9 +5832,21 @@ function renderCollection() {
               <h3>${escapeHtml(team.name)}</h3>
             </div>
           </div>
-          <button type="button" class="secondary-btn toolbar-toggle-btn detail-bulk-toggle ${isSetBulkSellOpen ? "active" : ""}" id="toggleSetBulkSell">Bulk Sell</button>
-          <button type="button" class="secondary-btn detail-back-btn" id="collectionBack">Back To ${escapeHtml(parentCollection?.shortName || "Collection")}</button>
+          ${mobileDetailMode ? "" : `<button type="button" class="secondary-btn toolbar-toggle-btn detail-bulk-toggle ${isSetBulkSellOpen ? "active" : ""}" id="toggleSetBulkSell">Bulk Sell</button>`}
+          ${mobileDetailMode ? "" : `<button type="button" class="secondary-btn detail-back-btn" id="collectionBack">Back To ${escapeHtml(parentCollection?.shortName || "Collection")}</button>`}
         </div>
+        ${canStepCollectionTeams ? `
+          <div class="detail-set-switcher">
+            <button type="button" class="secondary-btn detail-nav-pill prev" data-detail-step-set="-1" aria-label="Previous set">
+              <span>Prev Set</span>
+              <strong>${escapeHtml(collectionNavigation.previousTeam.shortName || collectionNavigation.previousTeam.name)}</strong>
+            </button>
+            <button type="button" class="secondary-btn detail-nav-pill next" data-detail-step-set="1" aria-label="Next set">
+              <span>Next Set</span>
+              <strong>${escapeHtml(collectionNavigation.nextTeam.shortName || collectionNavigation.nextTeam.name)}</strong>
+            </button>
+          </div>
+        ` : ""}
         <div class="detail-meta-row">
           <div class="detail-progress-copy">Set progress: ${owned}/${teamCards.length}</div>
           <div class="detail-pulls-copy">Total cards pulled: ${teamCards.reduce((sum, card) => sum + (state.pullCounts[card.id] || 0), 0)}</div>
@@ -5746,7 +5876,7 @@ function renderCollection() {
     </section>
   `;
 
-  document.getElementById("collectionBack").addEventListener("click", closeCollectionTeam);
+  document.getElementById("collectionBack")?.addEventListener("click", closeCollectionTeam);
   document.getElementById("toggleSetBulkSell")?.addEventListener("click", toggleSetBulkSellMenu);
   if (isSetBulkSellOpen) {
     bindBulkSellPanel(document.getElementById("detailBulkSell"), teamCards);
@@ -6855,6 +6985,12 @@ navTabsEl.addEventListener("click", (event) => {
   setActiveView(button.dataset.view);
 });
 
+mobileBottomNavEl?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-view]");
+  if (!button) return;
+  setActiveView(button.dataset.view);
+});
+
 packModeTabsEl?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-pack-section]");
   if (!button) return;
@@ -7063,6 +7199,18 @@ packRevealGridEl.addEventListener("click", (event) => {
 });
 
 teamGridEl.addEventListener("click", (event) => {
+  if (performance.now() < collectionDetailSuppressClickUntil) return;
+  const detailCloseButton = event.target.closest("[data-detail-close]");
+  if (detailCloseButton) {
+    closeCollectionTeam();
+    return;
+  }
+  const detailStepButton = event.target.closest("[data-detail-step-set]");
+  if (detailStepButton) {
+    const direction = Number(detailStepButton.dataset.detailStepSet || 0);
+    if (direction) stepCollectionTeam(direction);
+    return;
+  }
   const sellButton = event.target.closest("[data-sell-duplicate-card]");
   if (sellButton) {
     sellDuplicateFromCollection(sellButton.dataset.sellDuplicateCard);
@@ -7075,6 +7223,96 @@ teamGridEl.addEventListener("click", (event) => {
     owned: previewCard.dataset.previewOwned !== "false",
   });
 });
+
+function resetCollectionDetailSwipeState() {
+  const shell = teamGridEl?.querySelector(".team-detail-shell");
+  if (!shell) return;
+  shell.classList.remove("is-swiping");
+  shell.style.removeProperty("--collection-detail-swipe-x");
+  shell.style.removeProperty("--collection-detail-swipe-rotate");
+}
+
+function shouldStartCollectionDetailSwipe(target) {
+  if (!isCompactMobileUi() || !activeCollectionTeam) return false;
+  if (!(target instanceof Element)) return false;
+  if (!target.closest(".team-detail-shell")) return false;
+  if (target.closest("[data-detail-close], [data-detail-step-set], button, input, select, textarea, label, a")) return false;
+  return true;
+}
+
+teamGridEl?.addEventListener("pointerdown", (event) => {
+  if (!shouldStartCollectionDetailSwipe(event.target)) return;
+  if (event.button !== undefined && event.button !== 0) return;
+  collectionDetailSwipeState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    deltaX: 0,
+    deltaY: 0,
+    dragging: false,
+  };
+  teamGridEl.setPointerCapture?.(event.pointerId);
+});
+
+teamGridEl?.addEventListener("pointermove", (event) => {
+  if (!collectionDetailSwipeState || event.pointerId !== collectionDetailSwipeState.pointerId) return;
+  const shell = teamGridEl.querySelector(".team-detail-shell");
+  if (!shell) return;
+  collectionDetailSwipeState.deltaX = event.clientX - collectionDetailSwipeState.startX;
+  collectionDetailSwipeState.deltaY = event.clientY - collectionDetailSwipeState.startY;
+  if (!collectionDetailSwipeState.dragging) {
+    if (Math.abs(collectionDetailSwipeState.deltaX) < 10 && Math.abs(collectionDetailSwipeState.deltaY) < 10) return;
+    if (Math.abs(collectionDetailSwipeState.deltaX) <= Math.abs(collectionDetailSwipeState.deltaY)) {
+      try {
+        if (teamGridEl?.hasPointerCapture?.(event.pointerId)) {
+          teamGridEl.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        // Ignore release failures after rerender.
+      }
+      collectionDetailSwipeState = null;
+      resetCollectionDetailSwipeState();
+      return;
+    }
+    collectionDetailSwipeState.dragging = true;
+    shell.classList.add("is-swiping");
+  }
+  event.preventDefault();
+  const limitedX = Math.max(-92, Math.min(92, collectionDetailSwipeState.deltaX));
+  const rotation = Math.max(
+    -COLLECTION_DETAIL_SWIPE_MAX_ROTATION_DEG,
+    Math.min(COLLECTION_DETAIL_SWIPE_MAX_ROTATION_DEG, limitedX * COLLECTION_DETAIL_SWIPE_ROTATION_FACTOR),
+  );
+  shell.style.setProperty("--collection-detail-swipe-x", `${limitedX}px`);
+  shell.style.setProperty("--collection-detail-swipe-rotate", `${rotation}deg`);
+}, { passive: false });
+
+function finalizeCollectionDetailSwipe(event) {
+  if (!collectionDetailSwipeState || event.pointerId !== collectionDetailSwipeState.pointerId) return;
+  try {
+    if (teamGridEl?.hasPointerCapture?.(event.pointerId)) {
+      teamGridEl.releasePointerCapture(event.pointerId);
+    }
+  } catch {
+    // Ignore release failures after rerender.
+  }
+  const { deltaX, dragging } = collectionDetailSwipeState;
+  collectionDetailSwipeState = null;
+  if (!dragging) {
+    resetCollectionDetailSwipeState();
+    return;
+  }
+  collectionDetailSuppressClickUntil = performance.now() + 260;
+  if (Math.abs(deltaX) >= COLLECTION_DETAIL_SWIPE_THRESHOLD_PX) {
+    const stepped = stepCollectionTeam(deltaX < 0 ? 1 : -1);
+    if (stepped) return;
+  }
+  resetCollectionDetailSwipeState();
+}
+
+teamGridEl?.addEventListener("pointerup", finalizeCollectionDetailSwipe);
+teamGridEl?.addEventListener("pointercancel", finalizeCollectionDetailSwipe);
+teamGridEl?.addEventListener("lostpointercapture", finalizeCollectionDetailSwipe);
 
 profileWorkspaceEl?.addEventListener("click", (event) => {
   const previewCard = event.target.closest("[data-preview-card-id]");
@@ -7281,13 +7519,17 @@ favoriteTeamModalEl?.addEventListener("click", (event) => {
   if (event.target === favoriteTeamModalEl) dismissFavoriteTeamPrompt();
 });
 favoriteTeamLaterEl?.addEventListener("click", dismissFavoriteTeamPrompt);
+closeFavoriteTeamModalIconEl?.addEventListener("click", dismissFavoriteTeamPrompt);
 favoriteTeamSaveEl?.addEventListener("click", () => {
   if (!favoriteTeamDraftId) return;
   setFavoriteTeam(favoriteTeamDraftId, { showCelebration: true });
 });
 closeProfileShowcaseModalEl?.addEventListener("click", closeProfileShowcaseModal);
+closeProfileShowcaseModalIconEl?.addEventListener("click", closeProfileShowcaseModal);
 closeProfileBadgeModalEl?.addEventListener("click", closeProfileBadgeModal);
+closeProfileBadgeModalIconEl?.addEventListener("click", closeProfileBadgeModal);
 closeProfileAchievementsModalEl?.addEventListener("click", closeProfileAchievementsModal);
+closeProfileAchievementsModalIconEl?.addEventListener("click", closeProfileAchievementsModal);
 
 document.addEventListener("keydown", (event) => {
   if (event.code === "Space") {

@@ -118,6 +118,60 @@
         <div class="profile-workspace" id="profileWorkspace"></div>
       </section>
     </main>
+
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile primary">
+      <button class="mobile-nav-btn active" data-view="packs" type="button" aria-current="page">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.5 8.5h15v10h-15z"></path>
+            <path d="M7 8.5v-3h10v3"></path>
+            <path d="M4.5 12h15"></path>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Packs</span>
+      </button>
+      <button class="mobile-nav-btn" data-view="collections" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4.5" y="4.5" width="6" height="6" rx="1.3"></rect>
+            <rect x="13.5" y="4.5" width="6" height="6" rx="1.3"></rect>
+            <rect x="4.5" y="13.5" width="6" height="6" rx="1.3"></rect>
+            <rect x="13.5" y="13.5" width="6" height="6" rx="1.3"></rect>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Sets</span>
+      </button>
+      <button class="mobile-nav-btn" data-view="players" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 12.5a3.5 3.5 0 1 0 0-7a3.5 3.5 0 0 0 0 7z"></path>
+            <path d="M5.5 19a6.8 6.8 0 0 1 13 0"></path>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Players</span>
+      </button>
+      <button class="mobile-nav-btn" data-view="profile" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 4.5l5.8 2.3v4.5c0 4.1-2.3 6.7-5.8 8.2c-3.5-1.5-5.8-4.1-5.8-8.2V6.8z"></path>
+            <path d="M9.5 10.3h5"></path>
+            <path d="M9.5 13.7h5"></path>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Profile</span>
+      </button>
+      <button class="mobile-nav-btn" data-view="stats" type="button">
+        <span class="mobile-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 18.5h14"></path>
+            <path d="M7.5 16v-4.5"></path>
+            <path d="M12 16v-7"></path>
+            <path d="M16.5 16v-2.5"></path>
+          </svg>
+        </span>
+        <span class="mobile-nav-label">Stats</span>
+      </button>
+    </nav>
   </div>
 
   <div class="modal-backdrop" id="packModal" hidden>
@@ -259,6 +313,9 @@
           <h3>Pick your squad.</h3>
           <p class="pack-copy">Set your favorite team for profile flair and team-specific achievements. You can change this later on your profile.</p>
         </div>
+        <div class="modal-head-actions">
+          <button class="icon-btn modal-close-icon mobile-modal-close-icon" id="closeFavoriteTeamModalIcon" type="button" aria-label="Close favorite team picker">&times;</button>
+        </div>
       </div>
       <div class="team-picker-grid" id="favoriteTeamGrid"></div>
       <div class="team-picker-actions">
@@ -276,7 +333,10 @@
           <h3 id="profileShowcaseModalTitle">Choose a featured card</h3>
           <p class="pack-copy" id="profileShowcaseModalSubtitle">Pick a card to place in this showcase slot.</p>
         </div>
-        <button class="secondary-btn" id="closeProfileShowcaseModal" type="button">Close</button>
+        <div class="modal-head-actions">
+          <button class="secondary-btn profile-modal-close-btn" id="closeProfileShowcaseModal" type="button">Close</button>
+          <button class="icon-btn modal-close-icon mobile-modal-close-icon" id="closeProfileShowcaseModalIcon" type="button" aria-label="Close featured cards">&times;</button>
+        </div>
       </div>
       <div class="profile-editor-toolbar" id="profileShowcaseToolbar"></div>
       <div class="profile-editor-grid" id="profileShowcasePickerGrid"></div>
@@ -291,7 +351,10 @@
           <h3>Arrange highlighted badges</h3>
           <p class="pack-copy">Choose a badge slot, then pick another earned badge to replace it. Used badges will swap positions.</p>
         </div>
-        <button class="secondary-btn" id="closeProfileBadgeModal" type="button">Close</button>
+        <div class="modal-head-actions">
+          <button class="secondary-btn profile-modal-close-btn" id="closeProfileBadgeModal" type="button">Close</button>
+          <button class="icon-btn modal-close-icon mobile-modal-close-icon" id="closeProfileBadgeModalIcon" type="button" aria-label="Close badge picker">&times;</button>
+        </div>
       </div>
       <div class="profile-badge-slot-grid" id="profileBadgeSlotGrid"></div>
       <div class="profile-badge-picker-grid" id="profileBadgePickerGrid"></div>
@@ -306,7 +369,10 @@
           <h3>Collection milestones</h3>
           <p class="pack-copy">Track every milestone, reward tier, and unlock date.</p>
         </div>
-        <button class="secondary-btn" id="closeProfileAchievementsModal" type="button">Close</button>
+        <div class="modal-head-actions">
+          <button class="secondary-btn profile-modal-close-btn" id="closeProfileAchievementsModal" type="button">Close</button>
+          <button class="icon-btn modal-close-icon mobile-modal-close-icon" id="closeProfileAchievementsModalIcon" type="button" aria-label="Close achievements">&times;</button>
+        </div>
       </div>
       <div class="profile-achievements-summary" id="profileAchievementsSummary"></div>
       <div class="profile-achievements-toolbar" id="profileAchievementsToolbar"></div>
