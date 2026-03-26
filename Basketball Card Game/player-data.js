@@ -4761,7 +4761,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "33",
           "ability": 100,
           "personId": 76003,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Kareem-Abdul-Jabbar%20Lipofsky%20%28HQ%29%20%28cropped%29.jpg",
+          "image": "https://static.tvtropes.org/pmwiki/pub/images/833d4d9f1ddd284d92eaa55af1a25ccf.jpg",
           "imagePosition": "50% 12%",
           "imageScale": 1
         },
@@ -4769,11 +4769,11 @@ window.BASKETBALL_CARD_DATA = {
           "name": "Michael Jordan",
           "position": "G",
           "jersey": "23",
-          "ability": 100,
+          "ability": 101,
           "personId": 893,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Jordan%20by%20Lipofsky%2016577.jpg",
+          "image": "https://i.pinimg.com/originals/e8/7b/9d/e87b9d31e68010a0ccf61fbe3e321d61.jpg",
           "imagePosition": "50% 12%",
-          "imageScale": 1.07
+          "imageScale": 1
         },
         {
           "name": "Bill Russell",
@@ -4781,7 +4781,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "6",
           "ability": 99,
           "personId": 78049,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Bill%20russell%20dribbling.jpg",
+          "image": "https://people.com/thmb/kiSF5mhZCgCoEDKEybTOIdWw-Q8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(776x0:778x2)/Bill-Russell-celtics-6-81122-dfd4d53e999046a78ff28a94ae7d6b6d.jpg",
           "imagePosition": "50% 12%",
           "imageScale": 1
         },
@@ -4791,7 +4791,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "24",
           "ability": 99,
           "personId": 977,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Bryant%20about%20to%20dunk%202008.jpg",
+          "image": "https://cdng.europosters.eu/pod_public/750/175229.jpg",
           "imagePosition": "50% 12%",
           "imageScale": 1
         },
@@ -4801,7 +4801,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "33",
           "ability": 99,
           "personId": 1449,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Larry%20Bird%20Lipofsky%20%28high%20quality%29.jpg",
+          "image": "https://preview.redd.it/whos-the-modern-day-larry-bird-v0-a11ixvuypj8e1.jpeg?width=640&crop=smart&auto=webp&s=d6711b6cfbe1b586f91d3f13d5a720af63a8a0f5",
           "imagePosition": "48% 14%",
           "imageScale": 1.03
         },
@@ -4851,7 +4851,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "44",
           "ability": 98,
           "personId": 78497,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Jerry%20West%20Lakers%201972%20champions.jpg",
+          "image": "https://static01.nyt.com/images/2024/06/12/multimedia/12West-jwlp/12West-jwlp-articleLarge.jpg?quality=75&auto=webp&disable=upscale",
           "imagePosition": "50% 10%",
           "imageScale": 1.03
         },
@@ -4861,7 +4861,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "1",
           "ability": 98,
           "personId": 600015,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Oscar%20Robertson%20Bucks.jpeg",
+          "image": "https://dktix1rrcd7mv.cloudfront.net/media/images/misc/Blog%20other/Oscar-Robertson-Bucks.jpg",
           "imagePosition": "50% 12%",
           "imageScale": 1.02
         },
@@ -4871,7 +4871,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "34",
           "ability": 98,
           "personId": 406,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Shaquille%20O%27Neal.jpg",
+          "image": "https://www.shopdynastysports.com/cdn/shop/products/LakersShaquilleO_Neal-3974892.jpg?v=1597522784",
           "imagePosition": "50% 12%",
           "imageScale": 1.05
         },
@@ -4881,7 +4881,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "41",
           "ability": 97,
           "personId": 1717,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Dirk%20Nowitzki%20shooting%20February%202013.jpg",
+          "image": "https://assets-cms.thescore.com/uploads/image/file/65723/w640xh480_REU_2014922.jpg?ts=1408459960",
           "imagePosition": "52% 16%",
           "imageScale": 1.08
         },
@@ -4891,7 +4891,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "6",
           "ability": 97,
           "personId": 76681,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Julius%20Erving%20UMass.jpg",
+          "image": "https://cdn.artphotolimited.com/images/67ceea65865e9b3b9ef7de2b/1000x1000/julius-erving-dunks-during-game-7-of-1982-nba-playoffs.jpg",
           "imagePosition": "50% 12%",
           "imageScale": 1
         },
@@ -4901,7 +4901,7 @@ window.BASKETBALL_CARD_DATA = {
           "jersey": "34",
           "ability": 96,
           "personId": 787,
-          "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Barkley%20Lipofsky.jpg",
+          "image": "https://fanbuzz.com/wp-content/uploads/sites/5/2026/01/GettyImages-2219481128.jpg?w=1056",
           "imagePosition": "50% 12%",
           "imageScale": 1.02
         }

@@ -31,41 +31,41 @@ const HALL_OF_FAME_LOGO_URL = "https://www.hoophall.com/packages/bhof/themes/bho
 const BLACK_MATTER_PLAYERS = {
   "shai-gilgeous-alexander": {
     ability: 100,
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/OKC%20Thunder%20at%20Washington%20Wizards%20%2851815871018%29.jpg",
-    imagePosition: "center 16%",
-    imageScale: 1.03,
+    image: "https://cdn.britannica.com/66/263766-050-7878A695/Shai-Gilgeous-Alexander-handles-the-ball-during-the-second-half-against-the-Detroit-Pistons-October-30-2023.jpg",
+    imagePosition: "center",
+    imageScale: 1,
   },
   "luka-doncic": {
     ability: 99,
-    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/san-antonio-spurs-v-los-angeles-lakers-juan-ocampo.jpg",
+    image: "https://www.hawaiitribune-herald.com/wp-content/uploads/2026/03/web1_USATSI_28534255.jpg",
     imagePosition: "50% 16%",
-    imageScale: 1.08,
+    imageScale: 1,
   },
   "nikola-jokic": {
     ability: 99,
-    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/2/1-denver-nuggets-v-new-york-knicks-jesse-d-garrabrant.jpg",
-    imagePosition: "50% 18%",
-    imageScale: 1.1,
+    image: "https://milehighsports.com/wp-content/uploads/2025/09/USATSI_25891061-1-728x485.jpg",
+    imagePosition: "25% 0%",
+    imageScale: 1,
   },
   "victor-wembanyama": {
     ability: 99,
-    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/14-victor-wembanyama-michael-gonzales.jpg",
+    image: "https://s.france24.com/media/display/fe897c26-e058-11ef-ac34-005056a90284/w:980/Part-GTY-2196410003-1-1-0.jpg",
     imagePosition: "50% 14%",
-    imageScale: 1.08,
+    imageScale: 1,
   },
   "giannis-antetokounmpo": {
     ability: 99,
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Giannis%20Antetokounmpo%20%2851664127127%29%2001.jpg",
+    image: "https://preview.redd.it/does-giannis-play-like-an-actual-power-forward-or-is-he-v0-4ppm6s1yn19g1.jpeg?width=640&crop=smart&auto=webp&s=0c3fc41189145f99c7f1caff868d24bb6137642d",
     imagePosition: "center 12%",
-    imageScale: 1.04,
+    imageScale: 1,
   },
 };
 
 const FULL_ART_GLASS_OVERRIDES = {
   "anthony-edwards": {
-    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/1-utah-jazz-v-minnesota-timberwolves-david-sherman.jpg",
-    imagePosition: "50% 18%",
-    imageScale: 1.08,
+    image: "https://i.pinimg.com/736x/90/80/e6/9080e6f3eec1fe7b7104c3d363ccb9ff.jpg",
+    imagePosition: "top center",
+    imageScale: 1.4,
   },
   "joel-embiid": {
     image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/41-joel-embiid-jesse-d-garrabrant.jpg",
@@ -73,7 +73,7 @@ const FULL_ART_GLASS_OVERRIDES = {
     imageScale: 1.1,
   },
   "tyrese-maxey": {
-    image: "https://nbcsports.brightspotcdn.com/dims4/default/c9e427f/2147483647/strip/true/crop/5460x3071%2B0%2B0/resize/1440x810%21/quality/90/?url=https%3A%2F%2Fnbc-sports-production-nbc-sports.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fc0%2F4d%2Fedbc590347e8a50f7f8f2c54f320%2Fhttps-delivery-gettyimages.com%2Fdownloads%2F2150619532",
+    image: "https://assets-cms.thescore.com/uploads/image/file/539896/w640xh480_GettyImages-1244301997.jpg?ts=1667009268",
     imagePosition: "50% 18%",
     imageScale: 1.08,
   },
@@ -88,31 +88,36 @@ const FULL_ART_GLASS_OVERRIDES = {
     imageScale: 1.08,
   },
   "cade-cunningham": {
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/1%20cade%20cunningham%202024.jpg",
-    imagePosition: "50% 16%",
-    imageScale: 1.08,
+    image: "https://cdn.nba.com/manage/2026/02/GettyImages-2258574437-784x441.jpg",
+    imagePosition: "60% 16%",
+    imageScale: 1,
   },
   "jaylen-brown": {
-    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/37-jaylen-brown-brian-babineau.jpg",
+    image: "https://s.yimg.com/ny/api/res/1.2/X4jnJqxUFRODqpOg1vFp9g--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD04MDA7Y2Y9d2VicA--/https://s.yimg.com/os/creatr-uploaded-images/2026-03/5c0e9d70-1ceb-11f1-bf8f-3c692ed90533",
     imagePosition: "50% 18%",
-    imageScale: 1.08,
+    imageScale: 1,
   },
   "james-harden": {
-    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/10-james-harden-adam-pantozzi.jpg",
-    imagePosition: "50% 18%",
-    imageScale: 1.08,
+    image: "https://i.redd.it/l2dneojcukz61.jpg",
+    imagePosition: "30% 20%",
+    imageScale: 1,
   },
   "kyrie-irving": {
-    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/2-kyrie-irving-jeff-haynes.jpg",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR8v6AdndQyCP__Bwo5iye9QThsJWUwgW8Aw&s",
     imagePosition: "50% 18%",
     imageScale: 1.08,
   },
   "kevin-durant": {
-    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/1-kevin-durant-logan-riely.jpg",
+    image: "https://www.vmcdn.ca/f/files/shared/feeds/cp/2025/12/fff7a2335eb2836c5d0929680c88a54ce38dac722302b4c696f7d3d9ca085110.jpg;w=960",
     imagePosition: "50% 16%",
     imageScale: 1.08,
   },
-};
+  "kawhi-leonard":  {
+  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzk4SJ439D42nDCe762QTWWF4OEPxzfpwpVQ&s",
+  imagePosition: "center",
+  imageScale: 1,
+},
+}
 
 const packTypes = [
   {
@@ -470,7 +475,7 @@ const glassShowcaseCardIds = new Set(
   [...cardCatalog]
     .filter((card) => card.displayRarityId === "diamond" && card.rarityId !== "blackmatter" && card.rarityId !== "legends")
     .sort((left, right) => right.ability - left.ability || left.teamName.localeCompare(right.teamName) || left.name.localeCompare(right.name))
-    .slice(0, 10)
+    .slice(0, 11)
     .map((card) => card.id),
 );
 
