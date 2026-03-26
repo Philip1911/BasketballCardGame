@@ -1119,7 +1119,7 @@ window.BASKETBALL_CARD_DATA = {
           "personId": 203999,
           "position": "C",
           "jersey": "15",
-          "ability": 98,
+          "ability": 97,
           "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png"
         },
         {
@@ -2065,7 +2065,7 @@ window.BASKETBALL_CARD_DATA = {
           "personId": 1629029,
           "position": "F-G",
           "jersey": "77",
-          "ability": 99,
+          "ability": 97,
           "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png"
         },
         {
@@ -3186,7 +3186,7 @@ window.BASKETBALL_CARD_DATA = {
           "personId": 1628983,
           "position": "G",
           "jersey": "2",
-          "ability": 97,
+          "ability": 98,
           "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png"
         },
         {

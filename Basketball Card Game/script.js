@@ -18,106 +18,310 @@ const rarityTiers = [
   { id: "legends", label: "Legends", min: 0, max: 100, sellPrice: 400, color: "#f3d37f" },
 ];
 
-const visibleRarityOptions = [
-  { id: "silver", value: "silver", label: "Silver" },
-  { id: "gold", value: "gold", label: "Gold" },
-  { id: "diamond", value: "diamond", label: "Glass" },
-  { id: "blackmatter", value: "blackmatter", label: "Black Matter" },
-  { id: "legends", value: "legends", label: "Legends" },
+const baseVisibleRarityOptions = [
+  { id: "silver", value: "silver", label: "Silver", sortRank: 0 },
+  { id: "gold", value: "gold", label: "Gold", sortRank: 1 },
+  { id: "diamond", value: "diamond", label: "Glass", sortRank: 2 },
+  { id: "blackmatter", value: "blackmatter", label: "Black Matter", sortRank: 4 },
+  { id: "legends", value: "legends", label: "Legends", sortRank: 5 },
 ];
-const visibleRarityIds = new Set(visibleRarityOptions.map((tier) => tier.id));
+let visibleRarityOptions = [...baseVisibleRarityOptions];
+let visibleRarityIds = new Set(visibleRarityOptions.map((tier) => tier.id));
+const rarityTierById = Object.fromEntries(rarityTiers.map((tier) => [tier.id, tier]));
 
 const HALL_OF_FAME_LOGO_URL = "https://www.hoophall.com/packages/bhof/themes/bhof/dist/images/bhof_logo.svg";
-const BLACK_MATTER_PLAYERS = {
-  "shai-gilgeous-alexander": {
-    ability: 100,
-    image: "https://cdn.britannica.com/66/263766-050-7878A695/Shai-Gilgeous-Alexander-handles-the-ball-during-the-second-half-against-the-Detroit-Pistons-October-30-2023.jpg",
-    imagePosition: "center",
-    imageScale: 1,
-  },
-  "luka-doncic": {
-    ability: 99,
-    image: "https://www.hawaiitribune-herald.com/wp-content/uploads/2026/03/web1_USATSI_28534255.jpg",
-    imagePosition: "50% 16%",
-    imageScale: 1,
-  },
-  "nikola-jokic": {
-    ability: 99,
-    image: "https://milehighsports.com/wp-content/uploads/2025/09/USATSI_25891061-1-728x485.jpg",
-    imagePosition: "25% 0%",
-    imageScale: 1,
-  },
-  "victor-wembanyama": {
-    ability: 99,
-    image: "https://s.france24.com/media/display/fe897c26-e058-11ef-ac34-005056a90284/w:980/Part-GTY-2196410003-1-1-0.jpg",
-    imagePosition: "50% 14%",
-    imageScale: 1,
-  },
-  "giannis-antetokounmpo": {
-    ability: 99,
-    image: "https://preview.redd.it/does-giannis-play-like-an-actual-power-forward-or-is-he-v0-4ppm6s1yn19g1.jpeg?width=640&crop=smart&auto=webp&s=0c3fc41189145f99c7f1caff868d24bb6137642d",
-    imagePosition: "center 12%",
-    imageScale: 1,
-  },
-};
 
-const FULL_ART_GLASS_OVERRIDES = {
-  "anthony-edwards": {
-    image: "https://i.pinimg.com/736x/90/80/e6/9080e6f3eec1fe7b7104c3d363ccb9ff.jpg",
-    imagePosition: "top center",
-    imageScale: 1.4,
-  },
-  "joel-embiid": {
-    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/41-joel-embiid-jesse-d-garrabrant.jpg",
-    imagePosition: "50% 18%",
-    imageScale: 1.1,
-  },
-  "tyrese-maxey": {
-    image: "https://assets-cms.thescore.com/uploads/image/file/539896/w640xh480_GettyImages-1244301997.jpg?ts=1667009268",
-    imagePosition: "50% 18%",
-    imageScale: 1.08,
-  },
-  "jayson-tatum": {
-    image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/20-jayson-tatum-nathaniel-s-butler.jpg",
-    imagePosition: "50% 18%",
-    imageScale: 1.08,
-  },
-  "donovan-mitchell": {
-    image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/9-donovan-mitchell-david-liam-kyle.jpg",
-    imagePosition: "50% 18%",
-    imageScale: 1.08,
-  },
-  "cade-cunningham": {
-    image: "https://cdn.nba.com/manage/2026/02/GettyImages-2258574437-784x441.jpg",
-    imagePosition: "60% 16%",
-    imageScale: 1,
-  },
-  "jaylen-brown": {
-    image: "https://s.yimg.com/ny/api/res/1.2/X4jnJqxUFRODqpOg1vFp9g--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD04MDA7Y2Y9d2VicA--/https://s.yimg.com/os/creatr-uploaded-images/2026-03/5c0e9d70-1ceb-11f1-bf8f-3c692ed90533",
-    imagePosition: "50% 18%",
-    imageScale: 1,
-  },
-  "james-harden": {
-    image: "https://i.redd.it/l2dneojcukz61.jpg",
-    imagePosition: "30% 20%",
-    imageScale: 1,
-  },
-  "kyrie-irving": {
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR8v6AdndQyCP__Bwo5iye9QThsJWUwgW8Aw&s",
-    imagePosition: "50% 18%",
-    imageScale: 1.08,
-  },
-  "kevin-durant": {
-    image: "https://www.vmcdn.ca/f/files/shared/feeds/cp/2025/12/fff7a2335eb2836c5d0929680c88a54ce38dac722302b4c696f7d3d9ca085110.jpg;w=960",
-    imagePosition: "50% 16%",
-    imageScale: 1.08,
-  },
-  "kawhi-leonard":  {
-  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzk4SJ439D42nDCe762QTWWF4OEPxzfpwpVQ&s",
-  imagePosition: "center",
-  imageScale: 1,
-},
+function normalizeCuratedSpecialCardTheme(theme) {
+  if (!theme || (!theme.primary && !theme.secondary && !theme.text && !theme.subtext)) return null;
+  return {
+    primary: theme.primary || theme.secondary || "",
+    secondary: theme.secondary || theme.primary || "",
+    text: theme.text || "",
+    subtext: theme.subtext || "",
+  };
 }
+
+function normalizeCuratedSpecialCardBackdrop(backdrop) {
+  if (!backdrop || !backdrop.image) return null;
+  return {
+    image: backdrop.image,
+    position: backdrop.position || "center",
+    size: backdrop.size || "cover",
+    opacity: Math.max(0, Math.min(1, Number(backdrop.opacity ?? 1) || 1)),
+    blendMode: backdrop.blendMode || "normal",
+  };
+}
+
+function normalizeCuratedSpecialCardSetDefinition(definition) {
+  const players = (definition.players || []).map((player) => ({
+    ...player,
+    slug: slugify(player.slug || player.name || ""),
+    enabled: player.enabled !== false,
+    showRating: typeof player.showRating === "boolean" ? player.showRating : null,
+    theme: normalizeCuratedSpecialCardTheme(player.theme),
+    backdrop: normalizeCuratedSpecialCardBackdrop(player.backdrop),
+  }));
+  return {
+    ...definition,
+    enabled: definition.enabled !== false,
+    showRating: typeof definition.showRating === "boolean" ? definition.showRating : null,
+    rarityId: definition.rarityId || "diamond",
+    displayRarityId: definition.displayRarityId || definition.rarityId || "diamond",
+    cardIdSuffix: definition.cardIdSuffix || definition.id,
+    theme: normalizeCuratedSpecialCardTheme(definition.theme),
+    backdrop: normalizeCuratedSpecialCardBackdrop(definition.backdrop),
+    players,
+    playerMap: Object.fromEntries(players.map((player) => [player.slug, player])),
+  };
+}
+
+function getRarityTierById(rarityId) {
+  return rarityTierById[rarityId] || rarityTiers[0];
+}
+
+function getCuratedSpecialCardAbility(player, setDefinition, entry = {}) {
+  const explicitAbility = entry.ability ?? setDefinition.ability;
+  return Number(explicitAbility ?? player.ability);
+}
+
+function getCuratedSpecialCardTheme(setDefinition, entry = {}) {
+  return entry.theme || setDefinition.theme || null;
+}
+
+function getCuratedSpecialCardBackdrop(setDefinition, entry = {}) {
+  return entry.backdrop || setDefinition.backdrop || null;
+}
+
+function getCuratedSpecialCardShowRating(setDefinition, entry = {}) {
+  return typeof entry.showRating === "boolean"
+    ? entry.showRating
+    : typeof setDefinition.showRating === "boolean"
+      ? setDefinition.showRating
+      : null;
+}
+
+function getCuratedSpecialRarityId(setDefinition) {
+  return `special-${slugify(setDefinition.id || setDefinition.label || "special")}`;
+}
+
+function getCuratedSpecialCardPullWeight(setDefinition, entry = {}) {
+  const weight = Number(entry.pullWeight ?? setDefinition.pullWeight ?? 0.18);
+  return Number.isFinite(weight) && weight > 0 ? weight : 0.18;
+}
+
+function applyCuratedSpecialCardFlags(card, setDefinition) {
+  if (setDefinition.flag) {
+    card[setDefinition.flag] = true;
+  }
+  (setDefinition.flags || []).forEach((flag) => {
+    card[flag] = true;
+  });
+}
+
+// Copy one block in this array to create another curated special set.
+// Each player entry adds an extra full-art collectible variant on top of the normal base card.
+// `enabled: false` disables the whole set without deleting it.
+// `showRating` can force rating on or off; omit it to keep the rarity default.
+// `pullWeight` makes the special rarer than normal cards inside the same pack pool; base cards stay at weight 1.
+// `theme` can override the border/overlay palette: { primary, secondary, text?, subtext? }.
+// `backdrop` is optional and will sit behind the player art if provided.
+// Example backdrop: { image: "https://...", position: "center", size: "cover", opacity: 1, blendMode: "normal" }
+// Membership, rarity, and art overrides stay together so new sets are easy to duplicate and edit.
+const CURATED_SPECIAL_CARD_SET_DEFINITIONS = [
+  {
+    id: "glass-full-art",
+    label: "Glass Full Art",
+    enabled: true,
+    rarityId: "diamond",
+    displayRarityId: "diamond",
+    cardIdSuffix: "glass-full-art",
+    pullWeight: 0.18,
+    flag: "glassShowcase",
+    backdrop: null,
+    players: [
+      {
+        slug: "anthony-edwards",
+        image: "https://i.pinimg.com/736x/90/80/e6/9080e6f3eec1fe7b7104c3d363ccb9ff.jpg",
+        imagePosition: "top center",
+        imageScale: 1.4,
+      },
+      {
+        slug: "joel-embiid",
+        image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/41-joel-embiid-jesse-d-garrabrant.jpg",
+        imagePosition: "50% 18%",
+        imageScale: 1.1,
+      },
+      {
+        slug: "tyrese-maxey",
+        image: "https://assets-cms.thescore.com/uploads/image/file/539896/w640xh480_GettyImages-1244301997.jpg?ts=1667009268",
+        imagePosition: "50% 18%",
+        imageScale: 1.08,
+      },
+      {
+        slug: "jayson-tatum",
+        image: "https://imagerenderer.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/20-jayson-tatum-nathaniel-s-butler.jpg",
+        imagePosition: "50% 18%",
+        imageScale: 1.08,
+      },
+      {
+        slug: "donovan-mitchell",
+        image: "https://render.fineartamerica.com/images/images-profile-flow/400/images/artworkimages/mediumlarge/3/9-donovan-mitchell-david-liam-kyle.jpg",
+        imagePosition: "50% 18%",
+        imageScale: 1.08,
+      },
+      {
+        slug: "cade-cunningham",
+        image: "https://cdn.nba.com/manage/2026/02/GettyImages-2258574437-784x441.jpg",
+        imagePosition: "60% 16%",
+        imageScale: 1,
+      },
+      {
+        slug: "jaylen-brown",
+        image: "https://s.yimg.com/ny/api/res/1.2/X4jnJqxUFRODqpOg1vFp9g--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD04MDA7Y2Y9d2VicA--/https://s.yimg.com/os/creatr-uploaded-images/2026-03/5c0e9d70-1ceb-11f1-bf8f-3c692ed90533",
+        imagePosition: "50% 18%",
+        imageScale: 1,
+      },
+      {
+        slug: "james-harden",
+        image: "https://i.redd.it/l2dneojcukz61.jpg",
+        imagePosition: "30% 20%",
+        imageScale: 1,
+      },
+      {
+        slug: "kyrie-irving",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR8v6AdndQyCP__Bwo5iye9QThsJWUwgW8Aw&s",
+        imagePosition: "50% 18%",
+        imageScale: 1.08,
+      },
+      {
+        slug: "kevin-durant",
+        image: "https://www.vmcdn.ca/f/files/shared/feeds/cp/2025/12/fff7a2335eb2836c5d0929680c88a54ce38dac722302b4c696f7d3d9ca085110.jpg;w=960",
+        imagePosition: "50% 16%",
+        imageScale: 1.08,
+      },
+      {
+        slug: "kawhi-leonard",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzk4SJ439D42nDCe762QTWWF4OEPxzfpwpVQ&s",
+        imagePosition: "center",
+        imageScale: 1,
+      },
+    ],
+  },
+  {
+    id: "black-matter",
+    label: "Black Matter",
+    enabled: true,
+    rarityId: "blackmatter",
+    displayRarityId: "blackmatter",
+    cardIdSuffix: "black-matter",
+    pullWeight: 0.1,
+    backdrop: null,
+    players: [
+      {
+        slug: "shai-gilgeous-alexander",
+        ability: 100,
+        image: "https://cdn.britannica.com/66/263766-050-7878A695/Shai-Gilgeous-Alexander-handles-the-ball-during-the-second-half-against-the-Detroit-Pistons-October-30-2023.jpg",
+        imagePosition: "center",
+        imageScale: 1,
+      },
+      {
+        slug: "luka-doncic",
+        ability: 99,
+        image: "https://www.hawaiitribune-herald.com/wp-content/uploads/2026/03/web1_USATSI_28534255.jpg",
+        imagePosition: "50% 16%",
+        imageScale: 1,
+      },
+      {
+        slug: "nikola-jokic",
+        ability: 99,
+        image: "https://milehighsports.com/wp-content/uploads/2025/09/USATSI_25891061-1-728x485.jpg",
+        imagePosition: "25% 0%",
+        imageScale: 1,
+      },
+      {
+        slug: "victor-wembanyama",
+        ability: 99,
+        image: "https://s.france24.com/media/display/fe897c26-e058-11ef-ac34-005056a90284/w:980/Part-GTY-2196410003-1-1-0.jpg",
+        imagePosition: "50% 14%",
+        imageScale: 1,
+      },
+      {
+        slug: "giannis-antetokounmpo",
+        ability: 99,
+        image: "https://preview.redd.it/does-giannis-play-like-an-actual-power-forward-or-is-he-v0-4ppm6s1yn19g1.jpeg?width=640&crop=smart&auto=webp&s=0c3fc41189145f99c7f1caff868d24bb6137642d",
+        imagePosition: "center 12%",
+        imageScale: 1,
+      },
+    ],
+  },
+  {
+    id: "sharpshooter",
+    label: "Sharpshooter",
+    enabled: true,
+    rarityId: "sharpshooter",
+    displayRarityId: "sharpshooter",
+    cardIdSuffix: "sharpshooter",
+    backdrop: null,
+    players: [
+      {
+        slug: "isaiah-joe",
+        ability: 94,
+        image: "https://substackcdn.com/image/fetch/$s_!ZHK6!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Ff450bbd9-8f86-42ab-acd7-095b83877581_960x640.jpeg",
+        imagePosition: "center",
+        imageScale: 1,
+      },
+      {
+        slug: "stephen-curry",
+        ability: 99,
+        image: "https://res.cloudinary.com/usopc-prod/image/upload/v1713551250/TeamUSA%20Assets/Migration/Athlete%20Profiles/Stephen%20Curry%20997380/Curry_s_hero_997380.jpg",
+        imagePosition: "50% 16%",
+        imageScale: 1,
+      },
+      {
+        slug: "kon-knueppel",
+        ability: 93,
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBL2ckCNDDaICwEAH3SuBfxCadfcl7hT_Hyg&s",
+        imagePosition: "25% 0%",
+        imageScale: 1,
+      },
+      {
+        slug: "cam-spencer",
+        ability: 91,
+        image: "https://wp.clutchpoints.com/wp-content/uploads/2025/01/IMG_1180.jpeg",
+        imagePosition: "50% 14%",
+        imageScale: 1,
+      },
+      {
+        slug: "jared-mcCain",
+        ability: 91,
+        image: "https://heavy.com/wp-content/uploads/2026/02/GettyImages-2259848060-e1771031680812.jpg?quality=65&strip=all",
+        imagePosition: "40% 12%",
+        imageScale: 1,
+      },
+    ],
+  },
+];
+
+const curatedSpecialCardSets = CURATED_SPECIAL_CARD_SET_DEFINITIONS
+  .map(normalizeCuratedSpecialCardSetDefinition)
+  .filter((setDefinition) => setDefinition.enabled);
+
+const curatedSpecialRarityOptions = curatedSpecialCardSets.map((setDefinition, index) => {
+  const parentRarityId = setDefinition.displayRarityId === "mythic" ? "diamond" : setDefinition.displayRarityId;
+  const parentRarity = baseVisibleRarityOptions.find((tier) => tier.id === parentRarityId);
+  return {
+    id: getCuratedSpecialRarityId(setDefinition),
+    value: getCuratedSpecialRarityId(setDefinition),
+    label: setDefinition.label,
+    parentRarityId,
+    sortRank: (parentRarity?.sortRank ?? 2) + 0.5 + (index * 0.01),
+    isSpecialRarity: true,
+  };
+});
+
+visibleRarityOptions = [...baseVisibleRarityOptions, ...curatedSpecialRarityOptions]
+  .sort((left, right) => (left.sortRank ?? 0) - (right.sortRank ?? 0) || left.label.localeCompare(right.label));
+visibleRarityIds = new Set(visibleRarityOptions.map((tier) => tier.id));
 
 const packTypes = [
   {
@@ -334,12 +538,8 @@ function getTeamArtGradientEnd(color) {
 }
 
 function getRarity(ability, teamId = "") {
-  const playerSlug = arguments[2] ? slugify(arguments[2]) : "";
   if (teamId === "hall-of-fame") {
     return rarityTiers.find((tier) => tier.id === "legends") || rarityTiers[0];
-  }
-  if (playerSlug && BLACK_MATTER_PLAYERS[playerSlug]) {
-    return rarityTiers.find((tier) => tier.id === "blackmatter") || rarityTiers[0];
   }
   return rarityTiers.find((tier) => ability >= tier.min && ability <= tier.max) || rarityTiers[0];
 }
@@ -432,19 +632,19 @@ const collectionGroups = [
 
 const collectionGroupById = Object.fromEntries(collectionGroups.map((group) => [group.id, group]));
 
-const cardCatalog = teamSets.flatMap((team) => team.players.map((player) => {
-  const playerSlug = slugify(player.name);
-  const blackMatterOverride = BLACK_MATTER_PLAYERS[playerSlug] || null;
-  const fullArtGlassOverride = FULL_ART_GLASS_OVERRIDES[playerSlug] || null;
-  const hiddenAbility = Number(blackMatterOverride?.ability || player.ability);
-  const rarity = getRarity(hiddenAbility, team.id, player.name);
-  const visualRarity = getVisualRarity(rarity);
-  const visualRarityColor = visualRarity.id === "diamond"
-    ? getGlassDisplayColor(team.colors.primary)
-    : visualRarity.color;
+function buildCatalogCard(team, player, options = {}) {
+  const ability = Number(options.ability ?? player.ability);
+  const rarity = options.rarity || getRarity(ability, team.id);
+  const displayRarity = options.displayRarity || getVisualRarity(rarity);
+  const specialRarityLabel = options.specialRarityLabel || options.specialSetLabel || "";
   const displayTeamName = team.id === "hall-of-fame" ? "Hall of Fame" : team.name;
-  return {
-    id: slugify(`${team.id}-${player.personId}-${player.name}`),
+  const visualRarityColor = displayRarity.id === "diamond"
+    ? getGlassDisplayColor(team.colors.primary)
+    : displayRarity.color;
+  const baseCardId = options.baseCardId || slugify(`${team.id}-${player.personId}-${player.name}`);
+  const card = {
+    id: options.id || baseCardId,
+    baseCardId,
     teamId: team.id,
     teamName: displayTeamName,
     teamShortName: team.id === "hall-of-fame" ? displayTeamName : team.shortName,
@@ -453,35 +653,96 @@ const cardCatalog = teamSets.flatMap((team) => team.players.map((player) => {
     conference: team.conference,
     division: team.division,
     name: player.name,
+    playerSlug: slugify(player.name),
     personId: player.personId,
-    image: blackMatterOverride?.image || fullArtGlassOverride?.image || player.image,
-    imagePosition: blackMatterOverride?.imagePosition || fullArtGlassOverride?.imagePosition || player.imagePosition || "",
-    imageScale: Number(blackMatterOverride?.imageScale || fullArtGlassOverride?.imageScale || player.imageScale || 1),
+    image: options.image || player.image,
+    imagePosition: options.imagePosition ?? player.imagePosition ?? "",
+    imageScale: Number(options.imageScale ?? player.imageScale ?? 1),
     position: player.position || "G-F",
     jersey: player.jersey || "--",
-    ability: hiddenAbility,
-    visibleAbility: rarity.id === "legends" || rarity.id === "blackmatter" ? null : hiddenAbility,
+    ability,
+    visibleAbility: rarity.id === "legends" || rarity.id === "blackmatter" ? null : ability,
     rarityId: rarity.id,
-    rarityLabel: rarity.label,
+    rarityLabel: specialRarityLabel || rarity.label,
     rarityColor: rarity.color,
-    displayRarityId: visualRarity.id,
-    displayRarityLabel: visualRarity.label,
+    displayRarityId: displayRarity.id,
+    displayRarityLabel: specialRarityLabel || displayRarity.label,
     displayRarityColor: visualRarityColor,
-    sellPrice: rarity.sellPrice,
+    sellPrice: Number(options.sellPrice ?? rarity.sellPrice),
+    specialSetId: options.specialSetId || "",
+    specialSetLabel: options.specialSetLabel || "",
+    specialRarityId: options.specialRarityId || "",
+    specialRarityLabel,
+    isSpecialCard: options.isSpecialCard === true,
+    fullArt: options.fullArt === true,
+    showRating: typeof options.showRating === "boolean" ? options.showRating : null,
+    pullWeight: Math.max(0.001, Number(options.pullWeight ?? 1) || 1),
+    themePrimary: options.themePrimary || "",
+    themeSecondary: options.themeSecondary || "",
+    themeText: options.themeText || "",
+    themeSubtext: options.themeSubtext || "",
+    backdropImage: options.backdropImage || "",
+    backdropPosition: options.backdropPosition || "center",
+    backdropSize: options.backdropSize || "cover",
+    backdropOpacity: Math.max(0, Math.min(1, Number(options.backdropOpacity ?? 1) || 1)),
+    backdropBlendMode: options.backdropBlendMode || "normal",
   };
+  if (options.setDefinition) {
+    applyCuratedSpecialCardFlags(card, options.setDefinition);
+  }
+  return card;
+}
+
+function buildCuratedSpecialCards(team, player, baseCardId) {
+  const playerSlug = slugify(player.name);
+  return curatedSpecialCardSets.flatMap((setDefinition) => {
+    const entry = setDefinition.playerMap[playerSlug];
+    if (!entry || entry.enabled === false) return [];
+    const rarity = getRarityTierById(entry.rarityId || setDefinition.rarityId);
+    const displayRarity = getRarityTierById(entry.displayRarityId || setDefinition.displayRarityId || rarity.id);
+    const specialRarityId = getCuratedSpecialRarityId(setDefinition);
+    const theme = getCuratedSpecialCardTheme(setDefinition, entry);
+    const backdrop = getCuratedSpecialCardBackdrop(setDefinition, entry);
+    return [buildCatalogCard(team, player, {
+      id: `${baseCardId}--${setDefinition.cardIdSuffix}`,
+      baseCardId,
+      ability: getCuratedSpecialCardAbility(player, setDefinition, entry),
+      rarity,
+      displayRarity,
+      image: entry.image || player.image,
+      imagePosition: entry.imagePosition ?? player.imagePosition ?? "",
+      imageScale: Number(entry.imageScale ?? player.imageScale ?? 1),
+      sellPrice: entry.sellPrice ?? setDefinition.sellPrice ?? rarity.sellPrice,
+      specialSetId: setDefinition.id,
+      specialSetLabel: setDefinition.label,
+      specialRarityId,
+      specialRarityLabel: setDefinition.label,
+      isSpecialCard: true,
+      fullArt: true,
+      showRating: getCuratedSpecialCardShowRating(setDefinition, entry),
+      pullWeight: getCuratedSpecialCardPullWeight(setDefinition, entry),
+      themePrimary: theme?.primary || "",
+      themeSecondary: theme?.secondary || "",
+      themeText: theme?.text || "",
+      themeSubtext: theme?.subtext || "",
+      backdropImage: backdrop?.image || "",
+      backdropPosition: backdrop?.position || "center",
+      backdropSize: backdrop?.size || "cover",
+      backdropOpacity: backdrop?.opacity ?? 1,
+      backdropBlendMode: backdrop?.blendMode || "normal",
+      setDefinition,
+    })];
+  });
+}
+
+const cardCatalog = teamSets.flatMap((team) => team.players.flatMap((player) => {
+  const baseCardId = slugify(`${team.id}-${player.personId}-${player.name}`);
+  const baseCard = buildCatalogCard(team, player, {
+    id: baseCardId,
+    baseCardId,
+  });
+  return [baseCard, ...buildCuratedSpecialCards(team, player, baseCardId)];
 }));
-
-const glassShowcaseCardIds = new Set(
-  [...cardCatalog]
-    .filter((card) => card.displayRarityId === "diamond" && card.rarityId !== "blackmatter" && card.rarityId !== "legends")
-    .sort((left, right) => right.ability - left.ability || left.teamName.localeCompare(right.teamName) || left.name.localeCompare(right.name))
-    .slice(0, 11)
-    .map((card) => card.id),
-);
-
-cardCatalog.forEach((card) => {
-  card.glassShowcase = glassShowcaseCardIds.has(card.id);
-});
 
 const teamById = Object.fromEntries(teamSets.map((team) => [team.id, team]));
 const cardsById = Object.fromEntries(cardCatalog.map((card) => [card.id, card]));
@@ -492,6 +753,30 @@ const cardsByConference = Object.fromEntries(collectionGroups.map((group) => [
   group.id,
   teamSets.filter((team) => team.conference === group.id).flatMap((team) => cardsByTeam[team.id]),
 ]));
+
+function computeSetRewardFromCards(teamId) {
+  const cards = cardsByTeam[teamId] || [];
+  const sellTotal = cards.reduce((sum, card) => sum + Number(card.sellPrice || 0), 0);
+  if (teamId === "hall-of-fame") return roundRewardAmount(sellTotal * 0.32 + cards.length * 24);
+  return roundRewardAmount(sellTotal * 0.4 + cards.length * 20);
+}
+
+function computeCollectionRewardFromCards(groupId) {
+  const teams = teamSets.filter((team) => team.conference === groupId);
+  const setRewardTotal = teams.reduce((sum, team) => sum + computeSetRewardFromCards(team.id), 0);
+  if (groupId === "Special") {
+    return roundRewardAmount(setRewardTotal * 0.46 + 240);
+  }
+  return roundRewardAmount(setRewardTotal * 0.22 + 180);
+}
+
+teamSets.forEach((team) => {
+  team.reward = computeSetRewardFromCards(team.id);
+});
+
+collectionGroups.forEach((group) => {
+  group.reward = computeCollectionRewardFromCards(group.id);
+});
 
 const PROFILE_SHOWCASE_LIMIT = 3;
 const PROFILE_HIGHLIGHTED_BADGE_LIMIT = 6;
@@ -1801,10 +2086,24 @@ function getPoolForMinimumAbility(minAbility, sourcePool = cardCatalog) {
   return filtered.length ? filtered : sourcePool;
 }
 
+function getCardPullWeight(card) {
+  const weight = Number(card?.pullWeight ?? 1);
+  return Number.isFinite(weight) && weight > 0 ? weight : 1;
+}
+
 function pickCardFromPool(pool, excludedIds = new Set()) {
   const available = pool.filter((card) => !excludedIds.has(card.id));
   if (!available.length) return null;
-  return available[Math.floor(Math.random() * available.length)];
+  const totalWeight = available.reduce((sum, card) => sum + getCardPullWeight(card), 0);
+  if (!(totalWeight > 0)) {
+    return available[Math.floor(Math.random() * available.length)];
+  }
+  let cursor = Math.random() * totalWeight;
+  for (const card of available) {
+    cursor -= getCardPullWeight(card);
+    if (cursor <= 0) return card;
+  }
+  return available[available.length - 1];
 }
 
 function drawRandomCard(excludedIds = new Set(), sourcePool = cardCatalog) {
@@ -4402,6 +4701,15 @@ function buildPlayerArt(card, options = {}) {
   const imageStyles = [];
   if (card.imagePosition) imageStyles.push(`object-position:${escapeHtml(card.imagePosition)}`);
   if (card.imageScale && Math.abs(card.imageScale - 1) > 0.001) imageStyles.push(`transform:scale(${card.imageScale.toFixed(3)})`);
+  const backdropMarkup = card.backdropImage
+    ? `
+        <div
+          class="player-art-backdrop"
+          aria-hidden="true"
+          style="--special-backdrop-image:url('${escapeHtml(card.backdropImage)}'); --special-backdrop-position:${escapeHtml(card.backdropPosition || "center")}; --special-backdrop-size:${escapeHtml(card.backdropSize || "cover")}; --special-backdrop-opacity:${Number(card.backdropOpacity ?? 1)}; --special-backdrop-blend:${escapeHtml(card.backdropBlendMode || "normal")};"
+        ></div>
+      `
+    : "";
   return `
     <div
       class="player-art"
@@ -4412,6 +4720,7 @@ function buildPlayerArt(card, options = {}) {
       ${overlayBottomEnd ? `<div class="player-art-overlay bottom-end">${overlayBottomEnd}</div>` : ""}
       <div class="player-art-core">
         <div class="player-art-bg"></div>
+        ${backdropMarkup}
         <div class="player-art-fallback" aria-hidden="true"></div>
         <img
           data-player-image
@@ -4611,27 +4920,33 @@ function buildCardFace(result, options = {}) {
   const visualRarityLabel = result.displayRarityLabel || result.rarityLabel;
   const visualRarityColor = result.displayRarityColor || result.rarityColor;
   const isBlackMatter = result.rarityId === "blackmatter";
+  const isCuratedSpecialFullArt = result.isSpecialCard === true;
+  const themePrimary = result.themePrimary || result.teamColors.primary;
+  const themeSecondary = result.themeSecondary || result.teamColors.secondary;
+  const hasSpecialTheme = Boolean(result.themePrimary || result.themeSecondary);
   const rarityColor = isMissing
     ? "#d3dbe6"
     : isBlackMatter
       ? "#040609"
-      : normalizeColor(visualRarityColor);
+      : normalizeColor(hasSpecialTheme ? themePrimary : visualRarityColor);
   const rarityTint = isMissing
     ? "rgba(208, 216, 228, 0.08)"
     : isBlackMatter
       ? "rgba(8, 10, 15, 0.72)"
-      : withAlpha(visualRarityColor, 0.22);
+      : withAlpha(hasSpecialTheme ? themePrimary : visualRarityColor, 0.22);
   const rarityGlow = isMissing
     ? "rgba(214, 222, 234, 0.18)"
     : isBlackMatter
       ? "rgba(232, 238, 255, 0.22)"
-      : withAlpha(visualRarityColor, 0.32);
+      : withAlpha(hasSpecialTheme ? themeSecondary || themePrimary : visualRarityColor, 0.32);
   const cardPrice = formatMoney(collectionMode ? result.sellPrice : result.isNew ? result.sellPrice : result.saleValue);
   const positionLabel = getPrimaryPosition(result.position);
-  const cardThemeSource = visualRarityId === "diamond"
-    ? mixColor(result.teamColors.primary, "#eff8ff", 0.2)
-    : visualRarityColor;
-  const cardTheme = isBlackMatter
+  const cardThemeSource = hasSpecialTheme
+    ? mixColor(themePrimary, themeSecondary || themePrimary, 0.34)
+    : visualRarityId === "diamond"
+      ? mixColor(themePrimary, "#eff8ff", 0.2)
+      : visualRarityColor;
+  const cardThemeBase = isBlackMatter
     ? {
         text: "#f4f8ff",
         subtext: "rgba(224, 232, 248, 0.82)",
@@ -4650,19 +4965,25 @@ function buildCardFace(result, options = {}) {
           badgeBorder: "rgba(230, 236, 245, 0.14)",
         }
       : getCardTheme(cardThemeSource);
+  const cardTheme = {
+    ...cardThemeBase,
+    text: result.themeText || cardThemeBase.text,
+    subtext: result.themeSubtext || cardThemeBase.subtext,
+  };
   const raritySurfaceClass = `rarity-card-${visualRarityId}`;
   const isGlassShowcase = result.glassShowcase === true && visualRarityId === "diamond" && result.rarityId !== "blackmatter" && result.rarityId !== "legends";
-  const variantCardClass = result.rarityId === "legends"
-    ? "legend-card"
-    : result.rarityId === "blackmatter"
-      ? "blackmatter-card"
-      : isGlassShowcase
-        ? "glass-showcase-card"
-        : "";
+  const variantCardClasses = [];
+  if (isCuratedSpecialFullArt) variantCardClasses.push("curated-special-card");
+  if (result.rarityId === "legends") variantCardClasses.push("legend-card");
+  else if (result.rarityId === "blackmatter") variantCardClasses.push("blackmatter-card");
+  else if (isGlassShowcase) variantCardClasses.push("glass-showcase-card");
+  if (result.specialSetId) variantCardClasses.push(`special-set-${slugify(result.specialSetLabel || result.specialSetId)}`);
+  const variantCardClass = variantCardClasses.join(" ");
   const shellGlowOpacity = getRarityShellGlowOpacity(visualRarityId, {
     missing: isMissing,
   });
-  const shouldShowRating = result.visibleAbility != null;
+  const explicitShowRating = typeof result.showRating === "boolean" ? result.showRating : null;
+  const shouldShowRating = explicitShowRating === null ? result.visibleAbility != null : explicitShowRating;
   const ratingValue = isMissing ? "?" : escapeHtml(String(result.visibleAbility ?? result.ability));
   const ratingBadge = shouldShowRating ? `
     <div class="rating-badge">
@@ -4673,14 +4994,16 @@ function buildCardFace(result, options = {}) {
 
   const rarityFrameLabel = isMissing
     ? "Locked"
-    : result.rarityId === "legends"
+    : result.specialRarityLabel
+      ? result.specialRarityLabel
+      : result.rarityId === "legends"
       ? "Legend"
       : visualRarityLabel;
   const faceMarkup = `
     <div
       class="${collectionMode ? "collection-card" : "reveal-card"} ${inlineFace ? "" : tiltEnabled ? "tilt-card" : ""} ${raritySurfaceClass} ${variantCardClass} ${isMissing ? "missing" : ""}"
       ${previewable ? `data-preview-card-id="${escapeHtml(result.id)}" data-preview-collection-mode="${collectionMode ? "true" : "false"}" data-preview-owned="${owned ? "true" : "false"}"` : ""}
-      style="--team-primary:${escapeHtml(result.teamColors.primary)}; --team-secondary:${escapeHtml(result.teamColors.secondary)}; --team-art-end:${getTeamArtGradientEnd(result.teamColors.primary)}; --rarity-line:${rarityColor}; --rarity-tint:${rarityTint}; --rarity-glow:${rarityGlow}; --card-text:${cardTheme.text}; --card-subtext:${cardTheme.subtext}; --card-panel:${cardTheme.panel}; --card-panel-border:${cardTheme.panelBorder}; --card-badge:${cardTheme.badge}; --card-badge-border:${cardTheme.badgeBorder}; --card-pattern-text:${isMissing ? "rgba(224, 230, 238, 0.9)" : isBlackMatter ? "rgba(247, 250, 255, 0.94)" : withAlpha(cardTheme.text, 0.8)}; --card-pattern-bg:${isMissing ? "rgba(214, 221, 231, 0.06)" : isBlackMatter ? "rgba(255, 255, 255, 0.04)" : withAlpha(visualRarityColor, 0.18)}; --card-pattern-line:${isMissing ? "rgba(208, 216, 228, 0.2)" : isBlackMatter ? "rgba(255, 255, 255, 0.12)" : withAlpha(visualRarityColor, 0.34)};"
+      style="--team-primary:${escapeHtml(themePrimary)}; --team-secondary:${escapeHtml(themeSecondary)}; --team-art-end:${getTeamArtGradientEnd(themePrimary)}; --rarity-line:${rarityColor}; --rarity-tint:${rarityTint}; --rarity-glow:${rarityGlow}; --card-text:${cardTheme.text}; --card-subtext:${cardTheme.subtext}; --card-panel:${cardTheme.panel}; --card-panel-border:${cardTheme.panelBorder}; --card-badge:${cardTheme.badge}; --card-badge-border:${cardTheme.badgeBorder}; --card-pattern-text:${isMissing ? "rgba(224, 230, 238, 0.9)" : isBlackMatter ? "rgba(247, 250, 255, 0.94)" : withAlpha(cardTheme.text, 0.8)}; --card-pattern-bg:${isMissing ? "rgba(214, 221, 231, 0.06)" : isBlackMatter ? "rgba(255, 255, 255, 0.04)" : withAlpha(hasSpecialTheme ? themeSecondary || themePrimary : visualRarityColor, 0.18)}; --card-pattern-line:${isMissing ? "rgba(208, 216, 228, 0.2)" : isBlackMatter ? "rgba(255, 255, 255, 0.12)" : withAlpha(hasSpecialTheme ? themePrimary : visualRarityColor, 0.34)};"
     >
       ${buildRarityFrame(rarityFrameLabel)}
       ${buildPlayerArt(result, {
@@ -5258,11 +5581,13 @@ function normalizeSearchText(value) {
 
 function getRarityRank(rarityId) {
   const normalized = rarityId === "mythic" ? "diamond" : rarityId;
-  return visibleRarityOptions.findIndex((tier) => tier.id === normalized);
+  const option = visibleRarityOptions.find((tier) => tier.id === normalized);
+  return option ? Number(option.sortRank ?? 0) : -1;
 }
 
 function getFilterableRarityId(card) {
   if (!card) return "silver";
+  if (card.specialRarityId) return card.specialRarityId;
   return card.displayRarityId || (card.rarityId === "mythic" ? "diamond" : card.rarityId);
 }
 
@@ -6915,7 +7240,9 @@ function renderStats() {
       if (!card || getFilterableRarityId(card) !== tier.id) return sum;
       return sum + Number(count || 0);
     }, 0),
-    meta: tier.id === "legends"
+    meta: tier.isSpecialRarity
+      ? `${tier.label} special pulls`
+      : tier.id === "legends"
       ? "Hall of Fame exclusives"
       : tier.id === "blackmatter"
         ? "The five apex pulls"

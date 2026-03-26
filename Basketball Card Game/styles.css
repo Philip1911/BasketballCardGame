@@ -3595,7 +3595,8 @@ img {
 
 .legend-card .player-art,
 .blackmatter-card .player-art,
-.glass-showcase-card .player-art {
+.glass-showcase-card .player-art,
+.curated-special-card .player-art {
   aspect-ratio: auto;
   height: 100%;
   min-height: 0;
@@ -3611,7 +3612,9 @@ img {
 .collection-card.blackmatter-card,
 .reveal-card.blackmatter-card,
 .collection-card.glass-showcase-card,
-.reveal-card.glass-showcase-card {
+.reveal-card.glass-showcase-card,
+.collection-card.curated-special-card,
+.reveal-card.curated-special-card {
   --legend-frame-inset: 0.54rem;
   display: block;
   grid-template-rows: none;
@@ -3636,7 +3639,9 @@ img {
 .collection-card.blackmatter-card .player-art,
 .reveal-card.blackmatter-card .player-art,
 .collection-card.glass-showcase-card .player-art,
-.reveal-card.glass-showcase-card .player-art {
+.reveal-card.glass-showcase-card .player-art,
+.collection-card.curated-special-card .player-art,
+.reveal-card.curated-special-card .player-art {
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -3654,6 +3659,19 @@ img {
       color-mix(in srgb, var(--team-primary, #6e85b7) 42%, var(--team-secondary, #9ab8ff) 18%, rgba(8, 14, 26, 0.18)) 46%,
       var(--team-art-end, color-mix(in srgb, var(--team-primary, #6e85b7) 68%, rgba(12, 19, 34, 0.9))) 100%
     );
+  pointer-events: none;
+}
+
+.player-art-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: var(--special-backdrop-image);
+  background-position: var(--special-backdrop-position, center);
+  background-size: var(--special-backdrop-size, cover);
+  background-repeat: no-repeat;
+  opacity: var(--special-backdrop-opacity, 1);
+  mix-blend-mode: var(--special-backdrop-blend, normal);
   pointer-events: none;
 }
 
@@ -3797,7 +3815,8 @@ img {
 }
 
 .team-detail-shell .collection-card.missing,
-.team-grid.players-mode .collection-card.missing {
+.team-grid.players-mode .collection-card.missing,
+.preview-card-shell .collection-card.missing {
   border-color: rgba(199, 210, 228, 0.24);
   background:
     linear-gradient(180deg, rgba(176, 185, 203, 0.26) 0%, rgba(118, 129, 150, 0.24) 52%, rgba(74, 83, 99, 0.28) 100%);
@@ -3807,7 +3826,8 @@ img {
 }
 
 .team-detail-shell .collection-card.missing .player-art,
-.team-grid.players-mode .collection-card.missing .player-art {
+.team-grid.players-mode .collection-card.missing .player-art,
+.preview-card-shell .collection-card.missing .player-art {
   background:
     radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.18) 0%, transparent 34%),
     linear-gradient(180deg, rgba(211, 218, 230, 0.26) 0%, transparent 28%),
@@ -3815,25 +3835,29 @@ img {
 }
 
 .team-detail-shell .collection-card.missing .player-art::before,
-.team-grid.players-mode .collection-card.missing .player-art::before {
+.team-grid.players-mode .collection-card.missing .player-art::before,
+.preview-card-shell .collection-card.missing .player-art::before {
   background: linear-gradient(180deg, transparent, rgba(17, 22, 32, 0.72));
 }
 
 .team-detail-shell .collection-card.missing .player-art-fallback,
-.team-grid.players-mode .collection-card.missing .player-art-fallback {
+.team-grid.players-mode .collection-card.missing .player-art-fallback,
+.preview-card-shell .collection-card.missing .player-art-fallback {
   background:
     radial-gradient(circle at 50% 28%, rgba(244, 248, 255, 0.18) 0%, transparent 18%),
     linear-gradient(145deg, rgba(174, 182, 196, 0.82) 0%, rgba(121, 130, 147, 0.92) 100%);
 }
 
 .team-detail-shell .collection-card.missing .card-body,
-.team-grid.players-mode .collection-card.missing .card-body {
+.team-grid.players-mode .collection-card.missing .card-body,
+.preview-card-shell .collection-card.missing .card-body {
   background: rgba(207, 214, 226, 0.34);
   border-color: rgba(255, 255, 255, 0.22);
 }
 
 .team-detail-shell .collection-card.legend-card.missing .card-body,
-.team-grid.players-mode .collection-card.legend-card.missing .card-body {
+.team-grid.players-mode .collection-card.legend-card.missing .card-body,
+.preview-card-shell .collection-card.legend-card.missing .card-body {
   background:
     linear-gradient(180deg, rgba(244, 246, 250, 0) 0%, rgba(231, 235, 241, 0.08) 24%, rgba(220, 226, 235, 0.58) 60%, rgba(210, 216, 226, 0.9) 84%, rgba(201, 208, 220, 0.98) 100%);
   border: 0;
@@ -3848,19 +3872,26 @@ img {
 .team-grid.players-mode .collection-card.missing .player-name,
 .team-grid.players-mode .collection-card.missing .card-team-name,
 .team-grid.players-mode .collection-card.missing .card-detail-row,
-.team-grid.players-mode .collection-card.missing .detail-pill-label {
+.team-grid.players-mode .collection-card.missing .detail-pill-label,
+.preview-card-shell .collection-card.missing .player-name,
+.preview-card-shell .collection-card.missing .card-team-name,
+.preview-card-shell .collection-card.missing .card-detail-row,
+.preview-card-shell .collection-card.missing .detail-pill-label {
   color: rgba(21, 31, 49, 0.82);
 }
 
 .team-detail-shell .collection-card.missing .card-team-mark,
 .team-detail-shell .collection-card.missing .card-team-logo,
 .team-grid.players-mode .collection-card.missing .card-team-mark,
-.team-grid.players-mode .collection-card.missing .card-team-logo {
+.team-grid.players-mode .collection-card.missing .card-team-logo,
+.preview-card-shell .collection-card.missing .card-team-mark,
+.preview-card-shell .collection-card.missing .card-team-logo {
   filter: grayscale(1) saturate(0.1) brightness(0.92);
 }
 
 .team-detail-shell .collection-card.missing::after,
-.team-grid.players-mode .collection-card.missing::after {
+.team-grid.players-mode .collection-card.missing::after,
+.preview-card-shell .collection-card.missing::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -3872,7 +3903,8 @@ img {
 }
 
 .team-detail-shell .collection-card.missing .status-pill.duplicate,
-.team-grid.players-mode .collection-card.missing .status-pill.duplicate {
+.team-grid.players-mode .collection-card.missing .status-pill.duplicate,
+.preview-card-shell .collection-card.missing .status-pill.duplicate {
   background: rgba(35, 44, 60, 0.82);
   border-color: rgba(255, 255, 255, 0.14);
   color: #eef4ff;
@@ -4057,6 +4089,157 @@ img {
   background-size: 100% 100%, 220% 100%;
   background-position: 50% 0%, -26% 50%;
   mix-blend-mode: screen;
+}
+
+.curated-special-card {
+  position: relative;
+  display: block;
+  padding: var(--legend-frame-inset, 0.54rem);
+  border-radius: 24px;
+  overflow: hidden;
+  contain: paint;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.curated-special-card:not(.missing) {
+  border: 1px solid color-mix(in srgb, var(--rarity-line, #8fc8ff) 50%, rgba(255, 255, 255, 0.22));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--team-primary, #6e85b7) 18%, rgba(246, 250, 255, 0.64)) 0%, color-mix(in srgb, var(--team-secondary, #9ab8ff) 16%, rgba(19, 32, 54, 0.18)) 52%, color-mix(in srgb, var(--team-primary, #6e85b7) 18%, rgba(10, 16, 29, 0.42)) 100%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--rarity-line, #8fc8ff) 18%, rgba(255, 255, 255, 0.16)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 16px 34px rgba(7, 12, 22, 0.22),
+    0 0 28px color-mix(in srgb, var(--rarity-glow, rgba(143, 200, 255, 0.24)) 34%, transparent);
+}
+
+.curated-special-card:not(.missing)::before {
+  content: "";
+  position: absolute;
+  inset: var(--legend-frame-inset, 0.54rem);
+  border-radius: 16px;
+  clip-path: inset(0 round 16px);
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(circle at top center, rgba(255, 255, 255, 0.18) 0%, transparent 28%),
+    linear-gradient(120deg, transparent 18%, rgba(255, 255, 255, 0.08) 38%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.08) 62%, transparent 82%);
+  background-size: 100% 100%, 220% 100%;
+  background-position: 50% 0%, -28% 50%;
+  mix-blend-mode: screen;
+  opacity: 0.42;
+  animation: mythic-surface-drift 15.5s ease-in-out infinite;
+}
+
+.curated-special-card .card-body {
+  position: absolute;
+  inset: var(--legend-frame-inset, 0.54rem);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.16rem;
+  padding: 1.14rem 0.92rem 0.9rem;
+  border-radius: 16px;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(245, 249, 255, 0.04) 20%, color-mix(in srgb, var(--team-primary, #6e85b7) 10%, rgba(20, 34, 58, 0.18)) 44%, color-mix(in srgb, var(--team-primary, #6e85b7) 12%, rgba(9, 16, 29, 0.56)) 72%, color-mix(in srgb, var(--team-primary, #6e85b7) 16%, rgba(6, 11, 20, 0.82)) 100%);
+}
+
+.curated-special-card .player-name,
+.curated-special-card .card-team-name,
+.curated-special-card .card-detail-row,
+.curated-special-card .detail-pill-label {
+  color: var(--card-text, #f4f8ff);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+.curated-special-card .card-team-name {
+  opacity: 0.88;
+  font-weight: 800;
+  font-size: clamp(0.58rem, 0.5rem + 0.24vw, 0.78rem);
+  line-height: 1.04;
+}
+
+.curated-special-card .card-detail-row {
+  font-weight: 800;
+  margin-top: 0.08rem;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.3rem;
+}
+
+.curated-special-card .card-team-line {
+  gap: 0.34rem;
+  margin-bottom: 0;
+  min-height: 18px;
+}
+
+.curated-special-card .player-name {
+  min-height: 0;
+  font-size: clamp(0.82rem, 0.7rem + 0.4vw, 1.06rem);
+  line-height: 1.02;
+  margin-bottom: 0;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.curated-special-card .player-art {
+  background:
+    linear-gradient(148deg, color-mix(in srgb, var(--team-primary, #6e85b7) 26%, rgba(247, 252, 255, 0.28)) 0%, color-mix(in srgb, var(--team-secondary, #9ab8ff) 14%, rgba(23, 36, 60, 0.2)) 52%, color-mix(in srgb, var(--team-art-end, #0f1d32) 76%, rgba(6, 10, 18, 0.84)) 100%);
+}
+
+.curated-special-card .player-art-bg {
+  background:
+    linear-gradient(140deg, color-mix(in srgb, var(--team-primary, #6e85b7) 74%, rgba(248, 252, 255, 0.22)) 0%, color-mix(in srgb, var(--team-secondary, #9ab8ff) 22%, rgba(255, 255, 255, 0.06)) 46%, color-mix(in srgb, var(--team-art-end, #0f1d32) 88%, rgba(255, 255, 255, 0.04)) 100%);
+  opacity: 0.96;
+}
+
+.curated-special-card .player-art-bg::before {
+  opacity: 0.24;
+  filter: saturate(0) brightness(2.1);
+  mix-blend-mode: screen;
+}
+
+.curated-special-card .player-art::before {
+  display: none;
+}
+
+.curated-special-card .player-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  clip-path: inset(0 round 16px);
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(245, 250, 255, 0.18) 0%, transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(248, 252, 255, 0.04) 20%, rgba(10, 18, 32, 0.12) 48%, rgba(8, 14, 24, 0.44) 72%, rgba(6, 10, 18, 0.82) 100%),
+    linear-gradient(124deg, transparent 16%, rgba(255, 255, 255, 0.06) 38%, rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0.04) 62%, transparent 84%);
+  background-size: 100% 100%, 100% 100%, 220% 100%;
+  background-position: 50% 0%, 50% 0%, -24% 50%;
+  mix-blend-mode: normal, normal, screen;
+  opacity: 0.92;
+  animation: mythic-card-flow 15.8s ease-in-out infinite;
+}
+
+.curated-special-card .player-art img {
+  filter: saturate(1.04) contrast(1.04);
+}
+
+.curated-special-card .detail-pill-label {
+  font-size: clamp(0.34rem, 0.3rem + 0.12vw, 0.44rem);
+  color: color-mix(in srgb, var(--card-subtext, rgba(228, 237, 249, 0.78)) 88%, rgba(255, 255, 255, 0.2));
+}
+
+.curated-special-card .position-pill,
+.curated-special-card .jersey-pill,
+.curated-special-card .value-pill {
+  font-size: clamp(0.52rem, 0.48rem + 0.1vw, 0.62rem);
 }
 
 .blackmatter-card {
@@ -6354,7 +6537,8 @@ img {
 .mobile-pack-stage .card-rarity-frame,
 .mobile-pack-stage .legend-card .card-rarity-frame,
 .mobile-pack-stage .blackmatter-card .card-rarity-frame,
-.mobile-pack-stage .glass-showcase-card .card-rarity-frame {
+.mobile-pack-stage .glass-showcase-card .card-rarity-frame,
+.mobile-pack-stage .curated-special-card .card-rarity-frame {
   inset: 0.04rem;
 }
 
@@ -6372,7 +6556,8 @@ img {
 
 .mobile-pack-stage .legend-card .card-body,
 .mobile-pack-stage .blackmatter-card .card-body,
-.mobile-pack-stage .glass-showcase-card .card-body {
+.mobile-pack-stage .glass-showcase-card .card-body,
+.mobile-pack-stage .curated-special-card .card-body {
   gap: 0.12rem;
   padding: 0.86rem 0.64rem 0.64rem;
 }
@@ -6380,7 +6565,8 @@ img {
 .mobile-pack-stage .player-name,
 .mobile-pack-stage .legend-card .player-name,
 .mobile-pack-stage .blackmatter-card .player-name,
-.mobile-pack-stage .glass-showcase-card .player-name {
+.mobile-pack-stage .glass-showcase-card .player-name,
+.mobile-pack-stage .curated-special-card .player-name {
   font-size: 0.82rem;
   line-height: 1.04;
   min-height: 2.02em;
@@ -6389,7 +6575,8 @@ img {
 .mobile-pack-stage .card-team-name,
 .mobile-pack-stage .legend-card .card-team-name,
 .mobile-pack-stage .blackmatter-card .card-team-name,
-.mobile-pack-stage .glass-showcase-card .card-team-name {
+.mobile-pack-stage .glass-showcase-card .card-team-name,
+.mobile-pack-stage .curated-special-card .card-team-name {
   font-size: 0.54rem;
   line-height: 1.12;
 }
@@ -6397,7 +6584,8 @@ img {
 .mobile-pack-stage .card-team-line,
 .mobile-pack-stage .legend-card .card-team-line,
 .mobile-pack-stage .blackmatter-card .card-team-line,
-.mobile-pack-stage .glass-showcase-card .card-team-line {
+.mobile-pack-stage .glass-showcase-card .card-team-line,
+.mobile-pack-stage .curated-special-card .card-team-line {
   gap: 0.24rem;
   min-height: 18px;
 }
@@ -6452,7 +6640,10 @@ img {
 .mobile-pack-stage .blackmatter-card .value-pill,
 .mobile-pack-stage .glass-showcase-card .position-pill,
 .mobile-pack-stage .glass-showcase-card .jersey-pill,
-.mobile-pack-stage .glass-showcase-card .value-pill {
+.mobile-pack-stage .glass-showcase-card .value-pill,
+.mobile-pack-stage .curated-special-card .position-pill,
+.mobile-pack-stage .curated-special-card .jersey-pill,
+.mobile-pack-stage .curated-special-card .value-pill {
   font-size: 0.54rem;
   gap: 0.12rem;
 }
@@ -6460,7 +6651,8 @@ img {
 .mobile-pack-stage .detail-pill-label,
 .mobile-pack-stage .legend-card .detail-pill-label,
 .mobile-pack-stage .blackmatter-card .detail-pill-label,
-.mobile-pack-stage .glass-showcase-card .detail-pill-label {
+.mobile-pack-stage .glass-showcase-card .detail-pill-label,
+.mobile-pack-stage .curated-special-card .detail-pill-label {
   font-size: 0.34rem;
 }
 
@@ -8240,7 +8432,8 @@ img {
   .card-rarity-frame,
   .legend-card .card-rarity-frame,
   .blackmatter-card .card-rarity-frame,
-  .glass-showcase-card .card-rarity-frame {
+  .glass-showcase-card .card-rarity-frame,
+  .curated-special-card .card-rarity-frame {
     inset: 0.12rem;
   }
 
@@ -8253,7 +8446,8 @@ img {
   .player-name,
   .legend-card .player-name,
   .blackmatter-card .player-name,
-  .glass-showcase-card .player-name {
+  .glass-showcase-card .player-name,
+  .curated-special-card .player-name {
     font-size: 0.9rem;
     line-height: 1.02;
   }
@@ -8261,7 +8455,8 @@ img {
   .card-team-name,
   .legend-card .card-team-name,
   .blackmatter-card .card-team-name,
-  .glass-showcase-card .card-team-name {
+  .glass-showcase-card .card-team-name,
+  .curated-special-card .card-team-name {
     font-size: 0.62rem;
   }
 
@@ -8272,7 +8467,8 @@ img {
 
   .legend-card .card-body,
   .blackmatter-card .card-body,
-  .glass-showcase-card .card-body {
+  .glass-showcase-card .card-body,
+  .curated-special-card .card-body {
     gap: 0.14rem;
     padding: 0.92rem 0.72rem 0.72rem;
   }
@@ -8286,7 +8482,8 @@ img {
   .card-team-line,
   .legend-card .card-team-line,
   .blackmatter-card .card-team-line,
-  .glass-showcase-card .card-team-line {
+  .glass-showcase-card .card-team-line,
+  .curated-special-card .card-team-line {
     grid-template-columns: 20px minmax(0, 1fr);
     gap: 0.26rem;
     min-height: 20px;
@@ -8318,7 +8515,10 @@ img {
   .blackmatter-card .value-pill,
   .glass-showcase-card .position-pill,
   .glass-showcase-card .jersey-pill,
-  .glass-showcase-card .value-pill {
+  .glass-showcase-card .value-pill,
+  .curated-special-card .position-pill,
+  .curated-special-card .jersey-pill,
+  .curated-special-card .value-pill {
     font-size: 0.58rem;
     gap: 0.14rem;
   }
@@ -8326,7 +8526,8 @@ img {
   .detail-pill-label,
   .legend-card .detail-pill-label,
   .blackmatter-card .detail-pill-label,
-  .glass-showcase-card .detail-pill-label {
+  .glass-showcase-card .detail-pill-label,
+  .curated-special-card .detail-pill-label {
     font-size: 0.38rem;
   }
 
@@ -8765,7 +8966,8 @@ img {
   .mobile-pack-stage .card-rarity-frame,
   .mobile-pack-stage .legend-card .card-rarity-frame,
   .mobile-pack-stage .blackmatter-card .card-rarity-frame,
-  .mobile-pack-stage .glass-showcase-card .card-rarity-frame {
+  .mobile-pack-stage .glass-showcase-card .card-rarity-frame,
+  .mobile-pack-stage .curated-special-card .card-rarity-frame {
     inset: 0.03rem;
   }
 
@@ -8777,7 +8979,8 @@ img {
   .mobile-pack-stage .player-name,
   .mobile-pack-stage .legend-card .player-name,
   .mobile-pack-stage .blackmatter-card .player-name,
-  .mobile-pack-stage .glass-showcase-card .player-name {
+  .mobile-pack-stage .glass-showcase-card .player-name,
+  .mobile-pack-stage .curated-special-card .player-name {
     font-size: 0.8rem;
   }
 
@@ -8924,7 +9127,8 @@ img {
   .card-rarity-frame,
   .legend-card .card-rarity-frame,
   .blackmatter-card .card-rarity-frame,
-  .glass-showcase-card .card-rarity-frame {
+  .glass-showcase-card .card-rarity-frame,
+  .curated-special-card .card-rarity-frame {
     inset: 0rem;
   }
 
@@ -8937,7 +9141,8 @@ img {
   .player-name,
   .legend-card .player-name,
   .blackmatter-card .player-name,
-  .glass-showcase-card .player-name {
+  .glass-showcase-card .player-name,
+  .curated-special-card .player-name {
     font-size: 0.78rem;
     line-height: 1.04;
   }
@@ -8945,7 +9150,8 @@ img {
   .card-team-name,
   .legend-card .card-team-name,
   .blackmatter-card .card-team-name,
-  .glass-showcase-card .card-team-name {
+  .glass-showcase-card .card-team-name,
+  .curated-special-card .card-team-name {
     font-size: 0.56rem;
   }
 
@@ -8956,7 +9162,8 @@ img {
 
   .legend-card .card-body,
   .blackmatter-card .card-body,
-  .glass-showcase-card .card-body {
+  .glass-showcase-card .card-body,
+  .curated-special-card .card-body {
     gap: 0.12rem;
     padding: 0.82rem 0.62rem 0.62rem;
   }
@@ -8970,7 +9177,8 @@ img {
   .card-team-line,
   .legend-card .card-team-line,
   .blackmatter-card .card-team-line,
-  .glass-showcase-card .card-team-line {
+  .glass-showcase-card .card-team-line,
+  .curated-special-card .card-team-line {
     grid-template-columns: 18px minmax(0, 1fr);
     gap: 0.22rem;
     min-height: 18px;
@@ -8999,7 +9207,10 @@ img {
   .blackmatter-card .value-pill,
   .glass-showcase-card .position-pill,
   .glass-showcase-card .jersey-pill,
-  .glass-showcase-card .value-pill {
+  .glass-showcase-card .value-pill,
+  .curated-special-card .position-pill,
+  .curated-special-card .jersey-pill,
+  .curated-special-card .value-pill {
     font-size: 0.52rem;
     gap: 0.12rem;
   }
@@ -9007,7 +9218,8 @@ img {
   .detail-pill-label,
   .legend-card .detail-pill-label,
   .blackmatter-card .detail-pill-label,
-  .glass-showcase-card .detail-pill-label {
+  .glass-showcase-card .detail-pill-label,
+  .curated-special-card .detail-pill-label {
     font-size: 0.34rem;
   }
 
