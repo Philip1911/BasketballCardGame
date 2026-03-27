@@ -22,7 +22,6 @@ const baseVisibleRarityOptions = [
   { id: "silver", value: "silver", label: "Silver", sortRank: 0 },
   { id: "gold", value: "gold", label: "Gold", sortRank: 1 },
   { id: "diamond", value: "diamond", label: "Glass", sortRank: 2 },
-  { id: "blackmatter", value: "blackmatter", label: "Black Matter", sortRank: 4 },
   { id: "legends", value: "legends", label: "Legends", sortRank: 5 },
 ];
 let visibleRarityOptions = [...baseVisibleRarityOptions];
@@ -64,6 +63,7 @@ function normalizeCuratedSpecialCardSetDefinition(definition) {
   return {
     ...definition,
     enabled: definition.enabled !== false,
+    cardStyle: definition.cardStyle || "",
     showRating: typeof definition.showRating === "boolean" ? definition.showRating : null,
     rarityId: definition.rarityId || "diamond",
     displayRarityId: definition.displayRarityId || definition.rarityId || "diamond",
@@ -109,6 +109,16 @@ function getCuratedSpecialCardPullWeight(setDefinition, entry = {}) {
   return Number.isFinite(weight) && weight > 0 ? weight : 0.18;
 }
 
+function getCollectionSetAbbreviation(label = "") {
+  const words = String(label || "")
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+  if (!words.length) return "SET";
+  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+  return words.slice(0, 3).map((word) => word[0]).join("").toUpperCase();
+}
+
 function applyCuratedSpecialCardFlags(card, setDefinition) {
   if (setDefinition.flag) {
     card[setDefinition.flag] = true;
@@ -129,12 +139,12 @@ function applyCuratedSpecialCardFlags(card, setDefinition) {
 // Membership, rarity, and art overrides stay together so new sets are easy to duplicate and edit.
 const CURATED_SPECIAL_CARD_SET_DEFINITIONS = [
   {
-    id: "glass-full-art",
-    label: "Glass Full Art",
+    id: "prism",
+    label: "Prism",
     enabled: true,
     rarityId: "diamond",
     displayRarityId: "diamond",
-    cardIdSuffix: "glass-full-art",
+    cardIdSuffix: "prism",
     pullWeight: 0.18,
     flag: "glassShowcase",
     backdrop: null,
@@ -258,17 +268,17 @@ const CURATED_SPECIAL_CARD_SET_DEFINITIONS = [
     id: "sharpshooter",
     label: "Sharpshooter",
     enabled: true,
-    rarityId: "sharpshooter",
-    displayRarityId: "sharpshooter",
+    cardStyle: "sharpshooter",
+    rarityId: "diamond",
+    displayRarityId: "diamond",
     cardIdSuffix: "sharpshooter",
     backdrop: null,
     players: [
       {
         slug: "isaiah-joe",
         ability: 94,
-        image: "https://substackcdn.com/image/fetch/$s_!ZHK6!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Ff450bbd9-8f86-42ab-acd7-095b83877581_960x640.jpeg",
-        imagePosition: "center",
-        imageScale: 1,
+        imagePosition: "50% 8%",
+        imageScale: 1.08,
       },
       {
         slug: "stephen-curry",
@@ -308,7 +318,8 @@ const curatedSpecialCardSets = CURATED_SPECIAL_CARD_SET_DEFINITIONS
 
 const curatedSpecialRarityOptions = curatedSpecialCardSets.map((setDefinition, index) => {
   const parentRarityId = setDefinition.displayRarityId === "mythic" ? "diamond" : setDefinition.displayRarityId;
-  const parentRarity = baseVisibleRarityOptions.find((tier) => tier.id === parentRarityId);
+  const parentRarity = baseVisibleRarityOptions.find((tier) => tier.id === parentRarityId)
+    || { sortRank: parentRarityId === "blackmatter" ? 4 : 2 };
   return {
     id: getCuratedSpecialRarityId(setDefinition),
     value: getCuratedSpecialRarityId(setDefinition),
@@ -588,6 +599,8 @@ const teamSets = GAME_DATA.sets.map((set) => ({
   ...set,
   players: [...set.players].sort((a, b) => b.ability - a.ability || a.name.localeCompare(b.name)),
   reward: computeSetReward(set),
+  collectionSetType: "team",
+  specialSetId: "",
 })).sort((a, b) => {
   const conferenceDelta = (conferenceOrder[a.conference] ?? 99) - (conferenceOrder[b.conference] ?? 99);
   if (conferenceDelta !== 0) return conferenceDelta;
@@ -673,6 +686,7 @@ function buildCatalogCard(team, player, options = {}) {
     specialSetLabel: options.specialSetLabel || "",
     specialRarityId: options.specialRarityId || "",
     specialRarityLabel,
+    specialCardStyle: options.specialCardStyle || "",
     isSpecialCard: options.isSpecialCard === true,
     fullArt: options.fullArt === true,
     showRating: typeof options.showRating === "boolean" ? options.showRating : null,
@@ -717,6 +731,7 @@ function buildCuratedSpecialCards(team, player, baseCardId) {
       specialSetLabel: setDefinition.label,
       specialRarityId,
       specialRarityLabel: setDefinition.label,
+      specialCardStyle: entry.cardStyle || setDefinition.cardStyle || "",
       isSpecialCard: true,
       fullArt: true,
       showRating: getCuratedSpecialCardShowRating(setDefinition, entry),
@@ -745,24 +760,55 @@ const cardCatalog = teamSets.flatMap((team) => team.players.flatMap((player) => 
 }));
 
 const teamById = Object.fromEntries(teamSets.map((team) => [team.id, team]));
+const specialCollectionSets = curatedSpecialCardSets.map((setDefinition) => {
+  const visualRarity = getRarityTierById(setDefinition.displayRarityId || setDefinition.rarityId);
+  const primary = setDefinition.theme?.primary || visualRarity.color || "#6e85b7";
+  const secondary = setDefinition.theme?.secondary || mixColor(primary, "#ffffff", 0.3);
+  return {
+    id: setDefinition.id,
+    name: setDefinition.label,
+    shortName: setDefinition.label,
+    abbreviation: getCollectionSetAbbreviation(setDefinition.label),
+    conference: "Special",
+    division: "Curated Special",
+    players: setDefinition.players,
+    reward: 0,
+    colors: {
+      primary,
+      secondary,
+    },
+    collectionSetType: "special",
+    specialSetId: setDefinition.id,
+    teamId: 0,
+  };
+});
+const collectionSetEntries = [...teamSets, ...specialCollectionSets];
+const collectionSetById = Object.fromEntries(collectionSetEntries.map((team) => [team.id, team]));
 const cardsById = Object.fromEntries(cardCatalog.map((card) => [card.id, card]));
-const cardsByTeam = Object.fromEntries(teamSets.map((team) => [team.id, cardCatalog.filter((card) => card.teamId === team.id)]));
+const cardsByTeam = Object.fromEntries(teamSets.map((team) => [team.id, cardCatalog.filter((card) => card.teamId === team.id && !card.isSpecialCard)]));
+const cardsBySpecialSet = Object.fromEntries(curatedSpecialCardSets.map((setDefinition) => [setDefinition.id, cardCatalog.filter((card) => card.specialSetId === setDefinition.id)]));
+const cardsByCollectionSet = Object.fromEntries(collectionSetEntries.map((team) => [
+  team.id,
+  team.collectionSetType === "special"
+    ? (cardsBySpecialSet[team.id] || [])
+    : (cardsByTeam[team.id] || []),
+]));
 const cardsByRarity = Object.fromEntries(rarityTiers.map((tier) => [tier.id, cardCatalog.filter((card) => card.rarityId === tier.id)]));
 const packById = Object.fromEntries(packTypes.map((pack) => [pack.id, pack]));
 const cardsByConference = Object.fromEntries(collectionGroups.map((group) => [
   group.id,
-  teamSets.filter((team) => team.conference === group.id).flatMap((team) => cardsByTeam[team.id]),
+  collectionSetEntries.filter((team) => team.conference === group.id).flatMap((team) => cardsByCollectionSet[team.id] || []),
 ]));
 
 function computeSetRewardFromCards(teamId) {
-  const cards = cardsByTeam[teamId] || [];
+  const cards = cardsByCollectionSet[teamId] || [];
   const sellTotal = cards.reduce((sum, card) => sum + Number(card.sellPrice || 0), 0);
   if (teamId === "hall-of-fame") return roundRewardAmount(sellTotal * 0.32 + cards.length * 24);
   return roundRewardAmount(sellTotal * 0.4 + cards.length * 20);
 }
 
 function computeCollectionRewardFromCards(groupId) {
-  const teams = teamSets.filter((team) => team.conference === groupId);
+  const teams = collectionSetEntries.filter((team) => team.conference === groupId);
   const setRewardTotal = teams.reduce((sum, team) => sum + computeSetRewardFromCards(team.id), 0);
   if (groupId === "Special") {
     return roundRewardAmount(setRewardTotal * 0.46 + 240);
@@ -770,13 +816,44 @@ function computeCollectionRewardFromCards(groupId) {
   return roundRewardAmount(setRewardTotal * 0.22 + 180);
 }
 
-teamSets.forEach((team) => {
+collectionSetEntries.forEach((team) => {
   team.reward = computeSetRewardFromCards(team.id);
 });
 
 collectionGroups.forEach((group) => {
   group.reward = computeCollectionRewardFromCards(group.id);
 });
+
+function getCollectionSetIdForCard(card) {
+  if (!card) return "";
+  return card.specialSetId || card.teamId || "";
+}
+
+function getCardsForCollectionSet(collectionSetId) {
+  return cardsByCollectionSet[collectionSetId] || [];
+}
+
+function getCompletedCollectionSetIdSet(collection = state?.cardCopies || {}) {
+  const completed = new Set();
+  collectionSetEntries.forEach((team) => {
+    const cards = getCardsForCollectionSet(team.id);
+    if (!cards.length) return;
+    if (cards.every((card) => Number(collection[card.id] || 0) > 0)) {
+      completed.add(team.id);
+    }
+  });
+  return completed;
+}
+
+function getCompletedCollectionGroupIdSet(completedSetIds = getCompletedCollectionSetIdSet()) {
+  const completed = new Set();
+  collectionGroups.forEach((group) => {
+    if (isCollectionGroupCompleteFromTeams(completedSetIds, group.id)) {
+      completed.add(group.id);
+    }
+  });
+  return completed;
+}
 
 const PROFILE_SHOWCASE_LIMIT = 3;
 const PROFILE_HIGHLIGHTED_BADGE_LIMIT = 6;
@@ -970,7 +1047,7 @@ function getFavoriteTeamProgress(teamId) {
   return {
     uniqueOwned,
     totalPulled,
-    setComplete: state.completedTeams.includes(teamId),
+    setComplete: getCompletedCollectionSetIdSet().has(teamId),
     totalSetCards: teamCards.length,
   };
 }
@@ -1030,13 +1107,13 @@ function getAchievementDefinitions() {
       title: "Set Closer",
       note: "Finish team sets and turn pack luck into completed pages.",
       badgeAcronym: "SC",
-      getProgress: () => state.completedTeams.length,
+      getProgress: () => getCompletedCollectionSetIdSet().size,
       tiers: [
         { target: 1, label: "Closer I", badgeTone: "silver", rewardTemplates: ["milestone_gold"] },
         { target: 4, label: "Closer II", badgeTone: "gold", rewardTemplates: ["milestone_diamond"] },
         { target: 10, label: "Closer III", badgeTone: "diamond", rewardTemplates: ["milestone_elite"] },
         { target: 20, label: "Closer IV", badgeTone: "mythic", rewardTemplates: ["milestone_mythic"] },
-        { target: teamSets.length, label: "Closer V", badgeTone: "legend", rewardTemplates: ["milestone_legend", "milestone_elite"] },
+        { target: collectionSetEntries.length, label: "Closer V", badgeTone: "legend", rewardTemplates: ["milestone_legend", "milestone_elite"] },
       ],
     },
     {
@@ -1499,6 +1576,20 @@ function cloneDefaultState() {
   };
 }
 
+const LEGACY_CARD_ID_SUFFIX_MIGRATIONS = [
+  ["--glass-full-art", "--prism"],
+];
+
+function migrateLegacyCardId(cardId = "") {
+  let nextCardId = String(cardId || "");
+  LEGACY_CARD_ID_SUFFIX_MIGRATIONS.forEach(([legacySuffix, nextSuffix]) => {
+    if (nextCardId.endsWith(legacySuffix)) {
+      nextCardId = `${nextCardId.slice(0, -legacySuffix.length)}${nextSuffix}`;
+    }
+  });
+  return nextCardId;
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -1506,12 +1597,16 @@ function loadState() {
     const parsed = JSON.parse(raw);
     const cardCopies = {};
     Object.entries(parsed.cardCopies || {}).forEach(([cardId, count]) => {
+      const normalizedCardId = migrateLegacyCardId(cardId);
       const normalized = Math.max(0, Math.floor(Number(count) || 0));
-      if (normalized > 0) cardCopies[cardId] = normalized;
+      if (normalized > 0) {
+        cardCopies[normalizedCardId] = Math.max(0, Number(cardCopies[normalizedCardId] || 0)) + normalized;
+      }
     });
     Object.entries(parsed.collection || {}).forEach(([cardId, owned]) => {
       if (!owned) return;
-      if (!cardCopies[cardId]) cardCopies[cardId] = 1;
+      const normalizedCardId = migrateLegacyCardId(cardId);
+      if (!cardCopies[normalizedCardId]) cardCopies[normalizedCardId] = 1;
     });
     const collection = Object.fromEntries(Object.keys(cardCopies).map((cardId) => [cardId, true]));
     const lastPack = parsed.lastPack
@@ -1523,9 +1618,11 @@ function loadState() {
         repeatableStorePackId: parsed.lastPack.repeatableStorePackId || null,
         results: Array.isArray(parsed.lastPack.results)
           ? parsed.lastPack.results.map((result, index) => ({
+            ...(cardsById[migrateLegacyCardId(result.id)] || {}),
             ...result,
+            id: migrateLegacyCardId(result.id),
             saleValue: Number(result.saleValue || result.sellPrice || 0),
-            packResultId: result.packResultId || `${parsed.lastPack.packId || "pack"}-${index}-${result.id}`,
+            packResultId: result.packResultId || `${parsed.lastPack.packId || "pack"}-${index}-${migrateLegacyCardId(result.id)}`,
             duplicateDecision: result.isNew ? "new" : result.duplicateDecision === "sold" ? "sold" : "saved",
           }))
           : [],
@@ -1539,7 +1636,16 @@ function loadState() {
     const firstPullAt = {};
     Object.entries(parsed.firstPullAt || {}).forEach(([cardId, value]) => {
       const normalized = Number(value || 0);
-      if (normalized > 0) firstPullAt[cardId] = normalized;
+      const normalizedCardId = migrateLegacyCardId(cardId);
+      if (normalized > 0) firstPullAt[normalizedCardId] = normalized;
+    });
+    const pullCounts = {};
+    Object.entries(parsed.pullCounts || {}).forEach(([cardId, count]) => {
+      const normalizedCardId = migrateLegacyCardId(cardId);
+      const normalized = Math.max(0, Math.floor(Number(count) || 0));
+      if (normalized > 0) {
+        pullCounts[normalizedCardId] = Math.max(0, Number(pullCounts[normalizedCardId] || 0)) + normalized;
+      }
     });
     const profile = {
       ...cloneDefaultState().profile,
@@ -1549,9 +1655,9 @@ function loadState() {
       favoriteTeamPromptDismissed: Boolean(parsed.profile?.favoriteTeamPromptDismissed),
       name: String(parsed.profile?.name || "").trim().slice(0, PROFILE_NAME_MAX_LENGTH),
       showcasedCardIds: normalizeSlotArray(
-        parsed.profile?.showcasedCardIds,
+        (parsed.profile?.showcasedCardIds || []).map(migrateLegacyCardId),
         PROFILE_SHOWCASE_LIMIT,
-        (cardId) => Boolean(cardsById[cardId]) && Math.max(0, Number(parsed.pullCounts?.[cardId]) || 0) > 0,
+        (cardId) => Boolean(cardsById[cardId]) && Math.max(0, Number(pullCounts?.[cardId]) || 0) > 0,
       ),
       highlightedBadgeIds: normalizeSlotArray(parsed.profile?.highlightedBadgeIds, PROFILE_HIGHLIGHTED_BADGE_LIMIT),
     };
@@ -1575,7 +1681,7 @@ function loadState() {
       ...parsed,
       cardCopies,
       collection,
-      pullCounts: parsed.pullCounts || {},
+      pullCounts,
       upgrades: Array.isArray(parsed.upgrades) ? parsed.upgrades : [],
       completedTeams: Array.isArray(parsed.completedTeams) ? parsed.completedTeams : [],
       completedCollections: Array.isArray(parsed.completedCollections) ? parsed.completedCollections : [],
@@ -1605,6 +1711,7 @@ let activePackSection = "store";
 let openingPack = null;
 let isPackModalOpen = false;
 let activePackPreview = null;
+let packSelloutPrompt = null;
 let activeCardPreview = null;
 let cardPreviewSwipeState = null;
 let cardPreviewSuppressTapUntil = 0;
@@ -1613,6 +1720,7 @@ let collectionDetailSuppressClickUntil = 0;
 let setCompletionCelebration = null;
 let dailyChallengeCelebration = null;
 let achievementCelebration = null;
+let pendingCelebrationQueue = [];
 let activeCollectionGroup = null;
 let activeCollectionTeam = null;
 let collectionSection = "collections";
@@ -1625,6 +1733,8 @@ let playerCollectionPositionFilter = "all";
 let playerCollectionShowLocked = false;
 let isPlayerFilterMenuOpen = false;
 let isPlayerBulkSellOpen = false;
+let isPlayerTeamFilterModalOpen = false;
+let playerTeamFilterDraft = [];
 let isSetBulkSellOpen = false;
 let bulkSellKeepCopies = 1;
 let bulkSellTeamFilters = [];
@@ -1649,12 +1759,15 @@ let profileAchievementSort = "date-desc";
 let isProfileNameEditing = false;
 let profileNameDraft = "";
 let mobilePackOverviewCenterFrame = 0;
+let collectionAssetWarmupToken = 0;
 const assetPreloadCache = new Map();
 const NBA_HEADSHOT_URL_PATTERN = /^(https:\/\/cdn\.nba\.com\/headshots\/nba\/latest\/)(1040x760|520x380|260x190)\/(\d+)\.png$/i;
 const PLAYER_IMAGE_SIZES = {
   card: "(max-width: 430px) 148px, (max-width: 620px) 162px, (max-width: 820px) 178px, 204px",
   preview: "(max-width: 430px) 240px, (max-width: 820px) 320px, 420px",
 };
+const CARD_BROWSE_PRELOAD_COUNT = 10;
+const PACK_FINAL_REWARD_DELAY_MS = 720;
 const MOBILE_PACK_REVEAL_BREAKPOINT_PX = 620;
 const MOBILE_PACK_SWIPE_THRESHOLD_PX = 96;
 const MOBILE_PACK_SWIPE_ROTATION_FACTOR = 0.055;
@@ -1666,6 +1779,18 @@ const CARD_PREVIEW_SWIPE_MAX_ROTATION_DEG = 12;
 const COLLECTION_DETAIL_SWIPE_THRESHOLD_PX = 74;
 const COLLECTION_DETAIL_SWIPE_ROTATION_FACTOR = 0.018;
 const COLLECTION_DETAIL_SWIPE_MAX_ROTATION_DEG = 6;
+const APP_TITLE = "Hoops Card Club";
+const MAX_MOBILE_PACK_SET_PROGRESS_CHIPS = 2;
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "area[href]",
+  "button:not([disabled]):not([hidden])",
+  "input:not([disabled]):not([type='hidden'])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "summary",
+  "[tabindex]:not([tabindex='-1'])",
+].join(", ");
 
 const navTabsEl = document.getElementById("navTabs");
 const mobileBottomNavEl = document.getElementById("mobileBottomNav");
@@ -1710,6 +1835,9 @@ const packModalNextEl = document.getElementById("packModalNext");
 const revealAllCardsEl = document.getElementById("revealAllCards");
 const openAnotherPackEl = document.getElementById("openAnotherPack");
 const sellAllDuplicatesEl = document.getElementById("sellAllDuplicates");
+const packSelloutModalEl = document.getElementById("packSelloutModal");
+const packSelloutGoToPacksEl = document.getElementById("packSelloutGoToPacks");
+const packSelloutOpenNewPackEl = document.getElementById("packSelloutOpenNewPack");
 const revealTitleEl = document.getElementById("revealTitle");
 const revealSubtitleEl = document.getElementById("revealSubtitle");
 const revealProgressEl = document.getElementById("revealProgress");
@@ -1718,6 +1846,7 @@ const revealSetProgressEl = document.getElementById("revealSetProgress");
 const revealDailyProgressEl = document.getElementById("revealDailyProgress");
 const packRevealGridEl = document.getElementById("packRevealGrid");
 const modalBottomActionsEl = document.querySelector(".modal-bottom-actions");
+const modalRepeatStackEl = document.querySelector(".modal-repeat-stack");
 const cardPreviewModalEl = document.getElementById("cardPreviewModal");
 const cardPreviewStageShellEl = document.getElementById("cardPreviewStageShell");
 const cardPreviewPrevEl = document.getElementById("cardPreviewPrev");
@@ -1776,9 +1905,232 @@ const playerControlsModalSubtitleEl = document.getElementById("playerControlsMod
 const playerControlsModalBodyEl = document.getElementById("playerControlsModalBody");
 const closePlayerControlsModalEl = document.getElementById("closePlayerControlsModal");
 const savePlayerControlsModalEl = document.getElementById("savePlayerControlsModal");
+const playerTeamFilterModalEl = document.getElementById("playerTeamFilterModal");
+const playerTeamFilterGridEl = document.getElementById("playerTeamFilterGrid");
+const playerTeamFilterSummaryEl = document.getElementById("playerTeamFilterSummary");
+const closePlayerTeamFilterModalEl = document.getElementById("closePlayerTeamFilterModal");
+const clearPlayerTeamFilterEl = document.getElementById("clearPlayerTeamFilter");
+const applyPlayerTeamFilterEl = document.getElementById("applyPlayerTeamFilter");
 const mobilePackRevealMedia = typeof window !== "undefined"
   ? window.matchMedia(`(max-width: ${MOBILE_PACK_REVEAL_BREAKPOINT_PX}px)`)
   : null;
+const MANAGED_MODAL_ROOTS = [
+  packModalEl,
+  packSelloutModalEl,
+  cardPreviewModalEl,
+  setCompletionModalEl,
+  dailyChallengeMobileModalEl,
+  playerControlsModalEl,
+  playerTeamFilterModalEl,
+  dailyRewardModalEl,
+  achievementRewardModalEl,
+  favoriteTeamModalEl,
+  profileShowcaseModalEl,
+  profileBadgeModalEl,
+  profileAchievementsModalEl,
+].filter(Boolean);
+const modalRestoreFocusTargets = new WeakMap();
+const modalOpenState = new WeakMap();
+let accessibilitySyncFrame = 0;
+
+function getModalDialogSurface(modal) {
+  if (!modal) return null;
+  if (modal.getAttribute("role") === "dialog") return modal;
+  return modal.querySelector('[role="dialog"]');
+}
+
+function isElementRendered(element) {
+  if (!(element instanceof HTMLElement)) return false;
+  if (element.hidden) return false;
+  const style = window.getComputedStyle(element);
+  if (style.display === "none" || style.visibility === "hidden") return false;
+  return element.getClientRects().length > 0;
+}
+
+function isFocusableVisible(element) {
+  if (!(element instanceof HTMLElement)) return false;
+  if (element.hidden || element.hasAttribute("disabled")) return false;
+  const style = window.getComputedStyle(element);
+  if (style.display === "none" || style.visibility === "hidden") return false;
+  return element.getClientRects().length > 0;
+}
+
+function getFocusableElements(root) {
+  if (!(root instanceof HTMLElement)) return [];
+  return [...root.querySelectorAll(FOCUSABLE_SELECTOR)].filter(isFocusableVisible);
+}
+
+function getModalZIndex(modal) {
+  const surface = getModalDialogSurface(modal) || modal;
+  const rootZ = Number.parseInt(window.getComputedStyle(modal).zIndex, 10);
+  const surfaceZ = Number.parseInt(window.getComputedStyle(surface).zIndex, 10);
+  if (Number.isFinite(rootZ)) return rootZ;
+  if (Number.isFinite(surfaceZ)) return surfaceZ;
+  return 0;
+}
+
+function getVisibleModalStack() {
+  return [...MANAGED_MODAL_ROOTS]
+    .filter(isElementRendered)
+    .sort((left, right) => {
+      const delta = getModalZIndex(left) - getModalZIndex(right);
+      if (delta !== 0) return delta;
+      return MANAGED_MODAL_ROOTS.indexOf(left) - MANAGED_MODAL_ROOTS.indexOf(right);
+    });
+}
+
+function getTopVisibleModal() {
+  const stack = getVisibleModalStack();
+  return stack.length ? stack[stack.length - 1] : null;
+}
+
+function rememberModalRestoreTarget(modal) {
+  if (!modal) return;
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && active.isConnected && !modal.contains(active)) {
+    modalRestoreFocusTargets.set(modal, active);
+    return;
+  }
+  modalRestoreFocusTargets.set(modal, null);
+}
+
+function restoreFocusFromModal(modal) {
+  if (!modal) return false;
+  const target = modalRestoreFocusTargets.get(modal);
+  modalRestoreFocusTargets.delete(modal);
+  if (!(target instanceof HTMLElement) || !target.isConnected || !isFocusableVisible(target)) return false;
+  target.focus({ preventScroll: true });
+  return true;
+}
+
+function ensureModalHasFocus(modal) {
+  if (!modal) return;
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && modal.contains(active)) return;
+  const surface = getModalDialogSurface(modal);
+  const focusables = getFocusableElements(modal);
+  const target = focusables[0] || surface || modal;
+  if (!(target instanceof HTMLElement)) return;
+  target.focus({ preventScroll: true });
+}
+
+function trapFocusWithinModal(modal, event) {
+  if (!modal) return false;
+  const surface = getModalDialogSurface(modal) || modal;
+  const focusables = getFocusableElements(modal);
+  if (!focusables.length) {
+    event.preventDefault();
+    if (surface instanceof HTMLElement) surface.focus({ preventScroll: true });
+    return true;
+  }
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement) || !modal.contains(active)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus({ preventScroll: true });
+    return true;
+  }
+  if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus({ preventScroll: true });
+    return true;
+  }
+  if (event.shiftKey && active === first) {
+    event.preventDefault();
+    last.focus({ preventScroll: true });
+    return true;
+  }
+  return false;
+}
+
+function getDocumentTitle() {
+  if (activeCardPreview && !cardPreviewModalEl.hidden) {
+    const previewCard = cardsById[activeCardPreview.cardId];
+    return `${previewCard ? `${previewCard.name} Preview` : "Card Preview"} | ${APP_TITLE}`;
+  }
+  if (isPackModalOpen) {
+    if (openingPack?.packName) return `Opening ${openingPack.packName} | ${APP_TITLE}`;
+    if (activePackPreview?.packName || activePackPreview?.name) {
+      return `${activePackPreview.packName || activePackPreview.name} Preview | ${APP_TITLE}`;
+    }
+    if (state.lastPack?.packName) return `${state.lastPack.packName} Complete | ${APP_TITLE}`;
+    return `Pack Reveal | ${APP_TITLE}`;
+  }
+  if (setCompletionCelebration) return `Set Rewards | ${APP_TITLE}`;
+  if (dailyChallengeCelebration) return `Daily Rewards | ${APP_TITLE}`;
+  if (achievementCelebration) return `Achievement Rewards | ${APP_TITLE}`;
+  if (isFavoriteTeamModalOpen) return `Favorite Team | ${APP_TITLE}`;
+  if (isProfileShowcaseModalOpen) return `Featured Cards | ${APP_TITLE}`;
+  if (isProfileBadgeModalOpen) return `Badge Display | ${APP_TITLE}`;
+  if (isProfileAchievementsModalOpen) return `Achievements | ${APP_TITLE}`;
+  if (activeView === "collections" || activeView === "players") {
+    if (activeCollectionTeam) {
+      const team = collectionSetById[activeCollectionTeam];
+      return `${team ? `${team.name} Set` : "Set"} | ${APP_TITLE}`;
+    }
+    if (activeCollectionGroup) {
+      const group = collectionGroupById[activeCollectionGroup];
+      return `${group?.name || "Collections"} | ${APP_TITLE}`;
+    }
+    if (collectionSection === "players") return `Players | ${APP_TITLE}`;
+    return `Collections | ${APP_TITLE}`;
+  }
+  if (activeView === "profile") return `Profile | ${APP_TITLE}`;
+  if (activeView === "stats") return `Stats | ${APP_TITLE}`;
+  if (activeView === "packs") {
+    return `${activePackSection === "inventory" ? "My Packs" : "Packs"} | ${APP_TITLE}`;
+  }
+  return APP_TITLE;
+}
+
+function syncDocumentTitle() {
+  const nextTitle = getDocumentTitle();
+  if (document.title !== nextTitle) document.title = nextTitle;
+}
+
+function syncModalFocusState() {
+  const visibleStack = getVisibleModalStack();
+  const visibleSet = new Set(visibleStack);
+  const justClosed = [];
+
+  MANAGED_MODAL_ROOTS.forEach((modal) => {
+    const isOpen = visibleSet.has(modal);
+    const wasOpen = modalOpenState.get(modal) === true;
+    if (isOpen && !wasOpen) {
+      rememberModalRestoreTarget(modal);
+    } else if (!isOpen && wasOpen) {
+      justClosed.push(modal);
+    }
+    modalOpenState.set(modal, isOpen);
+  });
+
+  if (visibleStack.length) {
+    ensureModalHasFocus(visibleStack[visibleStack.length - 1]);
+    return;
+  }
+
+  if (!justClosed.length) return;
+  justClosed.sort((left, right) => getModalZIndex(left) - getModalZIndex(right));
+  restoreFocusFromModal(justClosed[justClosed.length - 1]);
+}
+
+function scheduleAccessibilityUiSync() {
+  if (accessibilitySyncFrame) window.cancelAnimationFrame(accessibilitySyncFrame);
+  accessibilitySyncFrame = window.requestAnimationFrame(() => {
+    accessibilitySyncFrame = 0;
+    syncDocumentTitle();
+    syncModalFocusState();
+  });
+}
+
+MANAGED_MODAL_ROOTS.forEach((modal) => {
+  const surface = getModalDialogSurface(modal);
+  if (surface && !surface.hasAttribute("tabindex")) {
+    surface.setAttribute("tabindex", "-1");
+  }
+  modalOpenState.set(modal, isElementRendered(modal));
+});
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1793,6 +2145,7 @@ function getNbaHeadshotVariantUrl(src, variant = "1040x760") {
 function getPlayerImageAsset(src, options = {}) {
   const key = String(src || "").trim();
   const mode = options.mode === "preview" ? "preview" : "card";
+  const forceFullRes = options.forceFullRes === true;
   if (!key) {
     return {
       src: "",
@@ -1816,14 +2169,24 @@ function getPlayerImageAsset(src, options = {}) {
 
   const thumb = getNbaHeadshotVariantUrl(key, "260x190");
   const medium = getNbaHeadshotVariantUrl(key, "520x380");
-  const preferredSrc = mode === "preview" ? full : medium || full;
+  if (forceFullRes) {
+    return {
+      src: full,
+      srcset: "",
+      sizes: "",
+      fallbackSrc: full,
+      preloadSrc: full,
+    };
+  }
+  const preferredSrc = mode === "preview" ? full : thumb || medium || full;
+  const preloadSrc = mode === "preview" ? medium || full : medium || thumb || full;
 
   return {
     src: preferredSrc,
     srcset: `${thumb} 260w, ${medium} 520w, ${full} 1040w`,
     sizes: PLAYER_IMAGE_SIZES[mode],
     fallbackSrc: full,
-    preloadSrc: preferredSrc,
+    preloadSrc,
   };
 }
 
@@ -1863,6 +2226,35 @@ function preloadImageAsset(src) {
   return promise;
 }
 
+let playerImageStateSyncFrame = 0;
+
+function syncRenderedPlayerImageStates(root = document) {
+  const scope = root && typeof root.querySelectorAll === "function" ? root : document;
+  const images = [...scope.querySelectorAll("[data-player-image]")];
+  images.forEach((image) => {
+    if (!(image instanceof HTMLImageElement)) return;
+    const shell = image.closest(".player-art");
+    if (!shell || !image.complete) return;
+    if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+      shell.classList.remove("image-fallback");
+      shell.classList.add("image-ready");
+      return;
+    }
+    shell.classList.remove("image-ready");
+    shell.classList.add("image-fallback");
+  });
+}
+
+function scheduleRenderedPlayerImageStateSync(root = document) {
+  if (playerImageStateSyncFrame) {
+    window.cancelAnimationFrame(playerImageStateSyncFrame);
+  }
+  playerImageStateSyncFrame = window.requestAnimationFrame(() => {
+    playerImageStateSyncFrame = 0;
+    syncRenderedPlayerImageStates(root);
+  });
+}
+
 function preloadPackAssets(results) {
   const assets = new Set();
   results.forEach((result) => {
@@ -1872,6 +2264,58 @@ function preloadPackAssets(results) {
     if (logoUrl) assets.add(logoUrl);
   });
   return Promise.allSettled([...assets].map((src) => preloadImageAsset(src)));
+}
+
+function scheduleCardBrowseAssetWarmup(cards, options = {}) {
+  const limit = Math.max(1, Number(options.limit) || CARD_BROWSE_PRELOAD_COUNT);
+  const visibleCards = (Array.isArray(cards) ? cards : [])
+    .filter((card) => card?.image)
+    .slice(0, limit);
+  if (!visibleCards.length) return;
+
+  const warmupToken = ++collectionAssetWarmupToken;
+  const runWarmup = () => {
+    if (warmupToken !== collectionAssetWarmupToken) return;
+    visibleCards.forEach((card) => {
+      const imageAsset = getPlayerImageAsset(card.image, { mode: "card" });
+      const preloadSrc = imageAsset.preloadSrc || imageAsset.src;
+      if (preloadSrc) preloadImageAsset(preloadSrc);
+      const logoUrl = getTeamLogoUrl(card.teamId);
+      if (logoUrl) preloadImageAsset(logoUrl);
+    });
+  };
+
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(runWarmup, { timeout: 420 });
+    return;
+  }
+  window.setTimeout(runWarmup, 40);
+}
+
+function hasActiveCelebrationModal() {
+  return Boolean(setCompletionCelebration || dailyChallengeCelebration || achievementCelebration);
+}
+
+function queueCelebration(type, payload) {
+  if (!payload) return;
+  pendingCelebrationQueue.push({ type, payload });
+}
+
+function flushCelebrationQueue() {
+  if (isPackModalOpen || hasActiveCelebrationModal()) return false;
+  const next = pendingCelebrationQueue.shift();
+  if (!next) return false;
+  if (next.type === "set-completion") {
+    setCompletionCelebration = next.payload;
+  } else if (next.type === "daily-reward") {
+    dailyChallengeCelebration = next.payload;
+  } else if (next.type === "achievement-reward") {
+    achievementCelebration = next.payload;
+  } else {
+    return false;
+  }
+  renderAll();
+  return true;
 }
 
 function formatMoney(value) {
@@ -2012,7 +2456,7 @@ function getRewardCashEarned() {
 function getDisplayedTeamReward(teamId) {
   const stored = Number(state.teamRewardCash?.[teamId]);
   if (stored > 0) return roundRewardAmount(stored);
-  const team = teamById[teamId];
+  const team = collectionSetById[teamId];
   return team ? roundRewardAmount(team.reward) : 0;
 }
 
@@ -2068,6 +2512,9 @@ function getEligibleCardsForPack(pack) {
   if (!pack) return cardCatalog;
   if (pack.poolType === "team" && pack.poolId && cardsByTeam[pack.poolId]?.length) {
     return cardsByTeam[pack.poolId];
+  }
+  if (pack.poolType === "collection-set" && pack.poolId && cardsByCollectionSet[pack.poolId]?.length) {
+    return cardsByCollectionSet[pack.poolId];
   }
   if (pack.poolType === "conference" && pack.poolId && cardsByConference[pack.poolId]?.length) {
     return cardsByConference[pack.poolId];
@@ -2157,7 +2604,8 @@ function applyPackGuarantees(cards, pack, sourcePool = cardCatalog) {
 }
 
 function isTeamCompleteInCollection(collection, teamId) {
-  return cardsByTeam[teamId].every((card) => Number(collection[card.id] || 0) > 0);
+  const cards = cardsByCollectionSet[teamId] || [];
+  return cards.length > 0 && cards.every((card) => Number(collection[card.id] || 0) > 0);
 }
 
 function isCollectionGroupCompleteFromTeams(completedTeamIds, groupId) {
@@ -2171,9 +2619,9 @@ function isPackUnlocked(pack) {
 
 function getClosestTeam() {
   let closest = null;
-  teamSets.forEach((team) => {
-    const total = cardsByTeam[team.id].length;
-    const owned = cardsByTeam[team.id].filter((card) => hasOwnedCard(card.id)).length;
+  collectionSetEntries.forEach((team) => {
+    const total = getCardsForCollectionSet(team.id).length;
+    const owned = getCardsForCollectionSet(team.id).filter((card) => hasOwnedCard(card.id)).length;
     const remaining = total - owned;
     if (remaining === 0) return;
     if (!closest || remaining < closest.remaining || (remaining === closest.remaining && owned > closest.owned)) {
@@ -2223,7 +2671,7 @@ function getPrimaryPosition(position) {
 
 function getTeamLogoUrl(teamKey) {
   if (teamKey === "hall-of-fame") return HALL_OF_FAME_LOGO_URL;
-  const team = teamById[teamKey];
+  const team = collectionSetById?.[teamKey] || teamById[teamKey];
   if (!team || !team.teamId) return "";
   return `https://cdn.nba.com/logos/nba/${team.teamId}/global/L/logo.svg`;
 }
@@ -2239,7 +2687,7 @@ function buildSetBrand(team) {
 }
 
 function getOwnedCountForTeam(teamId) {
-  return cardsByTeam[teamId].filter((card) => hasOwnedCard(card.id)).length;
+  return getCardsForCollectionSet(teamId).filter((card) => hasOwnedCard(card.id)).length;
 }
 
 function buildOutcomeSetProgress(results) {
@@ -2247,25 +2695,26 @@ function buildOutcomeSetProgress(results) {
 
   results.forEach((result, index) => {
     if (!result.isNew) return;
-    const team = teamById[result.teamId];
+    const collectionSetId = getCollectionSetIdForCard(result);
+    const team = collectionSetById[collectionSetId];
     if (!team) return;
 
-    let entry = progressByTeam.get(result.teamId);
+    let entry = progressByTeam.get(collectionSetId);
     if (!entry) {
-      const beforeOwned = getOwnedCountForTeam(result.teamId);
+      const beforeOwned = getOwnedCountForTeam(collectionSetId);
       entry = {
-        teamId: result.teamId,
+        teamId: collectionSetId,
         teamName: team.name,
-        teamShortName: team.shortName,
+        teamShortName: team.shortName || team.name,
         beforeOwned,
         afterOwned: beforeOwned,
-        total: cardsByTeam[result.teamId].length,
+        total: getCardsForCollectionSet(collectionSetId).length,
         colors: team.colors,
         revealIndices: [],
-        completedBefore: state.completedTeams.includes(result.teamId),
+        completedBefore: getCompletedCollectionSetIdSet().has(collectionSetId),
         completedAfter: false,
       };
-      progressByTeam.set(result.teamId, entry);
+      progressByTeam.set(collectionSetId, entry);
     }
 
     entry.afterOwned += 1;
@@ -2295,7 +2744,7 @@ function sortCollectionTeams(teams) {
 }
 
 function getTeamsForCollectionGroup(groupId) {
-  return teamSets.filter((team) => team.conference === groupId);
+  return collectionSetEntries.filter((team) => team.conference === groupId);
 }
 
 function sanitizeProfileName(value) {
@@ -2337,43 +2786,48 @@ function formatAchievementDate(value) {
 }
 
 function getCompletedSetCountForCollectionGroup(groupId) {
-  return getTeamsForCollectionGroup(groupId).filter((team) => state.completedTeams.includes(team.id)).length;
+  const completedSetIds = getCompletedCollectionSetIdSet();
+  return getTeamsForCollectionGroup(groupId).filter((team) => completedSetIds.has(team.id)).length;
 }
 
 function isCollectionGroupComplete(groupId) {
-  const teams = getTeamsForCollectionGroup(groupId);
-  return teams.length > 0 && teams.every((team) => state.completedTeams.includes(team.id));
+  return getCompletedCollectionGroupIdSet().has(groupId);
 }
 
 function getCompletedCollectionCount() {
-  return collectionGroups.filter((group) => isCollectionGroupComplete(group.id)).length;
+  return getCompletedCollectionGroupIdSet().size;
 }
 
 function getCollectionGroupProgress(groupId) {
   const teams = getTeamsForCollectionGroup(groupId);
+  const completedSetIds = getCompletedCollectionSetIdSet();
   return {
     totalSets: teams.length,
-    completedSets: teams.filter((team) => state.completedTeams.includes(team.id)).length,
+    completedSets: teams.filter((team) => completedSetIds.has(team.id)).length,
   };
 }
 
 function createTeamRewardPackDefinition(teamId) {
-  const team = teamById[teamId];
+  const team = collectionSetById[teamId];
   if (!team) return null;
-  const topAbility = cardsByTeam[teamId]?.[0]?.ability || 84;
+  const teamCards = getCardsForCollectionSet(teamId);
+  const topAbility = teamCards?.[0]?.ability || 84;
+  const isSpecialSet = team.collectionSetType === "special";
   return {
     id: `reward-team-${team.id}`,
     templateId: `reward-team-${team.id}`,
-    name: `${team.shortName || team.name} Team Pack`,
+    name: isSpecialSet ? `${team.shortName || team.name} Set Pack` : `${team.shortName || team.name} Team Pack`,
     cost: 0,
     baseCards: 2,
     guaranteedCards: 1,
     guaranteedMinAbility: Math.max(84, Math.min(88, topAbility - 2)),
     accent: team.colors.primary,
     accentSecondary: team.colors.secondary,
-    stamp: "Team Pack",
-    description: `Reward pack with players from ${team.name}.`,
-    poolType: "team",
+    stamp: isSpecialSet ? "Special Set" : "Team Pack",
+    description: isSpecialSet
+      ? `Reward pack with cards from the ${team.name} set.`
+      : `Reward pack with players from ${team.name}.`,
+    poolType: isSpecialSet ? "collection-set" : "team",
     poolId: team.id,
     rewardSource: "set",
     rewardLabel: team.name,
@@ -2387,17 +2841,17 @@ function createCollectionRewardPackDefinition(groupId) {
     return {
       id: "reward-collection-special",
       templateId: "reward-collection-special",
-      name: "Legends Relic Pack",
+      name: "Special Collection Pack",
       cost: 0,
       baseCards: 1,
       guaranteedCards: 1,
-      guaranteedMinAbility: 98,
+      guaranteedMinAbility: 96,
       accent: "#d4ae5d",
       accentSecondary: "#fff1cf",
       stamp: "Collection Pack",
-      description: "One premium legends pull from the Special collection.",
-      poolType: "team",
-      poolId: "hall-of-fame",
+      description: "One premium pull from Legends and the curated special sets.",
+      poolType: "conference",
+      poolId: "Special",
       rewardSource: "collection",
       rewardLabel: group.name,
     };
@@ -2676,7 +3130,7 @@ function closeCollectionGroup() {
 }
 
 function openCollectionTeam(teamId) {
-  const team = teamById[teamId];
+  const team = collectionSetById[teamId];
   if (!team) return;
   collectionSection = "collections";
   activeCollectionGroup = team.conference || activeCollectionGroup;
@@ -2701,7 +3155,7 @@ function closeCollectionTeam() {
 }
 
 function getCollectionTeamNavigation(teamId = activeCollectionTeam) {
-  const team = teamById[teamId];
+  const team = collectionSetById[teamId];
   if (!team) return null;
   const groupId = activeCollectionGroup || team.conference;
   const teams = sortCollectionTeams(getTeamsForCollectionGroup(groupId));
@@ -2736,6 +3190,8 @@ function setCollectionSection(section) {
   if (collectionSection !== "players") {
     isPlayerFilterMenuOpen = false;
     isPlayerBulkSellOpen = false;
+    isPlayerTeamFilterModalOpen = false;
+    playerTeamFilterDraft = [];
   }
   renderCollection();
 }
@@ -2751,7 +3207,7 @@ function setPlayerCollectionSort(sort) {
 }
 
 function setPlayerCollectionTeamFilter(filter) {
-  playerCollectionTeamFilter = normalizeFilterList(filter, (teamId) => Boolean(teamById[teamId]));
+  playerCollectionTeamFilter = normalizeFilterList(filter, (teamId) => Boolean(teamById[teamId]) && teamId !== "hall-of-fame");
   renderCollection();
 }
 
@@ -2773,6 +3229,7 @@ function setPlayerCollectionShowLocked(showLocked) {
 function setPackSection(section) {
   activePackSection = section === "inventory" ? "inventory" : "store";
   renderPackStore();
+  scheduleAccessibilityUiSync();
 }
 
 function getSortedSavedPacks() {
@@ -2887,7 +3344,7 @@ function setBulkSellKeepCopies(value) {
 }
 
 function setBulkSellTeamFilters(teamIds) {
-  bulkSellTeamFilters = normalizeFilterList(teamIds, (teamId) => Boolean(teamById[teamId]));
+  bulkSellTeamFilters = normalizeFilterList(teamIds, (teamId) => Boolean(teamById[teamId]) && teamId !== "hall-of-fame");
   renderCollection();
 }
 
@@ -2899,12 +3356,20 @@ function setBulkSellRarityFilters(rarityIds) {
 function togglePlayerFilterMenu() {
   isPlayerFilterMenuOpen = !isPlayerFilterMenuOpen;
   if (isPlayerFilterMenuOpen) isPlayerBulkSellOpen = false;
+  if (!isPlayerFilterMenuOpen) {
+    isPlayerTeamFilterModalOpen = false;
+    playerTeamFilterDraft = [];
+  }
   renderCollection();
 }
 
 function togglePlayerBulkSellMenu() {
   isPlayerBulkSellOpen = !isPlayerBulkSellOpen;
   if (isPlayerBulkSellOpen) isPlayerFilterMenuOpen = false;
+  if (isPlayerBulkSellOpen) {
+    isPlayerTeamFilterModalOpen = false;
+    playerTeamFilterDraft = [];
+  }
   renderCollection();
 }
 
@@ -2927,6 +3392,7 @@ function openPackModal() {
 
 function closePackModal() {
   if (openingPack) return;
+  clearPackSelloutPrompt();
   activePackPreview = null;
   if (state.lastPack) {
     state.lastPack = null;
@@ -2934,9 +3400,11 @@ function closePackModal() {
   }
   isPackModalOpen = false;
   renderAll();
+  flushCelebrationQueue();
 }
 
 function closeResolvedPackFlow() {
+  clearPackSelloutPrompt();
   isPackModalOpen = false;
   activePackPreview = null;
   if (state.lastPack) {
@@ -2944,22 +3412,31 @@ function closeResolvedPackFlow() {
     saveState();
   }
   renderAll();
+  flushCelebrationQueue();
 }
 
 function closeSetCompletionModal() {
   setCompletionCelebration = null;
   renderAll();
+  flushCelebrationQueue();
 }
 
 function closeDailyRewardModal() {
   dailyChallengeCelebration = null;
   renderAll();
+  flushCelebrationQueue();
 }
 
 function clearOpeningPackDailyProgressTimer(packState = openingPack) {
   if (!packState?.dailyProgressTimer) return;
   window.clearTimeout(packState.dailyProgressTimer);
   packState.dailyProgressTimer = null;
+}
+
+function clearOpeningPackFinalRevealTimer(packState = openingPack) {
+  if (!packState?.finalRevealTimer) return;
+  window.clearTimeout(packState.finalRevealTimer);
+  packState.finalRevealTimer = null;
 }
 
 function scheduleOpeningPackDailyProgressDismiss(packState = openingPack) {
@@ -2975,6 +3452,17 @@ function scheduleOpeningPackDailyProgressDismiss(packState = openingPack) {
   }, 4200);
 }
 
+function scheduleOpeningPackCompletion(packState = openingPack, options = {}) {
+  if (!packState) return;
+  clearOpeningPackFinalRevealTimer(packState);
+  const preloadId = packState.preloadId;
+  const delayMs = Math.max(0, Number(options.delayMs) || PACK_FINAL_REWARD_DELAY_MS);
+  packState.finalRevealTimer = window.setTimeout(() => {
+    if (!openingPack || openingPack.preloadId !== preloadId) return;
+    finishOpeningPack({ deferCelebrations: true });
+  }, delayMs);
+}
+
 function formatPreviewDate(value) {
   const timestamp = Number(value || 0);
   if (!timestamp) return "Not unboxed yet";
@@ -2987,13 +3475,14 @@ function formatPreviewDate(value) {
 
 function getCardPreviewNavigationContext(cardId, options = {}) {
   const explicitContext = options.navigationContext;
-  if (explicitContext?.type === "set" && Array.isArray(explicitContext.cardIds)) {
+  if (Array.isArray(explicitContext?.cardIds)) {
     const cardIds = explicitContext.cardIds.filter((id) => Boolean(cardsById[id]));
     const derivedIndex = cardIds.indexOf(cardId);
     if (cardIds.length > 1 && derivedIndex !== -1) {
       const requestedIndex = Number.isInteger(explicitContext.index) ? explicitContext.index : derivedIndex;
+      const type = explicitContext.type === "players" ? "players" : "set";
       return {
-        type: "set",
+        type,
         teamId: explicitContext.teamId || activeCollectionTeam || "",
         cardIds,
         index: Math.max(0, Math.min(cardIds.length - 1, requestedIndex)),
@@ -3001,8 +3490,21 @@ function getCardPreviewNavigationContext(cardId, options = {}) {
     }
   }
 
-  if (options.collectionMode === true && activeCollectionTeam) {
-    const teamCards = cardsByTeam[activeCollectionTeam] || [];
+  if (options.collectionMode === true && activeView === "players" && collectionSection === "players") {
+    const playerCards = getFilteredPlayerCards();
+    const cardIds = playerCards.map((card) => card.id);
+    const index = cardIds.indexOf(cardId);
+    if (cardIds.length > 1 && index !== -1) {
+      return {
+        type: "players",
+        cardIds,
+        index,
+      };
+    }
+  }
+
+  if (options.collectionMode === true && activeView === "collections" && activeCollectionTeam) {
+    const teamCards = getCardsForCollectionSet(activeCollectionTeam);
     const cardIds = teamCards.map((card) => card.id);
     const index = cardIds.indexOf(cardId);
     if (cardIds.length > 1 && index !== -1) {
@@ -3020,7 +3522,11 @@ function getCardPreviewNavigationContext(cardId, options = {}) {
 
 function getActiveCardPreviewNavigation(preview = activeCardPreview) {
   const navigation = preview?.navigation;
-  if (!navigation || navigation.type !== "set" || !Array.isArray(navigation.cardIds)) return null;
+  if (
+    !navigation
+    || !Array.isArray(navigation.cardIds)
+    || (navigation.type !== "set" && navigation.type !== "players")
+  ) return null;
   const cardIds = navigation.cardIds.filter((id) => Boolean(cardsById[id]));
   if (cardIds.length <= 1) return null;
   const derivedIndex = cardIds.indexOf(preview.cardId);
@@ -3045,7 +3551,11 @@ function resetCardPreviewSwipeState() {
 }
 
 function isCardPreviewCinematicCard(card = cardsById[activeCardPreview?.cardId]) {
-  return card?.rarityId === "legends" || card?.rarityId === "blackmatter";
+  if (!card || activeCardPreview?.owned === false) return false;
+  return card?.isSpecialCard === true
+    || card?.glassShowcase === true
+    || card?.rarityId === "legends"
+    || card?.rarityId === "blackmatter";
 }
 
 function stopCardPreviewAmbientMotion() {
@@ -3106,6 +3616,7 @@ function syncCardPreviewNavigationControls() {
   const hasNavigation = Boolean(navigation);
   const isMobilePreview = isMobilePackRevealMode();
   const supportsCinematic = isMobilePreview && isCardPreviewCinematicCard();
+  const navigationLabel = navigation?.type === "players" ? "your filtered players" : "this set";
   if (cardPreviewStageShellEl) {
     cardPreviewStageShellEl.classList.toggle("has-navigation", hasNavigation);
     cardPreviewStageShellEl.classList.toggle("swipe-enabled", hasNavigation && isMobilePreview);
@@ -3122,9 +3633,9 @@ function syncCardPreviewNavigationControls() {
     cardPreviewHintEl.textContent = hasNavigation
       ? isMobilePreview
         ? supportsCinematic
-          ? "Swipe or use the arrows to move through this set. Tap the card to toggle cinematic mode, or tap outside to close."
-          : "Swipe or use the arrows to move through this set. Tap outside the card to close."
-        : "Use the arrows to move through this set. Click anywhere outside the card to close."
+          ? `Swipe or use the arrows to move through ${navigationLabel}. Tap the card to toggle cinematic mode, or tap outside to close.`
+          : `Swipe or use the arrows to move through ${navigationLabel}. Tap outside the card to close.`
+        : `Use the arrows to move through ${navigationLabel}. Click anywhere outside the card to close.`
       : isMobilePreview
         ? supportsCinematic
           ? "Tap the card to toggle cinematic mode. Tap outside the card to close."
@@ -3158,6 +3669,7 @@ function renderActiveCardPreview() {
     tiltEnabled: true,
     shellClass: "preview-card-shell",
   });
+  scheduleRenderedPlayerImageStateSync(cardPreviewStageEl);
 
   const totalPulls = Number(state.pullCounts?.[activeCardPreview.cardId] || 0);
   const firstUnboxedAt = Number(state.firstPullAt?.[activeCardPreview.cardId] || 0);
@@ -3169,7 +3681,8 @@ function renderActiveCardPreview() {
   const navigationTeam = navigation?.teamId ? teamById[navigation.teamId] : null;
   const metaLines = [];
   if (navigation) {
-    metaLines.push(`<div class="card-preview-meta-line">Set card ${navigation.index + 1}/${navigation.cardIds.length}${navigationTeam ? ` - ${escapeHtml(navigationTeam.name)}` : ""}</div>`);
+    const navigationPrefix = navigation.type === "players" ? "Player" : "Set card";
+    metaLines.push(`<div class="card-preview-meta-line">${escapeHtml(navigationPrefix)} ${navigation.index + 1}/${navigation.cardIds.length}${navigationTeam ? ` - ${escapeHtml(navigationTeam.name)}` : ""}</div>`);
   }
   metaLines.push(`<div class="card-preview-meta-line">First unboxed: ${escapeHtml(firstUnboxedText)}</div>`);
   metaLines.push(`<div class="card-preview-meta-line">Unboxed ${escapeHtml(totalPulls.toLocaleString("en-US"))} ${totalPulls === 1 ? "time" : "times"}</div>`);
@@ -3179,6 +3692,7 @@ function renderActiveCardPreview() {
   syncCardPreviewNavigationControls();
   cardPreviewModalEl.hidden = false;
   syncCardPreviewAmbientMotion();
+  scheduleAccessibilityUiSync();
 }
 
 function stepCardPreview(offset) {
@@ -3220,6 +3734,7 @@ function closeCardPreview() {
     cardPreviewHintEl.textContent = "Click anywhere outside the card to close.";
   }
   syncCardPreviewNavigationControls();
+  scheduleAccessibilityUiSync();
 }
 
 function syncCollectionViewMeta() {
@@ -3232,7 +3747,7 @@ function syncCollectionViewMeta() {
   }
 
   if (activeCollectionTeam) {
-    const team = teamById[activeCollectionTeam];
+    const team = collectionSetById[activeCollectionTeam];
     const parentCollection = collectionGroupById[activeCollectionGroup || team?.conference];
     collectionEyebrowEl.textContent = "Set";
     collectionTitleEl.textContent = team ? `${team.name}.` : "Track set progress.";
@@ -3284,7 +3799,7 @@ function getSectionIdForView(view) {
   return `${view}View`;
 }
 
-function setActiveView(view) {
+function setActiveView(view, options = {}) {
   activeView = view === "collection" || view === "sets" ? "collections" : view;
   if (activeView !== "players") {
     isPlayerFilterMenuOpen = false;
@@ -3305,7 +3820,11 @@ function setActiveView(view) {
       button.removeAttribute("aria-current");
     }
   });
+  if (options.render === false) return;
   if (activeView === "collections" || activeView === "players") renderCollection();
+  if (activeView === "profile") renderProfile();
+  if (activeView === "stats") renderStats();
+  scheduleAccessibilityUiSync();
 }
 
 function shouldApplyStreetPackPity(pack, sourceType = "store") {
@@ -3316,8 +3835,8 @@ function simulatePackOutcome(pack, options = {}) {
   const sourceType = options.sourceType || "store";
   const sourcePool = getEligibleCardsForPack(pack);
   const tempCollection = { ...(state.cardCopies || {}) };
-  const tempCompleted = new Set(state.completedTeams);
-  const tempCompletedCollections = new Set(state.completedCollections || []);
+  const tempCompleted = getCompletedCollectionSetIdSet(tempCollection);
+  const tempCompletedCollections = getCompletedCollectionGroupIdSet(tempCompleted);
   const results = [];
   const completedTeams = [];
   const completedCollections = [];
@@ -3345,18 +3864,20 @@ function simulatePackOutcome(pack, options = {}) {
 
   packCards.forEach((card, index) => {
     const alreadyOwned = Number(tempCollection[card.id] || 0) > 0;
+    const collectionSetId = getCollectionSetIdForCard(card);
+    const collectionSet = collectionSetById[collectionSetId];
     if (!alreadyOwned) {
       tempCollection[card.id] = 1;
-      if (!tempCompleted.has(card.teamId) && isTeamCompleteInCollection(tempCollection, card.teamId)) {
-        const reward = teamById[card.teamId].reward;
-        tempCompleted.add(card.teamId);
+      if (collectionSetId && collectionSet && !tempCompleted.has(collectionSetId) && isTeamCompleteInCollection(tempCollection, collectionSetId)) {
+        const reward = collectionSet.reward;
+        tempCompleted.add(collectionSetId);
         completedTeams.push({
-          teamId: card.teamId,
-          teamName: card.teamName,
+          teamId: collectionSetId,
+          teamName: collectionSet.name,
           reward,
-          rewardPack: createTeamRewardPackDefinition(card.teamId),
+          rewardPack: createTeamRewardPackDefinition(collectionSetId),
         });
-        const collectionId = teamById[card.teamId]?.conference;
+        const collectionId = collectionSet.conference;
         if (collectionId && !tempCompletedCollections.has(collectionId) && isCollectionGroupCompleteFromTeams(tempCompleted, collectionId)) {
           const group = collectionGroupById[collectionId];
           tempCompletedCollections.add(collectionId);
@@ -3396,7 +3917,9 @@ function simulatePackOutcome(pack, options = {}) {
   };
 }
 
-function applyPackOutcome(outcome) {
+function applyPackOutcome(outcome, options = {}) {
+  const deferCelebrations = options.deferCelebrations === true;
+  const storeLastPack = options.storeLastPack !== false;
   state.packsOpened += 1;
   outcome.results.forEach((result) => {
     if (!state.firstPullAt[result.id]) {
@@ -3433,17 +3956,25 @@ function applyPackOutcome(outcome) {
 
   const dailyChallengeUpdate = updateDailyChallengesFromOutcome(outcome);
   if (dailyChallengeUpdate.rewardEntries.length) {
-    dailyChallengeCelebration = {
+    const dailyCelebration = {
       rewards: dailyChallengeUpdate.rewardEntries,
     };
+    if (deferCelebrations) queueCelebration("daily-reward", dailyCelebration);
+    else dailyChallengeCelebration = dailyCelebration;
   }
-  reconcileAchievements({ showCelebration: true });
-  state.lastPack = outcome;
+  const achievementUpdate = reconcileAchievements({ showCelebration: !deferCelebrations });
+  if (deferCelebrations && achievementUpdate.rewardEntries.length) {
+    queueCelebration("achievement-reward", {
+      rewards: achievementUpdate.rewardEntries,
+    });
+  }
+  state.lastPack = storeLastPack ? outcome : null;
   saveState();
 }
 
 function openPack(packId, options = {}) {
   if (openingPack) return;
+  clearPackSelloutPrompt();
   const sourceType = options.sourceType || "store";
   const savedPackId = options.savedPackId || null;
   const previewIndex = Number.isInteger(options.previewIndex) ? options.previewIndex : null;
@@ -3454,6 +3985,7 @@ function openPack(packId, options = {}) {
   if (sourceType === "store" && state.money < pack.cost) return;
   setCompletionCelebration = null;
   dailyChallengeCelebration = null;
+  achievementCelebration = null;
   activePackPreview = null;
   if (sourceType === "store") {
     state.money -= pack.cost;
@@ -3481,9 +4013,11 @@ function openPack(packId, options = {}) {
     flipped: Array.from({ length: outcome.results.length }, () => false),
     revealedCount: 0,
     mobileRevealIndex: 0,
+    desktopKeyboardIndex: 0,
     mobileSwipeLocked: false,
     assetsReady: false,
     preloadId,
+    finalRevealTimer: null,
     setProgress: outcome.setProgress.map((entry) => ({
       ...entry,
       currentOwned: entry.beforeOwned,
@@ -3531,6 +4065,125 @@ function getOpeningPackMobileIndex(packState = openingPack) {
   return nextIndex;
 }
 
+function getOpeningPackDesktopIndex(packState = openingPack) {
+  if (!packState?.outcome?.results?.length) return 0;
+  const lastIndex = packState.outcome.results.length - 1;
+  const nextIndex = Math.max(0, Math.min(lastIndex, Number(packState.desktopKeyboardIndex) || 0));
+  packState.desktopKeyboardIndex = nextIndex;
+  return nextIndex;
+}
+
+function getOpeningPackRevealButtons() {
+  return packRevealGridEl
+    ? [...packRevealGridEl.querySelectorAll("[data-flip-index]")]
+    : [];
+}
+
+function getOpeningPackNextUnrevealedIndex(packState = openingPack, startIndex = 0) {
+  if (!packState?.outcome?.results?.length) return -1;
+  for (let index = Math.max(0, Number(startIndex) || 0); index < packState.outcome.results.length; index += 1) {
+    if (!packState.flipped[index]) return index;
+  }
+  return -1;
+}
+
+function getOpeningPackDesktopActionIndex(packState = openingPack) {
+  if (!packState || isMobilePackRevealMode()) return -1;
+  const currentIndex = getOpeningPackDesktopIndex(packState);
+  if (!packState.flipped[currentIndex]) return currentIndex;
+  const nextIndex = getOpeningPackNextUnrevealedIndex(packState, currentIndex + 1);
+  if (nextIndex !== -1) return nextIndex;
+  return getOpeningPackNextUnrevealedIndex(packState, 0);
+}
+
+function getOpeningPackDesktopColumnCount() {
+  const buttons = getOpeningPackRevealButtons();
+  if (!buttons.length) return 1;
+  const firstTop = buttons[0].getBoundingClientRect().top;
+  let columnCount = 0;
+  buttons.forEach((button) => {
+    if (Math.abs(button.getBoundingClientRect().top - firstTop) <= 10) {
+      columnCount += 1;
+    }
+  });
+  return Math.max(1, columnCount);
+}
+
+function syncDesktopOpeningPackSelection(options = {}) {
+  if (!openingPack || isMobilePackRevealMode()) return;
+  const buttons = getOpeningPackRevealButtons();
+  if (!buttons.length) return;
+  const nextIndex = Math.max(0, Math.min(buttons.length - 1, getOpeningPackDesktopIndex(openingPack)));
+  openingPack.desktopKeyboardIndex = nextIndex;
+  buttons.forEach((button, index) => {
+    const isActive = index === nextIndex;
+    button.tabIndex = isActive ? 0 : -1;
+    button.classList.toggle("keyboard-active", isActive);
+    button.setAttribute("aria-current", isActive ? "true" : "false");
+  });
+  if (options.focus === true) {
+    buttons[nextIndex].focus({ preventScroll: true });
+  }
+}
+
+function setOpeningPackDesktopIndex(index, options = {}) {
+  if (!openingPack || isMobilePackRevealMode()) return false;
+  const buttons = getOpeningPackRevealButtons();
+  if (!buttons.length) return false;
+  const nextIndex = Math.max(0, Math.min(buttons.length - 1, Number(index) || 0));
+  const changed = openingPack.desktopKeyboardIndex !== nextIndex;
+  openingPack.desktopKeyboardIndex = nextIndex;
+  syncDesktopOpeningPackSelection({
+    focus: options.focus === true,
+  });
+  return changed;
+}
+
+function stepOpeningPackDesktopSelection(direction) {
+  if (!openingPack || isMobilePackRevealMode()) return false;
+  const currentIndex = getOpeningPackDesktopIndex(openingPack);
+  const columns = getOpeningPackDesktopColumnCount();
+  const offset = direction === "left"
+    ? -1
+    : direction === "right"
+      ? 1
+      : direction === "up"
+        ? -columns
+        : direction === "down"
+          ? columns
+          : 0;
+  if (!offset) return false;
+  return setOpeningPackDesktopIndex(currentIndex + offset, { focus: true });
+}
+
+function isSingleCardPack(packState = openingPack) {
+  return Boolean(packState?.outcome?.results?.length === 1);
+}
+
+function shouldShowSingleCardPackContinue(packState = openingPack) {
+  return Boolean(packState?.assetsReady && isSingleCardPack(packState) && packState.revealedCount >= 1);
+}
+
+function shouldAllowPackRevealSkip(packState = openingPack) {
+  if (!packState?.assetsReady) return false;
+  return packState.revealedCount < (packState.outcome?.results?.length || 0);
+}
+
+function shouldShowOpeningPackPrimaryAction(packState = openingPack) {
+  if (!packState) return false;
+  if (!packState.assetsReady) return true;
+  if (shouldShowSingleCardPackContinue(packState)) return true;
+  if (isMobilePackRevealMode()) return true;
+  return packState.revealedCount < packState.outcome.results.length;
+}
+
+function isOpeningPackPrimaryActionEnabled(packState = openingPack) {
+  if (!packState?.assetsReady) return false;
+  if (shouldShowSingleCardPackContinue(packState)) return true;
+  if (isMobilePackRevealMode()) return true;
+  return packState.revealedCount < packState.outcome.results.length;
+}
+
 function revealPackCardState(index, options = {}) {
   if (!openingPack || openingPack.flipped[index]) return false;
   const result = openingPack.outcome.results[index];
@@ -3538,7 +4191,7 @@ function revealPackCardState(index, options = {}) {
   openingPack.revealedCount += 1;
   if (options.updateProgress !== false) updateRevealProgress();
   if (options.showSetProgress !== false && result?.isNew) {
-    markRevealSetProgress(result.teamId);
+    markRevealSetProgress(getCollectionSetIdForCard(result));
   }
   return true;
 }
@@ -3550,6 +4203,59 @@ function shouldShowMobilePackContinue(packState = openingPack) {
   return currentIndex === lastIndex && Boolean(packState.flipped[currentIndex]);
 }
 
+function shouldShowMobilePackAdvanceAction(packState = openingPack) {
+  if (!packState || !isMobilePackRevealMode() || !packState.assetsReady) return false;
+  const currentIndex = getOpeningPackMobileIndex(packState);
+  return Boolean(packState.flipped[currentIndex]);
+}
+
+function shouldShowPackContinue(packState = openingPack) {
+  return shouldShowSingleCardPackContinue(packState) || shouldShowMobilePackContinue(packState);
+}
+
+function getOpeningPackPrimaryActionLabel(packState = openingPack) {
+  if (!packState) return "Open Pack";
+  if (!packState.assetsReady) return "Loading Cards";
+  if (shouldShowSingleCardPackContinue(packState)) return "Continue";
+  if (isMobilePackRevealMode()) {
+    const currentIndex = getOpeningPackMobileIndex(packState);
+    if (!packState.flipped[currentIndex]) return "Reveal Card";
+    if (shouldShowMobilePackContinue(packState)) return "Continue";
+    return "Next Card";
+  }
+  if (packState.revealedCount < packState.outcome.results.length) {
+    return "Reveal Card";
+  }
+  return "Continue";
+}
+
+function getOpeningPackContinueHint(packState = openingPack) {
+  if (shouldShowSingleCardPackContinue(packState)) {
+    return "Tap continue to leave the pack and return to the app.";
+  }
+  if (shouldShowMobilePackContinue(packState)) {
+    return "Tap continue to open the full pack overview.";
+  }
+  if (shouldShowMobilePackAdvanceAction(packState)) {
+    return "Swipe or tap Next Card to move through the stack.";
+  }
+  return "Swipe to move to the next revealed card.";
+}
+
+function getOpeningPackDesktopHint(packState = openingPack) {
+  if (!packState) return "";
+  if (!packState.assetsReady) {
+    return "Loading player cards first so each reveal is instant.";
+  }
+  if (shouldShowSingleCardPackContinue(packState)) {
+    return "Press Space or click Continue to leave the pack and return to your club.";
+  }
+  if (packState.revealedCount >= packState.outcome.results.length) {
+    return "Finalizing the pack reveal.";
+  }
+  return "Use the arrow keys to move through the pack. Press Space or click Reveal Card, or hold to skip the reveal.";
+}
+
 function getOpeningPackMobileHint(packState = openingPack) {
   if (!packState) return "";
   if (!packState.assetsReady) {
@@ -3557,12 +4263,59 @@ function getOpeningPackMobileHint(packState = openingPack) {
   }
   const currentIndex = getOpeningPackMobileIndex(packState);
   if (!packState.flipped[currentIndex]) {
-    return "Tap the first card to reveal it.";
+    return "Tap to reveal.";
+  }
+  return getOpeningPackContinueHint(packState);
+}
+
+function getMobilePackStageStatus(packState = openingPack) {
+  if (!packState) return "";
+  const totalCards = packState.outcome?.results?.length || 0;
+  const currentIndex = getOpeningPackMobileIndex(packState);
+  const remainingCount = Math.max(0, totalCards - currentIndex - 1);
+  if (shouldShowSingleCardPackContinue(packState)) {
+    return "Ready to continue";
   }
   if (shouldShowMobilePackContinue(packState)) {
-    return "Tap continue to open the full pack overview.";
+    return "Ready for overview";
   }
-  return "Swipe to move to the next revealed card.";
+  if (remainingCount > 0) {
+    return `${remainingCount} card${remainingCount === 1 ? "" : "s"} behind`;
+  }
+  return "Last card";
+}
+
+function syncOpeningPackActionState(packState = openingPack) {
+  if (!revealAllCardsEl) return;
+  revealAllCardsEl.textContent = getOpeningPackPrimaryActionLabel(packState);
+  revealAllCardsEl.hidden = !shouldShowOpeningPackPrimaryAction(packState);
+  revealAllCardsEl.disabled = !isOpeningPackPrimaryActionEnabled(packState);
+  revealAllCardsEl.classList.toggle("hold-skip-enabled", shouldAllowPackRevealSkip(packState));
+  revealAllCardsEl.setAttribute(
+    "aria-label",
+    shouldAllowPackRevealSkip(packState)
+      ? `${getOpeningPackPrimaryActionLabel(packState)}. Hold to skip the pack reveal.`
+      : getOpeningPackPrimaryActionLabel(packState),
+  );
+}
+
+function syncMobilePackStageCopy(packState = openingPack) {
+  if (!packState || !packRevealGridEl?.classList.contains("mobile-pack-flow")) return;
+  const stageStatusEl = packRevealGridEl.querySelector("[data-mobile-pack-stage-status]");
+  const stageHintEl = packRevealGridEl.querySelector("[data-mobile-pack-stage-hint]");
+  const currentIndex = getOpeningPackMobileIndex(packState);
+  if (stageStatusEl) stageStatusEl.textContent = getMobilePackStageStatus(packState);
+  if (stageHintEl) {
+    stageHintEl.textContent = !packState.assetsReady
+      ? "Loading cards..."
+      : !packState.flipped[currentIndex]
+        ? "Tap to reveal"
+        : shouldShowSingleCardPackContinue(packState)
+          ? "Continue"
+          : shouldShowMobilePackContinue(packState)
+            ? "Continue to overview"
+            : "Swipe or tap Next Card";
+  }
 }
 
 function buildMobilePackStackCard(depth, options = {}) {
@@ -3596,26 +4349,23 @@ function buildMobilePackRevealStage(packState) {
   const currentIndex = getOpeningPackMobileIndex(packState);
   const currentResult = packState.outcome.results[currentIndex];
   const flipped = Boolean(packState.flipped[currentIndex]);
-  const remainingCount = Math.max(0, totalCards - currentIndex - 1);
   const nextIndex = currentIndex + 1;
   const hasNextCard = nextIndex < totalCards;
-  const trailingCount = Math.max(0, remainingCount - (hasNextCard ? 1 : 0));
+  const trailingCount = Math.max(0, totalCards - currentIndex - 1 - (hasNextCard ? 1 : 0));
   const trailingPreviewCount = Math.min(
     Math.max(0, MOBILE_PACK_STACK_PREVIEW_COUNT - (hasNextCard ? 1 : 0)),
     trailingCount,
   );
-  const stageStatus = shouldShowMobilePackContinue(packState)
-    ? "Ready for overview"
-    : remainingCount > 0
-    ? `${remainingCount} card${remainingCount === 1 ? "" : "s"} behind`
-    : "Last card";
+  const stageStatus = getMobilePackStageStatus(packState);
   const stageHint = !packState.assetsReady
     ? "Loading cards..."
     : !flipped
       ? "Tap to reveal"
-      : shouldShowMobilePackContinue(packState)
-        ? "Continue to overview"
-        : "Swipe for next card";
+      : shouldShowSingleCardPackContinue(packState)
+        ? "Continue"
+        : shouldShowMobilePackContinue(packState)
+          ? "Continue to overview"
+          : "Swipe or tap Next Card";
 
   return `
     <div class="mobile-pack-stage">
@@ -3635,8 +4385,8 @@ function buildMobilePackRevealStage(packState) {
         ${buildInteractiveRevealCard(currentResult, currentIndex, flipped, packState.assetsReady)}
       </div>
       <div class="mobile-pack-stage-footer">
-        <span class="mobile-pack-stage-chip">${escapeHtml(stageStatus)}</span>
-        <span class="mobile-pack-stage-hint">${escapeHtml(stageHint)}</span>
+        <span class="mobile-pack-stage-chip" data-mobile-pack-stage-status>${escapeHtml(stageStatus)}</span>
+        <span class="mobile-pack-stage-hint" data-mobile-pack-stage-hint role="status" aria-live="polite">${escapeHtml(stageHint)}</span>
       </div>
     </div>
   `;
@@ -3658,6 +4408,62 @@ function advanceMobilePackReveal() {
     });
   }
   renderPackArea();
+}
+
+function triggerOpeningPackPrimaryAction() {
+  if (!openingPack || !openingPack.assetsReady) return false;
+  if (shouldShowSingleCardPackContinue(openingPack)) {
+    revealAllPackCards();
+    return true;
+  }
+  if (isMobilePackRevealMode()) {
+    const currentIndex = getOpeningPackMobileIndex(openingPack);
+    if (!openingPack.flipped[currentIndex]) {
+      const currentButton = packRevealGridEl?.querySelector(`[data-flip-index="${currentIndex}"]`);
+      if (!currentButton) return false;
+      flipPackCard(currentButton, currentIndex);
+      return true;
+    }
+    revealAllPackCards();
+    return true;
+  }
+  const targetIndex = getOpeningPackDesktopActionIndex(openingPack);
+  if (targetIndex === -1) return false;
+  const targetButton = packRevealGridEl?.querySelector(`[data-flip-index="${targetIndex}"]`);
+  if (!targetButton || targetButton.getAttribute("aria-disabled") !== "false") return false;
+  setOpeningPackDesktopIndex(targetIndex, { focus: true });
+  flipPackCard(targetButton, targetIndex);
+  return true;
+}
+
+function triggerPackPrimaryAction() {
+  if (openingPack) return triggerOpeningPackPrimaryAction();
+  if (!openAnotherPackEl.hidden && !openAnotherPackEl.disabled) {
+    reopenCurrentPack();
+    return true;
+  }
+  return false;
+}
+
+function skipOpeningPackReveal() {
+  if (!openingPack || !openingPack.assetsReady) return false;
+  const packState = openingPack;
+  packState.outcome.results.forEach((_, index) => {
+    revealPackCardState(index, {
+      updateProgress: false,
+      showSetProgress: false,
+    });
+  });
+  if (isSingleCardPack(packState)) {
+    finishOpeningPack({
+      deferCelebrations: true,
+      closeAfter: true,
+      storeLastPack: false,
+    });
+    return true;
+  }
+  finishOpeningPack({ deferCelebrations: true });
+  return true;
 }
 
 function bindMobilePackSwipe(cardSlot, index) {
@@ -3820,6 +4626,7 @@ function renderRevealSetProgress() {
   if (!revealSetProgressEl) return;
   if (activePackPreview) {
     revealSetProgressEl.hidden = true;
+    revealSetProgressEl.classList.remove("compact-mobile");
     revealSetProgressEl.innerHTML = "";
     return;
   }
@@ -3838,22 +4645,43 @@ function renderRevealSetProgress() {
 
   if (!entries.length) {
     revealSetProgressEl.hidden = true;
+    revealSetProgressEl.classList.remove("compact-mobile");
     revealSetProgressEl.innerHTML = "";
     return;
   }
 
+  const compactMobileProgress = Boolean(openingPack) && isMobilePackRevealMode();
+  const visibleEntries = compactMobileProgress && entries.length > MAX_MOBILE_PACK_SET_PROGRESS_CHIPS
+    ? entries.slice(0, MAX_MOBILE_PACK_SET_PROGRESS_CHIPS)
+    : entries;
+  const overflowEntries = visibleEntries.length < entries.length
+    ? entries.slice(visibleEntries.length)
+    : [];
   revealSetProgressEl.hidden = false;
-  revealSetProgressEl.innerHTML = entries.map((entry) =>
-    buildRevealSetProgressChip(entry, {
-      currentOwned: openingPack ? entry.currentOwned : entry.afterOwned,
-    }),
-  ).join("");
+  revealSetProgressEl.classList.toggle("compact-mobile", compactMobileProgress);
+  revealSetProgressEl.innerHTML = [
+    ...visibleEntries.map((entry) =>
+      buildRevealSetProgressChip(entry, {
+        currentOwned: openingPack ? entry.currentOwned : entry.afterOwned,
+      }),
+    ),
+    overflowEntries.length ? `
+      <article class="reveal-set-progress-chip summary">
+        <div class="reveal-progress-summary">
+          <span class="mini-tag">Sets</span>
+          <strong>+${overflowEntries.length} more</strong>
+          <span>${overflowEntries.length === 1 ? "extra set updated" : "extra sets updated"}</span>
+        </div>
+      </article>
+    ` : "",
+  ].join("");
 }
 
 function renderRevealDailyProgress() {
   if (!revealDailyProgressEl) return;
   if (activePackPreview) {
     revealDailyProgressEl.hidden = true;
+    revealDailyProgressEl.classList.remove("compact-mobile");
     revealDailyProgressEl.innerHTML = "";
     return;
   }
@@ -3863,11 +4691,29 @@ function renderRevealDailyProgress() {
 
   if (!entries.length) {
     revealDailyProgressEl.hidden = true;
+    revealDailyProgressEl.classList.remove("compact-mobile");
     revealDailyProgressEl.innerHTML = "";
     return;
   }
 
+  const compactMobileProgress = Boolean(openingPack) && isMobilePackRevealMode() && entries.length > 1;
   revealDailyProgressEl.hidden = false;
+  revealDailyProgressEl.classList.toggle("compact-mobile", compactMobileProgress);
+  if (compactMobileProgress) {
+    const completedCount = entries.filter((entry) => entry.completedNow).length;
+    revealDailyProgressEl.innerHTML = `
+      <article class="reveal-daily-progress-chip summary">
+        <div class="reveal-daily-progress-top">
+          <span class="mini-tag success">Dailies</span>
+          <span class="reveal-daily-progress-count">${entries.length} updated</span>
+          <span class="reveal-daily-progress-tag">${completedCount ? `${completedCount} complete` : "In progress"}</span>
+        </div>
+        <div class="reveal-daily-progress-name">Daily challenge progress moved while this pack was opening.</div>
+      </article>
+    `;
+    return;
+  }
+
   revealDailyProgressEl.innerHTML = entries.map((entry) => {
     const progressTag = entry.completedNow ? "Pack Added" : `+${entry.increment}`;
     return `
@@ -3905,19 +4751,26 @@ function markRevealSetProgress(teamId) {
   }, 760);
 }
 
-function finishOpeningPack() {
+function finishOpeningPack(options = {}) {
   if (!openingPack) return;
   clearOpeningPackDailyProgressTimer(openingPack);
+  clearOpeningPackFinalRevealTimer(openingPack);
   const outcome = openingPack.outcome;
+  const deferCelebrations = options.deferCelebrations === true;
+  const closeAfter = options.closeAfter === true;
+  const storeLastPack = options.storeLastPack !== false;
   openingPack = null;
-  applyPackOutcome(outcome);
-  if (outcome.completedTeams.length || outcome.completedCollections.length) {
-    setCompletionCelebration = {
+  applyPackOutcome(outcome, {
+    deferCelebrations,
+    storeLastPack,
+  });
+  const setCompletionData = outcome.completedTeams.length || outcome.completedCollections.length
+    ? {
       teams: outcome.completedTeams.map((entry) => {
-        const team = teamById[entry.teamId];
+        const team = collectionSetById[entry.teamId];
         return {
           ...entry,
-          totalCards: cardsByTeam[entry.teamId]?.length || 0,
+          totalCards: getCardsForCollectionSet(entry.teamId).length,
           colors: team?.colors || { primary: "#c89a2d", secondary: "#f3d67f" },
         };
       }),
@@ -3934,7 +4787,18 @@ function finishOpeningPack() {
         ...outcome.completedTeams,
         ...outcome.completedCollections,
       ].filter((entry) => entry.grantedPack).length,
-    };
+    }
+    : null;
+  if (setCompletionData) {
+    if (deferCelebrations) queueCelebration("set-completion", setCompletionData);
+    else setCompletionCelebration = setCompletionData;
+  }
+  if (closeAfter) {
+    isPackModalOpen = false;
+    activePackPreview = null;
+    renderAll();
+    flushCelebrationQueue();
+    return;
   }
   renderAll();
 }
@@ -3942,6 +4806,31 @@ function finishOpeningPack() {
 function getPendingDuplicateResults() {
   if (!state.lastPack) return [];
   return state.lastPack.results.filter((result) => !result.isNew && result.duplicateDecision !== "sold");
+}
+
+function getVisibleLastPackResultEntries() {
+  if (!state.lastPack) return [];
+  return state.lastPack.results
+    .map((result, sourceIndex) => ({ result, sourceIndex }))
+    .filter(({ result }) => result.isNew || result.duplicateDecision !== "sold");
+}
+
+function getResolvedRepeatPack() {
+  if (!state.lastPack) return null;
+  return packById[state.lastPack.repeatableStorePackId || state.lastPack.packId] || null;
+}
+
+function clearPackSelloutPrompt() {
+  packSelloutPrompt = null;
+}
+
+function maybeOpenPackSelloutPrompt() {
+  if (!state.lastPack || openingPack) return false;
+  if (getVisibleLastPackResultEntries().length > 0) return false;
+  packSelloutPrompt = {
+    openedAt: Date.now(),
+  };
+  return true;
 }
 
 function getPendingDuplicateSaleTotal() {
@@ -3980,6 +4869,10 @@ function sellPackDuplicate(index) {
   result.duplicateDecision = "sold";
   state.lastPack.duplicateCash = (state.lastPack.duplicateCash || 0) + result.saleValue;
   saveState();
+  if (maybeOpenPackSelloutPrompt()) {
+    renderAll();
+    return;
+  }
   renderAll();
 }
 
@@ -4007,6 +4900,10 @@ function sellAllPendingDuplicates(options = {}) {
     return;
   }
   if (!soldAny) return;
+  if (maybeOpenPackSelloutPrompt()) {
+    renderAll();
+    return;
+  }
   renderAll();
 }
 
@@ -4066,11 +4963,24 @@ function sellBulkDuplicates(cards, config) {
 
 function revealAllPackCards() {
   if (!openingPack || !openingPack.assetsReady) return;
-  if (shouldShowMobilePackContinue(openingPack)) {
-    finishOpeningPack();
+  if (shouldShowSingleCardPackContinue(openingPack)) {
+    finishOpeningPack({
+      deferCelebrations: true,
+      closeAfter: true,
+      storeLastPack: false,
+    });
     return;
   }
-  if (isMobilePackRevealMode()) return;
+  if (shouldShowMobilePackContinue(openingPack)) {
+    finishOpeningPack({ deferCelebrations: true });
+    return;
+  }
+  if (isMobilePackRevealMode()) {
+    if (shouldShowMobilePackAdvanceAction(openingPack)) {
+      advanceMobilePackReveal();
+    }
+    return;
+  }
   revealAllCardsEl.disabled = true;
   const revealButtons = [...packRevealGridEl.querySelectorAll("[data-flip-index]")].filter((button) => button.getAttribute("aria-disabled") === "false");
   revealButtons.forEach((button, index) => {
@@ -4100,6 +5010,14 @@ function flipPackCard(button, index) {
   const settleDelay = suspenseDelay + revealDuration;
   const shell = button.closest(".card-shell");
   const priceRevealDelay = Math.max(suspenseDelay + 260, settleDelay - 220);
+  if (!isMobilePackRevealMode()) {
+    const nextKeyboardIndex = getOpeningPackNextUnrevealedIndex(openingPack, index + 1);
+    if (nextKeyboardIndex !== -1) {
+      setOpeningPackDesktopIndex(nextKeyboardIndex, { focus: true });
+    } else {
+      setOpeningPackDesktopIndex(index, { focus: false });
+    }
+  }
 
   if (isPremiumReveal) {
     button.classList.add("pre-reveal-charge");
@@ -4110,11 +5028,10 @@ function flipPackCard(button, index) {
     button.classList.add("flipped", "just-flipped", "is-revealed");
     updateRevealProgress();
     if (isMobilePackRevealMode() && getOpeningPackMobileIndex(openingPack) === index) {
-      revealSubtitleEl.textContent = shouldShowMobilePackContinue(openingPack)
-        ? "Tap continue to open the full pack overview."
-        : "Swipe to move to the next revealed card.";
+      syncMobilePackStageCopy(openingPack);
+      syncOpeningPackActionState(openingPack);
     }
-    if (result?.isNew) markRevealSetProgress(result.teamId);
+    if (result?.isNew) markRevealSetProgress(getCollectionSetIdForCard(result));
   }, suspenseDelay);
 
   window.setTimeout(() => {
@@ -4127,7 +5044,11 @@ function flipPackCard(button, index) {
   window.setTimeout(() => {
     button.classList.remove("just-flipped");
     if (openingPack && openingPack.revealedCount === openingPack.outcome.results.length && !isMobilePackRevealMode()) {
-      finishOpeningPack();
+      if (shouldShowSingleCardPackContinue(openingPack)) {
+        renderPackArea();
+      } else {
+        scheduleOpeningPackCompletion(openingPack);
+      }
     }
   }, settleDelay);
 }
@@ -4187,6 +5108,7 @@ function resetGame() {
   setCompletionCelebration = null;
   dailyChallengeCelebration = null;
   achievementCelebration = null;
+  pendingCelebrationQueue = [];
   isFavoriteTeamModalOpen = true;
   saveState();
   renderAll();
@@ -4326,6 +5248,7 @@ function renderDailyChallenges() {
     dailyChallengeMobileBonusEl.classList.toggle("completed", Boolean(state.dailyChallenges.bonusGranted));
     dailyChallengeMobileBonusEl.innerHTML = bonusMarkup;
   }
+  scheduleAccessibilityUiSync();
 }
 
 function renderClicker() {
@@ -4389,7 +5312,7 @@ function renderPackSummary() {
     .sort((left, right) => right.guaranteedMinAbility - left.guaranteedMinAbility)[0];
   const latestSales = state.lastPack ? state.lastPack.duplicateCash : 0;
   packSummaryEl.innerHTML = buildPackSummaryStrip([
-    { label: "Card Pool", value: String(cardCatalog.length), meta: `${teamSets.length} total sets` },
+    { label: "Card Pool", value: String(cardCatalog.length), meta: `${collectionSetEntries.length} total sets` },
     { label: "Pack Lineup", value: String(packTypes.length), meta: "Street Pack stays free forever" },
     { label: "Top Guarantee", value: bestPack ? `${bestPack.guaranteedMinAbility}+ OVR` : "None", meta: bestPack ? bestPack.name : "No guaranteed pack" },
     { label: "Latest Sales", value: state.lastPack ? formatMoney(latestSales) : "0M", meta: "Duplicate cards sold from the latest pack" },
@@ -4691,13 +5614,15 @@ function renderPackStore() {
 
 function buildPlayerArt(card, options = {}) {
   const lazy = options.lazy !== false;
+  const hideImage = options.hideImage === true;
   const imageMode = options.imageMode === "preview" ? "preview" : "card";
+  const forceFullRes = options.forceFullRes === true;
   const overlayStart = options.overlayStart || "";
   const overlayEnd = options.overlayEnd || "";
   const overlayBottomEnd = options.overlayBottomEnd || "";
   const logoUrl = getTeamLogoUrl(card.teamId);
   const artGradientEnd = getTeamArtGradientEnd(card.teamColors.primary);
-  const imageAsset = getPlayerImageAsset(card.image, { mode: imageMode });
+  const imageAsset = hideImage ? null : getPlayerImageAsset(card.image, { mode: imageMode, forceFullRes });
   const imageStyles = [];
   if (card.imagePosition) imageStyles.push(`object-position:${escapeHtml(card.imagePosition)}`);
   if (card.imageScale && Math.abs(card.imageScale - 1) > 0.001) imageStyles.push(`transform:scale(${card.imageScale.toFixed(3)})`);
@@ -4712,7 +5637,7 @@ function buildPlayerArt(card, options = {}) {
     : "";
   return `
     <div
-      class="player-art"
+      class="player-art ${hideImage ? "image-fallback" : ""}"
       style="--team-primary:${card.teamColors.primary}; --team-secondary:${card.teamColors.secondary}; --team-art-end:${artGradientEnd}; --rarity-line:${normalizeColor(card.rarityColor)}; --rarity-tint:${withAlpha(card.rarityColor, 0.22)}; --team-logo:${logoUrl ? `url('${escapeHtml(logoUrl)}')` : "none"};"
     >
       ${overlayStart ? `<div class="player-art-overlay start">${overlayStart}</div>` : ""}
@@ -4722,18 +5647,20 @@ function buildPlayerArt(card, options = {}) {
         <div class="player-art-bg"></div>
         ${backdropMarkup}
         <div class="player-art-fallback" aria-hidden="true"></div>
-        <img
-          data-player-image
-          loading="${lazy ? "lazy" : "eager"}"
-          fetchpriority="${lazy ? "auto" : "high"}"
-          decoding="async"
-          src="${escapeHtml(imageAsset.src || card.image)}"
-          ${imageAsset.srcset ? `srcset="${escapeHtml(imageAsset.srcset)}"` : ""}
-          ${imageAsset.sizes ? `sizes="${escapeHtml(imageAsset.sizes)}"` : ""}
-          ${imageAsset.fallbackSrc ? `data-player-image-fallback-src="${escapeHtml(imageAsset.fallbackSrc)}"` : ""}
-          alt="${escapeHtml(card.name)}"
-          ${imageStyles.length ? `style="${imageStyles.join(";")}"` : ""}
-        >
+        ${hideImage ? "" : `
+          <img
+            data-player-image
+            loading="${lazy ? "lazy" : "eager"}"
+            fetchpriority="${lazy ? "auto" : "high"}"
+            decoding="async"
+            src="${escapeHtml(imageAsset?.src || card.image)}"
+            ${imageAsset?.srcset ? `srcset="${escapeHtml(imageAsset.srcset)}"` : ""}
+            ${imageAsset?.sizes ? `sizes="${escapeHtml(imageAsset.sizes)}"` : ""}
+            ${imageAsset?.fallbackSrc ? `data-player-image-fallback-src="${escapeHtml(imageAsset.fallbackSrc)}"` : ""}
+            alt="${escapeHtml(card.name)}"
+            ${imageStyles.length ? `style="${imageStyles.join(";")}"` : ""}
+          >
+        `}
       </div>
     </div>
   `;
@@ -4759,10 +5686,12 @@ const RARITY_FRAME_PATH_LENGTH = RARITY_FRAME_LOOP_LENGTH * 2;
 const RARITY_FRAME_TAG_CHAR_WIDTH = 2.05;
 const RARITY_FRAME_TAG_GAP = 16;
 const RARITY_FRAME_LOOP_SECONDS = 20;
+const RARITY_FRAME_MAX_FPS = 30;
+const RARITY_FRAME_FRAME_INTERVAL_MS = 1000 / RARITY_FRAME_MAX_FPS;
 const RARITY_FRAME_VIEWBOX_WIDTH = 100;
 const RARITY_FRAME_VIEWBOX_HEIGHT = 140;
-const RARITY_FRAME_INSET = 2.15;
-const RARITY_FRAME_RADIUS = 12.2;
+const RARITY_FRAME_INSET = 2.08;
+const RARITY_FRAME_RADIUS = 13.72;
 const RARITY_FRAME_PATH_D = [
   `M${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)} ${RARITY_FRAME_INSET.toFixed(2)}`,
   `H${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,
@@ -4779,9 +5708,11 @@ const RARITY_FRAME_DOUBLE_PATH_D = `${RARITY_FRAME_PATH_D} ${RARITY_FRAME_PATH_D
 
 function getRarityFrameSlotCount(label) {
   const compactViewport = typeof window !== "undefined" && window.matchMedia("(max-width: 620px)").matches;
+  const ultraCompactViewport = typeof window !== "undefined" && window.matchMedia("(max-width: 430px)").matches;
+  const slotScale = ultraCompactViewport ? 1.78 : compactViewport ? 1.58 : 1;
   const slotWidth = Math.max(
     24,
-    ((label.length * RARITY_FRAME_TAG_CHAR_WIDTH) + RARITY_FRAME_TAG_GAP) * (compactViewport ? 1.24 : 1),
+    ((label.length * RARITY_FRAME_TAG_CHAR_WIDTH) + RARITY_FRAME_TAG_GAP) * slotScale,
   );
   return Math.max(10, Math.floor(RARITY_FRAME_LOOP_LENGTH / slotWidth));
 }
@@ -4984,6 +5915,8 @@ function buildCardFace(result, options = {}) {
   });
   const explicitShowRating = typeof result.showRating === "boolean" ? result.showRating : null;
   const shouldShowRating = explicitShowRating === null ? result.visibleAbility != null : explicitShowRating;
+  const artImageMode = previewMode || isCuratedSpecialFullArt ? "preview" : "card";
+  const forceHighResArt = isCuratedSpecialFullArt;
   const ratingValue = isMissing ? "?" : escapeHtml(String(result.visibleAbility ?? result.ability));
   const ratingBadge = shouldShowRating ? `
     <div class="rating-badge">
@@ -5008,7 +5941,9 @@ function buildCardFace(result, options = {}) {
       ${buildRarityFrame(rarityFrameLabel)}
       ${buildPlayerArt(result, {
         lazy: collectionMode && !previewMode,
-        imageMode: previewMode ? "preview" : "card",
+        hideImage: false,
+        imageMode: artImageMode,
+        forceFullRes: forceHighResArt,
         overlayStart: ratingBadge,
         overlayEnd: topStatus,
       })}
@@ -5097,7 +6032,7 @@ function buildInteractiveRevealCard(result, index, flipped, assetsReady = true) 
   const idlePackGlowOpacity = getPackIdleGlowOpacity(visualRarityId);
   const hoverPackGlowOpacity = getPackHoverGlowOpacity(visualRarityId);
   return `
-    <div class="card-shell interactive-card-shell ${flipped ? "revealed" : ""}" style="--rarity-line:${normalizeColor(visualRarityColor)}; --rarity-glow:${withAlpha(visualRarityColor, 0.42)}; --pack-aura:${packAura}; --card-shell-glow-opacity:${shellGlowOpacity};">
+    <div class="card-shell interactive-card-shell pack-reveal-card-shell ${flipped ? "revealed" : ""}" style="--rarity-line:${normalizeColor(visualRarityColor)}; --rarity-glow:${withAlpha(visualRarityColor, 0.42)}; --pack-aura:${packAura}; --card-shell-glow-opacity:${shellGlowOpacity};">
     <button
       type="button"
       class="flip-card pack-entry ${rarityClass} ${showcaseClass} ${premiumRevealClass} ${assetsReady ? "" : "assets-pending"} ${flipped ? "flipped is-revealed" : ""}"
@@ -5117,6 +6052,7 @@ function buildInteractiveRevealCard(result, index, flipped, assetsReady = true) 
         </div>
       </div>
     </button>
+    <div class="card-action-row pack-reveal-action-row" aria-hidden="true"></div>
   </div>
   `;
 }
@@ -5175,10 +6111,15 @@ function buildMobilePackOverviewDuplicateGroup(duplicateEntries = []) {
 }
 
 function buildMobilePackOverviewCarousel(results = []) {
-  const rankedEntries = results.map((result, index) => ({
-    result,
-    sourceIndex: index,
-  }));
+  const rankedEntries = results.map((entry, index) => entry?.result
+    ? {
+      result: entry.result,
+      sourceIndex: Number.isInteger(entry.sourceIndex) ? entry.sourceIndex : index,
+    }
+    : {
+      result: entry,
+      sourceIndex: index,
+    });
   const newEntries = rankedEntries.filter((entry) => entry.result.isNew).sort(comparePackOverviewEntries);
   const duplicateEntries = rankedEntries.filter((entry) => !entry.result.isNew).sort(comparePackOverviewEntries);
   const slides = [
@@ -5199,7 +6140,7 @@ function scheduleMobilePackOverviewCenter(force = false) {
   if (!packRevealGridEl?.classList.contains("mobile-pack-overview-carousel") || !state.lastPack) return;
   const centerTarget = packRevealGridEl.querySelector(".mobile-pack-overview-slide, .mobile-pack-overview-divider");
   if (!centerTarget) return;
-  const overviewKey = `${state.lastPack.openedAt || 0}:${state.lastPack.results.length}`;
+  const overviewKey = `${state.lastPack.openedAt || 0}:${getVisibleLastPackResultEntries().length}`;
   if (!force && packRevealGridEl.dataset.mobileOverviewCenteredKey === overviewKey) return;
   packRevealGridEl.dataset.mobileOverviewCenteredKey = overviewKey;
   if (mobilePackOverviewCenterFrame) {
@@ -5228,12 +6169,17 @@ function renderPackArea() {
   const hasRevealContent = Boolean(openingPack || state.lastPack || previewContext);
   const isMobileOpeningPack = Boolean(openingPack) && isMobilePackRevealMode();
   const isMobileResolvedPack = !openingPack && !isPreviewMode && Boolean(state.lastPack) && isMobilePackRevealMode();
+  const isDesktopOpeningPack = Boolean(openingPack) && !isMobilePackRevealMode();
+  const isDesktopResolvedPack = !openingPack && !isPreviewMode && Boolean(state.lastPack) && !isMobilePackRevealMode();
   const showMobilePackContinue = isMobileOpeningPack && shouldShowMobilePackContinue(openingPack);
+  const showSingleCardContinue = Boolean(openingPack) && shouldShowSingleCardPackContinue(openingPack);
   const repeatablePackId = state.lastPack?.repeatableStorePackId || state.lastPack?.packId || null;
   packModalEl.hidden = !isPackModalOpen || !hasRevealContent;
   document.body.classList.toggle("mobile-pack-modal-open", Boolean(isPackModalOpen && hasRevealContent && isMobilePackRevealMode()));
   packModalShellEl?.classList.toggle("mobile-pack-modal-compact", isMobileOpeningPack || isMobileResolvedPack);
   packModalShellEl?.classList.toggle("mobile-pack-overview-compact", isMobileResolvedPack);
+  packModalShellEl?.classList.toggle("desktop-pack-opening-grid-mode", isDesktopOpeningPack);
+  packModalShellEl?.classList.toggle("desktop-pack-overview-grid-mode", isDesktopResolvedPack);
   packRevealGridEl.classList.toggle("pack-preview-mode", isPreviewMode);
   packRevealGridEl.classList.toggle("mobile-pack-flow", isMobileOpeningPack);
   packRevealGridEl.classList.toggle("mobile-pack-overview-carousel", isMobileResolvedPack);
@@ -5248,15 +6194,13 @@ function renderPackArea() {
     closePackModalIconEl.disabled = Boolean(openingPack);
     closePackModalIconEl.setAttribute("aria-label", openingPack ? "Finish reveal first" : "Close pack modal");
   }
-  revealAllCardsEl.textContent = showMobilePackContinue ? "Continue" : "Skip Reveal";
-  revealAllCardsEl.hidden = !openingPack || (isMobileOpeningPack && !showMobilePackContinue);
-  revealAllCardsEl.disabled = !openingPack
-    || !openingPack.assetsReady
-    || (isMobileOpeningPack
-      ? !showMobilePackContinue
-      : openingPack.revealedCount === openingPack.outcome.results.length);
+  revealAllCardsEl.textContent = getOpeningPackPrimaryActionLabel(openingPack);
+  revealAllCardsEl.hidden = !shouldShowOpeningPackPrimaryAction(openingPack);
+  revealAllCardsEl.disabled = !isOpeningPackPrimaryActionEnabled(openingPack);
+  revealAllCardsEl.classList.toggle("hold-skip-enabled", shouldAllowPackRevealSkip(openingPack));
   const pendingDuplicates = getPendingDuplicateResults();
   const hasPendingDuplicates = pendingDuplicates.length > 0;
+  const pendingDuplicateTotal = getPendingDuplicateSaleTotal();
   openAnotherPackEl.hidden = Boolean(openingPack) || (!isPreviewMode && !repeatablePackId);
   if (isPreviewMode && previewContext) {
     const previewCanOpen = previewContext.sourceType === "saved"
@@ -5286,15 +6230,25 @@ function renderPackArea() {
       : "";
     modalPackMetaEl.hidden = !(modalStreetPackActive || modalStreetPackResolved || modalStreetPackPreview);
   }
+  if (modalRepeatStackEl) {
+    modalRepeatStackEl.hidden = openAnotherPackEl.hidden && (!modalPackMetaEl || modalPackMetaEl.hidden);
+  }
   if (modalBottomActionsEl) {
     modalBottomActionsEl.classList.toggle(
       "preview-open-mode",
       !openingPack && !openAnotherPackEl.hidden && revealAllCardsEl.hidden,
     );
+    modalBottomActionsEl.classList.toggle(
+      "opening-pack-primary-mode",
+      Boolean(openingPack && !revealAllCardsEl.hidden && openAnotherPackEl.hidden),
+    );
     modalBottomActionsEl.hidden = revealAllCardsEl.hidden && openAnotherPackEl.hidden && (!modalPackMetaEl || modalPackMetaEl.hidden);
   }
   sellAllDuplicatesEl.hidden = Boolean(openingPack) || isPreviewMode || !hasPendingDuplicates;
   sellAllDuplicatesEl.disabled = !hasPendingDuplicates;
+  sellAllDuplicatesEl.innerHTML = hasPendingDuplicates
+    ? `Sell ${pendingDuplicates.length} Duplicate${pendingDuplicates.length === 1 ? "" : "s"} <span class="sell-all-duplicates-total">${formatMoney(pendingDuplicateTotal)}</span>`
+    : "Sell All Duplicates";
   if (packModalPrevEl && packModalNextEl) {
     const showNav = !openingPack && isPreviewMode;
     packModalPrevEl.hidden = !showNav;
@@ -5313,6 +6267,7 @@ function renderPackArea() {
   if (packModalEl.hidden) {
     renderRevealSetProgress();
     renderRevealDailyProgress();
+    scheduleAccessibilityUiSync();
     return;
   }
 
@@ -5322,9 +6277,7 @@ function renderPackArea() {
     revealTitleEl.textContent = `Opening ${openingPack.packName}`;
     revealSubtitleEl.textContent = isMobileOpeningPack
       ? getOpeningPackMobileHint(openingPack)
-      : openingPack.assetsReady
-        ? "Hover a card to sense its rarity glow, then click each card to flip it."
-        : "Loading player cards first so each reveal is instant.";
+      : getOpeningPackDesktopHint(openingPack);
     revealSubtitleEl.hidden = isMobileOpeningPack;
     revealProgressEl.textContent = isMobileOpeningPack
       ? `Card ${Math.min(currentMobileIndex + 1, totalCards)} of ${totalCards}`
@@ -5338,9 +6291,14 @@ function renderPackArea() {
       if (activeCardSlot) {
         bindMobilePackSwipe(activeCardSlot, Number(activeCardSlot.dataset.mobilePackCurrent));
       }
+    } else {
+      syncDesktopOpeningPackSelection({
+        focus: openingPack.assetsReady,
+      });
     }
     renderRevealSetProgress();
     renderRevealDailyProgress();
+    scheduleAccessibilityUiSync();
     return;
   }
 
@@ -5356,13 +6314,16 @@ function renderPackArea() {
     packRevealGridEl.innerHTML = buildPackPreviewStage(previewContext.pack, previewContext.sourceType, previewContext.index);
     renderRevealSetProgress();
     renderRevealDailyProgress();
+    scheduleAccessibilityUiSync();
     return;
   }
 
   packRevealGridEl.classList.remove("loading-assets");
   const lastPack = state.lastPack;
-  const newCards = lastPack.results.filter((result) => result.isNew).length;
-  const duplicates = lastPack.results.length - newCards;
+  const visibleLastPackEntries = getVisibleLastPackResultEntries();
+  const visibleLastPackResults = visibleLastPackEntries.map(({ result }) => result);
+  const newCards = visibleLastPackResults.filter((result) => result.isNew).length;
+  const duplicates = visibleLastPackResults.length - newCards;
   const pendingDuplicateCount = getPendingDuplicateResults().length;
   const completedSetText = lastPack.completedTeams.length ? ` Completed sets: ${lastPack.completedTeams.map((entry) => entry.teamName).join(", ")}.` : "";
   const completedCollectionText = lastPack.completedCollections?.length ? ` Completed collections: ${lastPack.completedCollections.map((entry) => entry.groupName).join(", ")}.` : "";
@@ -5376,15 +6337,39 @@ function renderPackArea() {
   revealProgressEl.textContent = `${lastPack.results.length} / ${lastPack.results.length} Revealed`;
   revealProgressEl.hidden = isMobileResolvedPack;
   packRevealGridEl.innerHTML = isMobileResolvedPack
-    ? buildMobilePackOverviewCarousel(lastPack.results)
-    : lastPack.results.map((result, index) => buildCardFace(result, {
-      footerHtml: buildPackDuplicateFooter(result, index),
+    ? buildMobilePackOverviewCarousel(visibleLastPackEntries)
+    : visibleLastPackEntries.map(({ result, sourceIndex }) => buildCardFace(result, {
+      footerHtml: buildPackOverviewFooter(result, sourceIndex),
+      shellClass: "pack-overview-card-shell",
     })).join("");
   if (isMobileResolvedPack) {
     scheduleMobilePackOverviewCenter();
   }
   renderRevealSetProgress();
   renderRevealDailyProgress();
+  scheduleAccessibilityUiSync();
+}
+
+function renderPackSelloutModal() {
+  if (!packSelloutModalEl || !packSelloutOpenNewPackEl || !packSelloutGoToPacksEl) return;
+  const hasVisibleCards = getVisibleLastPackResultEntries().length > 0;
+  const shouldShow = Boolean(packSelloutPrompt && state.lastPack && !openingPack && !hasVisibleCards);
+  packSelloutModalEl.hidden = !shouldShow;
+  if (!shouldShow) return;
+
+  const repeatPack = getResolvedRepeatPack();
+  const canInstantReopen = Boolean(repeatPack) && state.money >= repeatPack.cost;
+  const packSelloutSubtitleEl = document.getElementById("packSelloutSubtitle");
+  if (packSelloutSubtitleEl) {
+    packSelloutSubtitleEl.textContent = canInstantReopen
+      ? "All duplicate cards were sold and removed from this pack. Go back to Packs or open the next pack right away."
+      : "All duplicate cards were sold and removed from this pack. Go back to Packs to choose what to open next.";
+  }
+  packSelloutGoToPacksEl.disabled = false;
+  packSelloutOpenNewPackEl.disabled = false;
+  packSelloutOpenNewPackEl.innerHTML = canInstantReopen
+    ? `Open New Pack <span class="repeat-pack-cost">${repeatPack.cost === 0 ? "Free" : formatMoney(repeatPack.cost)}</span>`
+    : "Choose New Pack";
 }
 
 function renderSetCompletionModal() {
@@ -5393,6 +6378,7 @@ function renderSetCompletionModal() {
   setCompletionModalEl.hidden = !celebration;
   if (!celebration) {
     setCompletionGridEl.innerHTML = "";
+    scheduleAccessibilityUiSync();
     return;
   }
 
@@ -5412,11 +6398,11 @@ function renderSetCompletionModal() {
   setCompletionRewardEl.textContent = rewardLabelParts.join(" + ") || "Rewards Added";
 
   const teamCards = celebration.teams.map((entry) => {
-    const team = teamById[entry.teamId];
+    const team = collectionSetById[entry.teamId];
     const logoUrl = getTeamLogoUrl(entry.teamId);
     const fallbackLabel = entry.teamId === "hall-of-fame"
       ? "HOF"
-      : (team?.abbreviation || entry.teamName.slice(0, 3)).toUpperCase();
+      : (team?.abbreviation || getCollectionSetAbbreviation(entry.teamName));
     return `
       <article
         class="completion-team-card"
@@ -5465,6 +6451,7 @@ function renderSetCompletionModal() {
   `);
 
   setCompletionGridEl.innerHTML = [...teamCards, ...collectionCards].join("");
+  scheduleAccessibilityUiSync();
 }
 
 function renderDailyRewardModal() {
@@ -5473,6 +6460,7 @@ function renderDailyRewardModal() {
   dailyRewardModalEl.hidden = !celebration;
   if (!celebration) {
     if (dailyRewardListEl) dailyRewardListEl.innerHTML = "";
+    scheduleAccessibilityUiSync();
     return;
   }
 
@@ -5549,6 +6537,7 @@ function renderDailyRewardModal() {
       `;
     }).join("");
   }
+  scheduleAccessibilityUiSync();
 }
 
 function renderSetCollectionFilters() {
@@ -5634,6 +6623,43 @@ function getFilterButtonLabel(baseLabel, count = 0) {
   return count > 0 ? `${baseLabel} • ${count}` : baseLabel;
 }
 
+function getPlayerTeamFilterSummaryLabel(selectedValues = playerCollectionTeamFilter, teamOptions = []) {
+  if (!selectedValues.length || selectedValues.length >= teamOptions.length) return "All Teams";
+  return `${selectedValues.length} Team${selectedValues.length === 1 ? "" : "s"} Selected`;
+}
+
+function buildPlayerTeamFilterButton(teamOptions) {
+  return `
+    <section class="filter-popover-group filter-span-full team-filter-trigger-group">
+      <div class="filter-popover-head">
+        <span class="label">Teams</span>
+        <button type="button" class="mini-link-btn" data-clear-filter-group="player-team">${playerCollectionTeamFilter.length ? "Clear" : "All Teams"}</button>
+      </div>
+      <button type="button" class="secondary-btn team-filter-modal-toggle-btn" data-open-player-team-filter>
+        ${escapeHtml(getPlayerTeamFilterSummaryLabel(playerCollectionTeamFilter, teamOptions))}
+      </button>
+    </section>
+  `;
+}
+
+function buildPlayerTeamFilterGrid(teamOptions, selectedValues = []) {
+  const activeValues = selectedValues.length ? selectedValues : teamOptions.map((team) => team.value);
+  return teamOptions.map((team) => `
+    <button
+      type="button"
+      class="favorite-team-option ${activeValues.includes(team.value) ? "active" : ""}"
+      data-player-team-option="${escapeHtml(team.value)}"
+      aria-pressed="${activeValues.includes(team.value) ? "true" : "false"}"
+      style="--team-primary:${escapeHtml(teamById[team.value]?.colors?.primary || "#6e85b7")}; --team-secondary:${escapeHtml(teamById[team.value]?.colors?.secondary || "#9ab8ff")};"
+    >
+      <span class="favorite-team-option-logo ${team.logoUrl ? "" : "fallback-only"}" data-fallback-label="${escapeHtml(team.fallbackLabel || team.abbreviation || team.label.slice(0, 3).toUpperCase())}">
+        ${team.logoUrl ? `<img loading="lazy" src="${escapeHtml(team.logoUrl)}" alt="${escapeHtml(team.label)} logo">` : ""}
+      </span>
+      <span class="favorite-team-option-name">${escapeHtml(team.abbreviation || team.fallbackLabel || team.label.slice(0, 3).toUpperCase())}</span>
+    </button>
+  `).join("");
+}
+
 function buildSelectableFilterGroup(title, items, selectedValues, dataAttr, options = {}) {
   const allowClear = options.allowClear !== false;
   const emptyText = options.emptyText || "No options";
@@ -5672,38 +6698,71 @@ function toggleFilterSelection(currentValues, value, universe = []) {
   return next;
 }
 
-function buildTeamLogoFilterGroup(title, items, selectedValues, dataAttr) {
+function buildTeamLogoFilterGroup(title, items, selectedValues, dataAttr, options = {}) {
   const activeValues = selectedValues.length ? selectedValues : items.map((item) => item.value);
+  const compactMobile = options.compactMobile === true;
+  const shouldCollapse = options.collapsible !== false && !compactMobile;
+  const summaryLabel = !selectedValues.length || selectedValues.length >= items.length
+    ? "All Teams"
+    : `${selectedValues.length} Selected`;
+  const buttonsMarkup = items.map((item) => `
+    <button
+      type="button"
+      class="team-logo-filter-btn ${activeValues.includes(item.value) ? "active" : ""} ${compactMobile ? "compact-mobile-picker-option" : ""}"
+      data-filter-option="${escapeHtml(dataAttr)}"
+      data-filter-value="${escapeHtml(item.value)}"
+      title="${escapeHtml(item.label)}"
+      aria-label="${escapeHtml(item.label)}"
+      style="--team-primary:${escapeHtml(teamById[item.value]?.colors?.primary || "#6e85b7")}; --team-secondary:${escapeHtml(teamById[item.value]?.colors?.secondary || "#9ab8ff")};"
+    >
+      <span class="team-logo-filter-mark ${item.logoUrl ? "" : "fallback-only"}" data-fallback-label="${escapeHtml(item.fallbackLabel || item.abbreviation || item.label.slice(0, 3).toUpperCase())}">
+        ${item.logoUrl ? `<img loading="lazy" src="${escapeHtml(item.logoUrl)}" alt="${escapeHtml(item.label)} logo">` : ""}
+      </span>
+      ${compactMobile ? `<span class="team-logo-filter-name">${escapeHtml(item.fallbackLabel || item.abbreviation || item.label.slice(0, 3).toUpperCase())}</span>` : ""}
+    </button>
+  `).join("");
+  if (shouldCollapse) {
+    return `
+      <section class="filter-popover-group team-logo-filter-group filter-span-full">
+        <details class="team-filter-disclosure" ${selectedValues.length ? "open" : ""}>
+          <summary class="team-filter-disclosure-summary">
+            <span class="label">${escapeHtml(title)}</span>
+            <span class="team-filter-disclosure-meta">${escapeHtml(summaryLabel)}</span>
+          </summary>
+          <div class="team-filter-disclosure-body">
+            <div class="filter-popover-head">
+              <span class="label">Choose Teams</span>
+              <button type="button" class="mini-link-btn" data-clear-filter-group="${escapeHtml(dataAttr)}">${selectedValues.length ? "Clear" : "All Teams"}</button>
+            </div>
+            <div class="team-logo-filter-grid">
+              ${buttonsMarkup}
+            </div>
+          </div>
+        </details>
+      </section>
+    `;
+  }
   return `
-    <section class="filter-popover-group team-logo-filter-group filter-span-full">
+    <section class="filter-popover-group team-logo-filter-group filter-span-full ${compactMobile ? "compact-mobile-picker" : ""}">
       <div class="filter-popover-head">
         <span class="label">${escapeHtml(title)}</span>
         <button type="button" class="mini-link-btn" data-clear-filter-group="${escapeHtml(dataAttr)}">${selectedValues.length ? "Clear" : "All Teams"}</button>
       </div>
       <div class="team-logo-filter-grid">
-        ${items.map((item) => `
-          <button
-            type="button"
-            class="team-logo-filter-btn ${activeValues.includes(item.value) ? "active" : ""}"
-            data-filter-option="${escapeHtml(dataAttr)}"
-            data-filter-value="${escapeHtml(item.value)}"
-            title="${escapeHtml(item.label)}"
-            aria-label="${escapeHtml(item.label)}"
-          >
-            <span class="team-logo-filter-mark ${item.logoUrl ? "" : "fallback-only"}" data-fallback-label="${escapeHtml(item.fallbackLabel || item.abbreviation || item.label.slice(0, 3).toUpperCase())}">
-              ${item.logoUrl ? `<img loading="lazy" src="${escapeHtml(item.logoUrl)}" alt="${escapeHtml(item.label)} logo">` : ""}
-            </span>
-          </button>
-        `).join("")}
+        ${buttonsMarkup}
       </div>
     </section>
   `;
 }
 
-function buildPlayerFilterPanel(teamOptions, positionOptions) {
+function buildPlayerFilterPanel(teamOptions, positionOptions, options = {}) {
   return `
     <section class="filter-popover-panel player-filter-panel">
-      ${buildTeamLogoFilterGroup("Teams", teamOptions, playerCollectionTeamFilter, "player-team")}
+      ${options.compactMobile === true
+        ? buildPlayerTeamFilterButton(teamOptions)
+        : buildTeamLogoFilterGroup("Teams", teamOptions, playerCollectionTeamFilter, "player-team", {
+          compactMobile: false,
+        })}
       <div class="filter-popover-grid player-filter-secondary-grid">
         ${buildSelectableFilterGroup("Rarities", visibleRarityOptions, playerCollectionRarityFilter, "player-rarity")}
         <section class="filter-popover-group">
@@ -5735,6 +6794,11 @@ function buildPlayerFilterPanel(teamOptions, positionOptions) {
 
 function bindPlayerFilterPanel(root, teamOptions) {
   if (!root) return;
+  root.querySelector("[data-open-player-team-filter]")?.addEventListener("click", () => {
+    playerTeamFilterDraft = normalizeFilterList(playerCollectionTeamFilter, (teamId) => Boolean(teamById[teamId]) && teamId !== "hall-of-fame");
+    isPlayerTeamFilterModalOpen = true;
+    renderCollection();
+  });
   root.querySelectorAll("[data-filter-option='player-team']").forEach((button) => {
     button.addEventListener("click", () => {
       const value = button.dataset.filterValue;
@@ -5775,7 +6839,43 @@ function closePlayerControlsModal() {
   if (!isPlayerFilterMenuOpen && !isPlayerBulkSellOpen) return;
   isPlayerFilterMenuOpen = false;
   isPlayerBulkSellOpen = false;
+  isPlayerTeamFilterModalOpen = false;
+  playerTeamFilterDraft = [];
   renderCollection();
+}
+
+function closePlayerTeamFilterModal(options = {}) {
+  if (!isPlayerTeamFilterModalOpen) return;
+  const shouldApply = options.apply === true;
+  isPlayerTeamFilterModalOpen = false;
+  if (shouldApply) {
+    const nextFilter = normalizeFilterList(playerTeamFilterDraft, (teamId) => Boolean(teamById[teamId]) && teamId !== "hall-of-fame");
+    playerTeamFilterDraft = [];
+    setPlayerCollectionTeamFilter(nextFilter);
+    return;
+  }
+  playerTeamFilterDraft = [];
+  renderCollection();
+}
+
+function renderPlayerTeamFilterModal(teamOptions) {
+  if (!playerTeamFilterModalEl || !playerTeamFilterGridEl) return;
+  const isOpen = Boolean(isCompactMobileUi() && isPlayerFilterMenuOpen && isPlayerTeamFilterModalOpen);
+  playerTeamFilterModalEl.hidden = !isOpen;
+  if (!isOpen) {
+    playerTeamFilterGridEl.innerHTML = "";
+    if (playerTeamFilterSummaryEl) playerTeamFilterSummaryEl.textContent = "All Teams";
+    scheduleAccessibilityUiSync();
+    return;
+  }
+  const activeValues = playerTeamFilterDraft.length ? playerTeamFilterDraft : teamOptions.map((team) => team.value);
+  playerTeamFilterGridEl.innerHTML = buildPlayerTeamFilterGrid(teamOptions, playerTeamFilterDraft);
+  if (playerTeamFilterSummaryEl) {
+    playerTeamFilterSummaryEl.textContent = activeValues.length >= teamOptions.length
+      ? "All Teams"
+      : `${activeValues.length} Selected`;
+  }
+  scheduleAccessibilityUiSync();
 }
 
 function renderPlayerControlsModal(filteredCards, teamOptions, positionOptions) {
@@ -5786,6 +6886,7 @@ function renderPlayerControlsModal(filteredCards, teamOptions, positionOptions) 
   playerControlsModalEl.hidden = !isOpen;
   if (!isOpen) {
     playerControlsModalBodyEl.innerHTML = "";
+    scheduleAccessibilityUiSync();
     return;
   }
 
@@ -5793,6 +6894,7 @@ function renderPlayerControlsModal(filteredCards, teamOptions, positionOptions) 
     if (playerControlsModalEyebrowEl) playerControlsModalEyebrowEl.textContent = "Bulk Sell";
     if (playerControlsModalTitleEl) playerControlsModalTitleEl.textContent = "Tune duplicate sell rules.";
     if (playerControlsModalSubtitleEl) playerControlsModalSubtitleEl.textContent = "Adjust your duplicate filters, then save settings to return to Players.";
+    if (savePlayerControlsModalEl) savePlayerControlsModalEl.textContent = "Save Bulk Rules";
     playerControlsModalBodyEl.innerHTML = buildBulkSellPanel(filteredCards, {
       scopeLabel: "Current Filters",
       title: "Bulk sell visible duplicates",
@@ -5800,28 +6902,35 @@ function renderPlayerControlsModal(filteredCards, teamOptions, positionOptions) 
       showTeamFilter: true,
       showRarityFilter: true,
       menuMode: true,
+      mobileTeamFilter: true,
     });
     bindBulkSellPanel(playerControlsModalBodyEl.querySelector(".bulk-sell-panel"), filteredCards);
+    scheduleAccessibilityUiSync();
     return;
   }
 
   if (playerControlsModalEyebrowEl) playerControlsModalEyebrowEl.textContent = "Player Filters";
   if (playerControlsModalTitleEl) playerControlsModalTitleEl.textContent = "Refine your club browser.";
   if (playerControlsModalSubtitleEl) playerControlsModalSubtitleEl.textContent = "Choose the cards you want to browse, then save settings to return to Players.";
-  playerControlsModalBodyEl.innerHTML = buildPlayerFilterPanel(teamOptions, positionOptions);
+  if (savePlayerControlsModalEl) savePlayerControlsModalEl.textContent = "Apply Filters";
+  playerControlsModalBodyEl.innerHTML = buildPlayerFilterPanel(teamOptions, positionOptions, {
+    compactMobile: true,
+  });
   bindPlayerFilterPanel(playerControlsModalBodyEl, teamOptions);
+  scheduleAccessibilityUiSync();
 }
 
 function renderPlayerCollectionFilters(ownedCards) {
   const availableCards = playerCollectionShowLocked ? cardCatalog : ownedCards;
   const teamOptions = teamSets
+    .filter((team) => team.id !== "hall-of-fame")
     .slice()
     .sort((left, right) => left.name.localeCompare(right.name))
     .map((team) => ({
       value: team.id,
-      label: team.id === "hall-of-fame" ? "Hall of Fame" : team.name,
+      label: team.name,
       abbreviation: team.abbreviation,
-      fallbackLabel: team.id === "hall-of-fame" ? "HOF" : team.abbreviation,
+      fallbackLabel: team.abbreviation,
       logoUrl: getTeamLogoUrl(team.id),
     }));
   const positionOptions = [...new Set(availableCards.map((card) => getPrimaryPosition(card.position)))].sort();
@@ -5893,13 +7002,21 @@ function renderPlayerCollectionFilters(ownedCards) {
     bindBulkSellPanel(collectionFiltersEl.querySelector(".bulk-sell-panel"), filteredCards);
   }
   renderPlayerControlsModal(filteredCards, teamOptions, positionOptions);
+  renderPlayerTeamFilterModal(teamOptions);
 }
 
 function buildBulkSellPanel(cards, options = {}) {
   const scopeCards = getUniqueCards(cards);
   const teamOptions = [...new Map(scopeCards.map((card) => [card.teamId, card.teamName])).entries()]
+    .filter(([value]) => value !== "hall-of-fame")
     .sort((left, right) => left[1].localeCompare(right[1]))
-    .map(([value, label]) => ({ value, label }));
+    .map(([value, label]) => ({
+      value,
+      label,
+      abbreviation: teamById[value]?.abbreviation || "",
+      fallbackLabel: teamById[value]?.abbreviation || String(label).slice(0, 3).toUpperCase(),
+      logoUrl: getTeamLogoUrl(value),
+    }));
   const showTeamFilter = options.showTeamFilter === true && teamOptions.length > 1;
   const showRarityFilter = options.showRarityFilter !== false;
   const visibleSnapshot = getBulkSellSnapshot(scopeCards, {
@@ -5953,7 +7070,9 @@ function buildBulkSellPanel(cards, options = {}) {
       </div>
       ${(showTeamFilter || showRarityFilter) ? `
         <div class="bulk-sell-filter-grid">
-          ${showTeamFilter ? buildSelectableFilterGroup("Teams", teamOptions, ruleConfig.teamIds, "bulk-team", { emptyText: "No teams" }) : ""}
+          ${showTeamFilter ? buildTeamLogoFilterGroup("Teams", teamOptions, ruleConfig.teamIds, "bulk-team", {
+            compactMobile: options.mobileTeamFilter === true,
+          }) : ""}
           ${showRarityFilter ? buildSelectableFilterGroup("Rarities", visibleRarityOptions, ruleConfig.rarityIds, "bulk-rarity", { emptyText: "No rarities" }) : ""}
         </div>
       ` : ""}
@@ -6036,6 +7155,9 @@ function renderCollection() {
           <p>Try clearing one of the filters or turning on locked cards.</p>
         </div>
       `;
+    scheduleRenderedPlayerImageStateSync(teamGridEl);
+    scheduleCardBrowseAssetWarmup(filteredCards.filter((card) => hasOwnedCard(card.id)));
+    scheduleAccessibilityUiSync();
     return;
   }
 
@@ -6090,6 +7212,8 @@ function renderCollection() {
     teamGridEl.querySelectorAll("[data-collection-open]").forEach((button) => {
       button.addEventListener("click", () => openCollectionGroup(button.dataset.collectionOpen));
     });
+    scheduleRenderedPlayerImageStateSync(teamGridEl);
+    scheduleAccessibilityUiSync();
     return;
   }
 
@@ -6113,13 +7237,13 @@ function renderCollection() {
 
     teamGridEl.className = "team-grid compact-mode";
     teamGridEl.innerHTML = groupTeams.map((team) => {
-      const teamCards = cardsByTeam[team.id];
+      const teamCards = getCardsForCollectionSet(team.id);
       const owned = getOwnedCountForTeam(team.id);
       const progress = Math.round((owned / teamCards.length) * 100);
       return `
         <button
           type="button"
-          class="team-card compact-set-card ${state.completedTeams.includes(team.id) ? "completed" : ""}"
+          class="team-card compact-set-card ${getCompletedCollectionSetIdSet().has(team.id) ? "completed" : ""}"
           data-team-open="${team.id}"
           style="
             --team-primary:${team.colors.primary};
@@ -6151,18 +7275,20 @@ function renderCollection() {
     teamGridEl.querySelectorAll("[data-team-open]").forEach((button) => {
       button.addEventListener("click", () => openCollectionTeam(button.dataset.teamOpen));
     });
+    scheduleRenderedPlayerImageStateSync(teamGridEl);
+    scheduleAccessibilityUiSync();
     return;
   }
 
-  const team = teamById[activeCollectionTeam];
+  const team = collectionSetById[activeCollectionTeam];
   const parentCollection = collectionGroupById[activeCollectionGroup || team.conference];
   const mobileDetailMode = isCompactMobileUi();
   const collectionNavigation = getCollectionTeamNavigation(team.id);
   const canStepCollectionTeams = Boolean(collectionNavigation && collectionNavigation.teams.length > 1);
-  const teamCards = cardsByTeam[team.id];
+  const teamCards = getCardsForCollectionSet(team.id);
   const owned = teamCards.filter((card) => hasOwnedCard(card.id)).length;
   const progress = Math.round((owned / teamCards.length) * 100);
-  const completed = state.completedTeams.includes(team.id);
+  const completed = getCompletedCollectionSetIdSet().has(team.id);
   applyCollectionDetailTheme(team);
   collectionActionsEl.innerHTML = "";
   collectionFiltersEl.innerHTML = "";
@@ -6244,11 +7370,15 @@ function renderCollection() {
     </section>
   `;
 
+  scheduleCardBrowseAssetWarmup(teamCards.filter((card) => hasOwnedCard(card.id)));
+  scheduleRenderedPlayerImageStateSync(teamGridEl);
+
   document.getElementById("collectionBack")?.addEventListener("click", closeCollectionTeam);
   document.getElementById("toggleSetBulkSell")?.addEventListener("click", toggleSetBulkSellMenu);
   if (isSetBulkSellOpen) {
     bindBulkSellPanel(document.getElementById("detailBulkSell"), teamCards);
   }
+  scheduleAccessibilityUiSync();
 }
 
 function getProfileFavoriteTeam() {
@@ -6316,6 +7446,7 @@ function dismissFavoriteTeamPrompt() {
 function closeAchievementRewardModal() {
   achievementCelebration = null;
   renderAll();
+  flushCelebrationQueue();
 }
 
 function buildProfileBadgeCard(badge, options = {}) {
@@ -6359,7 +7490,7 @@ function renderProfileOverview() {
   const quickStats = [
     { label: "Total Cards", value: getTotalStoredCards().toLocaleString("en-US"), meta: "All copies currently stored" },
     { label: "Collection Progress", value: `${countOwnedCards()}/${cardCatalog.length}`, meta: "Unique cards owned" },
-    { label: "Completed Sets", value: `${state.completedTeams.length}/${teamSets.length}`, meta: "Finished team pages" },
+    { label: "Completed Sets", value: `${getCompletedCollectionSetIdSet().size}/${collectionSetEntries.length}`, meta: "Finished set pages" },
     { label: "Earned Badges", value: getAllEarnedBadges().length.toLocaleString("en-US"), meta: "Unlocked across achievements and teams" },
   ];
   profileOverviewEl.innerHTML = `
@@ -6954,7 +8085,10 @@ function renderProfileWorkspace() {
 function renderProfileShowcaseModal() {
   if (!profileShowcaseModalEl || !profileShowcaseToolbarEl || !profileShowcasePickerGridEl) return;
   profileShowcaseModalEl.hidden = !isProfileShowcaseModalOpen;
-  if (!isProfileShowcaseModalOpen) return;
+  if (!isProfileShowcaseModalOpen) {
+    scheduleAccessibilityUiSync();
+    return;
+  }
 
   const slots = getProfileShowcaseSlots();
   const activeCardId = slots[activeProfileShowcaseSlot] || "";
@@ -7028,12 +8162,17 @@ function renderProfileShowcaseModal() {
       `;
     }).join("")
     : `<div class="profile-picker-empty">No cards match your current filters.</div>`;
+  scheduleCardBrowseAssetWarmup(cards);
+  scheduleAccessibilityUiSync();
 }
 
 function renderProfileBadgeModal() {
   if (!profileBadgeModalEl || !profileBadgeSlotGridEl || !profileBadgePickerGridEl) return;
   profileBadgeModalEl.hidden = !isProfileBadgeModalOpen;
-  if (!isProfileBadgeModalOpen) return;
+  if (!isProfileBadgeModalOpen) {
+    scheduleAccessibilityUiSync();
+    return;
+  }
 
   const slots = getProfileBadgeSlots();
   const badges = getAllEarnedBadges();
@@ -7066,12 +8205,16 @@ function renderProfileBadgeModal() {
       `;
     }).join("")
     : `<div class="profile-picker-empty">Earn badges through sets and achievements to feature them here.</div>`;
+  scheduleAccessibilityUiSync();
 }
 
 function renderProfileAchievementsModal() {
   if (!profileAchievementsModalEl || !profileAchievementsSummaryEl || !profileAchievementsToolbarEl || !profileAchievementsGridEl) return;
   profileAchievementsModalEl.hidden = !isProfileAchievementsModalOpen;
-  if (!isProfileAchievementsModalOpen) return;
+  if (!isProfileAchievementsModalOpen) {
+    scheduleAccessibilityUiSync();
+    return;
+  }
 
   const summary = getProfileAchievementSummary();
   const entries = getFilteredProfileAchievementEntries();
@@ -7143,6 +8286,7 @@ function renderProfileAchievementsModal() {
       </article>
     `).join("")
     : `<div class="profile-picker-empty">No achievements match the current filters.</div>`;
+  scheduleAccessibilityUiSync();
 }
 
 function renderProfile() {
@@ -7150,6 +8294,7 @@ function renderProfile() {
   renderProfileShowcaseModal();
   renderProfileBadgeModal();
   renderProfileAchievementsModal();
+  scheduleAccessibilityUiSync();
 }
 
 function renderAchievementRewardModal() {
@@ -7158,6 +8303,7 @@ function renderAchievementRewardModal() {
   achievementRewardModalEl.hidden = !celebration;
   if (!celebration) {
     if (achievementRewardListEl) achievementRewardListEl.innerHTML = "";
+    scheduleAccessibilityUiSync();
     return;
   }
   if (achievementRewardEyebrowEl) achievementRewardEyebrowEl.textContent = celebration.rewards.length > 1 ? "Achievements" : "Achievement";
@@ -7216,12 +8362,16 @@ function renderAchievementRewardModal() {
       </div>
     </article>
   `).join("");
+  scheduleAccessibilityUiSync();
 }
 
 function renderFavoriteTeamModal() {
   if (!favoriteTeamModalEl || !favoriteTeamGridEl) return;
   favoriteTeamModalEl.hidden = !isFavoriteTeamModalOpen;
-  if (!isFavoriteTeamModalOpen) return;
+  if (!isFavoriteTeamModalOpen) {
+    scheduleAccessibilityUiSync();
+    return;
+  }
   favoriteTeamGridEl.innerHTML = buildFavoriteTeamPickerGrid(favoriteTeamDraftId || "");
   if (favoriteTeamLaterEl) {
     favoriteTeamLaterEl.textContent = favoriteTeamModalContext === "profile" ? "Cancel" : "Choose Later";
@@ -7230,6 +8380,7 @@ function renderFavoriteTeamModal() {
     favoriteTeamSaveEl.textContent = "Continue";
     favoriteTeamSaveEl.disabled = !favoriteTeamDraftId;
   }
+  scheduleAccessibilityUiSync();
 }
 
 function renderStats() {
@@ -7283,19 +8434,24 @@ function renderStats() {
 
 function renderAll() {
   ensureDailyChallenges();
-  setActiveView(activeView);
+  setActiveView(activeView, { render: false });
   renderHud();
   renderDailyChallenges();
   renderPackSummary();
   renderPackStore();
   renderPackArea();
+  renderPackSelloutModal();
   renderSetCompletionModal();
   renderDailyRewardModal();
-  renderCollection();
-  renderProfile();
+  if (activeView === "collections" || activeView === "players") renderCollection();
+  if (activeView === "profile" || isProfileShowcaseModalOpen || isProfileBadgeModalOpen || isProfileAchievementsModalOpen || isProfileNameEditing) {
+    renderProfile();
+  }
   renderAchievementRewardModal();
   renderFavoriteTeamModal();
-  renderStats();
+  if (activeView === "stats") renderStats();
+  scheduleRenderedPlayerImageStateSync();
+  scheduleAccessibilityUiSync();
 }
 
 function handleCompactLayoutViewportChange() {
@@ -7304,6 +8460,12 @@ function handleCompactLayoutViewportChange() {
   }
   if (activeView === "players" || activeView === "collections") {
     renderCollection();
+  }
+  if (activeView === "profile" || isProfileShowcaseModalOpen || isProfileBadgeModalOpen || isProfileAchievementsModalOpen) {
+    renderProfile();
+  }
+  if (activeView === "stats") {
+    renderStats();
   }
   renderDailyChallenges();
   if (activeCardPreview && !cardPreviewModalEl.hidden) {
@@ -7430,9 +8592,31 @@ myPackStoreEl?.addEventListener("click", (event) => {
     previewIndex: Number(previewCard.dataset.previewIndex || 0),
   });
 });
-revealAllCardsEl.addEventListener("click", revealAllPackCards);
+revealAllCardsEl.addEventListener("click", (event) => {
+  if (performance.now() < holdActionSuppressUntil) {
+    event.preventDefault();
+    return;
+  }
+  triggerPackPrimaryAction();
+});
 openAnotherPackEl.addEventListener("click", reopenCurrentPack);
-sellAllDuplicatesEl.addEventListener("click", () => sellAllPendingDuplicates({ closeAfter: true }));
+sellAllDuplicatesEl.addEventListener("click", () => sellAllPendingDuplicates());
+packSelloutGoToPacksEl?.addEventListener("click", () => {
+  clearPackSelloutPrompt();
+  closeResolvedPackFlow();
+  setActiveView("packs");
+});
+packSelloutOpenNewPackEl?.addEventListener("click", () => {
+  const repeatPack = getResolvedRepeatPack();
+  const canInstantReopen = Boolean(repeatPack) && state.money >= repeatPack.cost;
+  clearPackSelloutPrompt();
+  if (canInstantReopen) {
+    reopenCurrentPack();
+    return;
+  }
+  closeResolvedPackFlow();
+  setActiveView("packs");
+});
 closePackModalEl.addEventListener("click", closePackModal);
 closePackModalIconEl?.addEventListener("click", closePackModal);
 closePlayerControlsModalEl?.addEventListener("click", closePlayerControlsModal);
@@ -7440,6 +8624,25 @@ savePlayerControlsModalEl?.addEventListener("click", closePlayerControlsModal);
 playerControlsModalEl?.addEventListener("click", (event) => {
   if (event.target === playerControlsModalEl) closePlayerControlsModal();
 });
+playerTeamFilterModalEl?.addEventListener("click", (event) => {
+  const option = event.target.closest("[data-player-team-option]");
+  if (option) {
+    const value = option.dataset.playerTeamOption;
+    const teamValues = [...new Set((playerTeamFilterGridEl?.querySelectorAll("[data-player-team-option]") || []).length
+      ? Array.from(playerTeamFilterGridEl.querySelectorAll("[data-player-team-option]")).map((button) => button.dataset.playerTeamOption)
+      : [])];
+    playerTeamFilterDraft = toggleFilterSelection(playerTeamFilterDraft, value, teamValues);
+    renderCollection();
+    return;
+  }
+  if (event.target === playerTeamFilterModalEl) closePlayerTeamFilterModal();
+});
+closePlayerTeamFilterModalEl?.addEventListener("click", () => closePlayerTeamFilterModal());
+clearPlayerTeamFilterEl?.addEventListener("click", () => {
+  playerTeamFilterDraft = [];
+  renderCollection();
+});
+applyPlayerTeamFilterEl?.addEventListener("click", () => closePlayerTeamFilterModal({ apply: true }));
 resetGameEl.addEventListener("click", resetGame);
 window.addEventListener("resize", handleWindowResize, { passive: true });
 if (mobilePackRevealMedia) {
@@ -7902,18 +9105,45 @@ closeProfileAchievementsModalEl?.addEventListener("click", closeProfileAchieveme
 closeProfileAchievementsModalIconEl?.addEventListener("click", closeProfileAchievementsModal);
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Tab") {
+    const topModal = getTopVisibleModal();
+    if (topModal && trapFocusWithinModal(topModal, event)) return;
+  }
   if (event.code === "Space") {
     if (isInteractiveTextTarget(event.target)) return;
+    const primaryAction = getPackPrimaryAction();
     const holdAction = getSpacebarHoldAction();
-    if (!holdAction) return;
+    if (!primaryAction && !holdAction) return;
     event.preventDefault();
-    if (!activeHoldAction) {
+    if (holdAction && !activeHoldAction && !event.repeat) {
       startHoldAction(holdAction);
     }
     return;
   }
+  if (openingPack && !isMobilePackRevealMode()) {
+    if (event.key === "ArrowLeft" && stepOpeningPackDesktopSelection("left")) {
+      event.preventDefault();
+      return;
+    }
+    if (event.key === "ArrowRight" && stepOpeningPackDesktopSelection("right")) {
+      event.preventDefault();
+      return;
+    }
+    if (event.key === "ArrowUp" && stepOpeningPackDesktopSelection("up")) {
+      event.preventDefault();
+      return;
+    }
+    if (event.key === "ArrowDown" && stepOpeningPackDesktopSelection("down")) {
+      event.preventDefault();
+      return;
+    }
+  }
   if (event.key === "Escape" && isDailyChallengesOpen) {
     closeDailyChallengesPanel();
+    return;
+  }
+  if (event.key === "Escape" && isPlayerTeamFilterModalOpen) {
+    closePlayerTeamFilterModal();
     return;
   }
   if (event.key === "Escape" && (isPlayerFilterMenuOpen || isPlayerBulkSellOpen)) {
@@ -7967,7 +9197,13 @@ document.addEventListener("keydown", (event) => {
 
 document.addEventListener("keyup", (event) => {
   if (event.code !== "Space") return;
+  if (!getPackPrimaryAction() && !activeHoldAction) return;
+  event.preventDefault();
+  const holdTriggered = Boolean(activeHoldAction?.fired);
   stopHoldAction(true);
+  if (!holdTriggered) {
+    triggerPackPrimaryAction();
+  }
 });
 
 const cardHoverSelector = ".flip-card, .collection-card, .reveal-card";
@@ -7977,7 +9213,7 @@ const CARD_TILT_DEAD_ZONE = 0.28;
 const CARD_TILT_EXPONENT = 1.25;
 const PREMIUM_CINEMATIC_ENTER_MS = 1700;
 const PREMIUM_CINEMATIC_EXIT_MS = 750;
-const HOLD_ACTION_DURATION_MS = 2000;
+const HOLD_ACTION_DURATION_MS = 1000;
 let activeTiltCard = null;
 let pendingTiltCard = null;
 let pendingTiltPoint = null;
@@ -7989,6 +9225,7 @@ let activePremiumHoverShell = null;
 const premiumHoverTimers = new WeakMap();
 let activeHoldAction = null;
 let holdActionFrame = 0;
+let holdActionSuppressUntil = 0;
 
 function getCardRarityTextPaths(card) {
   return card ? [...card.querySelectorAll(".card-rarity-text-path")] : [];
@@ -8035,7 +9272,12 @@ function animateRarityFrame(timestamp) {
     return;
   }
   if (!rarityFrameLastTimestamp) rarityFrameLastTimestamp = timestamp;
-  const deltaSeconds = (timestamp - rarityFrameLastTimestamp) / 1000;
+  const deltaMs = timestamp - rarityFrameLastTimestamp;
+  if (deltaMs < RARITY_FRAME_FRAME_INTERVAL_MS) {
+    rarityFrameAnimationHandle = window.requestAnimationFrame(animateRarityFrame);
+    return;
+  }
+  const deltaSeconds = deltaMs / 1000;
   rarityFrameLastTimestamp = timestamp;
   const currentOffset = Number(activeRarityFrameCard.dataset.rarityFrameOffset || 0);
   const step = cycleLength / RARITY_FRAME_LOOP_SECONDS;
@@ -8076,7 +9318,7 @@ function resetCardTilt(card) {
 function getPremiumHoverShell(target) {
   const shell = target?.closest?.(".card-shell");
   if (!shell) return null;
-  return shell.querySelector(".legend-card, .blackmatter-card") ? shell : null;
+  return shell.querySelector(".legend-card:not(.missing), .blackmatter-card:not(.missing), .glass-showcase-card:not(.missing), .curated-special-card:not(.missing), .sharpshooter-card:not(.missing)") ? shell : null;
 }
 
 function getPremiumHoverState(shell) {
@@ -8163,6 +9405,25 @@ function setHoldButtonProgress(button, progress) {
   button.style.setProperty("--hold-progress", `${Math.max(0, Math.min(1, progress)) * 100}%`);
 }
 
+function setHoldButtonLabel(button, label) {
+  if (!button || !label) return;
+  if (!button.dataset.holdOriginalLabel) {
+    button.dataset.holdOriginalLabel = button.textContent || "";
+  }
+  button.textContent = label;
+}
+
+function restoreHoldButtonLabel(button) {
+  if (!button) return;
+  if (openingPack && button === revealAllCardsEl) {
+    syncOpeningPackActionState(openingPack);
+    return;
+  }
+  if (!button.dataset.holdOriginalLabel) return;
+  button.textContent = button.dataset.holdOriginalLabel;
+  delete button.dataset.holdOriginalLabel;
+}
+
 function stopHoldAction(reset = true) {
   if (holdActionFrame) {
     window.cancelAnimationFrame(holdActionFrame);
@@ -8171,22 +9432,34 @@ function stopHoldAction(reset = true) {
   if (reset && activeHoldAction?.button) {
     activeHoldAction.button.classList.remove("hold-active", "hold-complete");
     setHoldButtonProgress(activeHoldAction.button, 0);
+    restoreHoldButtonLabel(activeHoldAction.button);
   }
   activeHoldAction = null;
 }
 
 function getSpacebarHoldAction() {
-  if (!isPackModalOpen) return null;
-  if (openingPack && !revealAllCardsEl.hidden && !revealAllCardsEl.disabled) {
+  if (!isPackModalOpen || !shouldAllowPackRevealSkip(openingPack) || revealAllCardsEl.hidden || revealAllCardsEl.disabled) return null;
+  if (openingPack) {
     return {
       id: "skip",
       button: revealAllCardsEl,
-      trigger: () => revealAllPackCards(),
+      trigger: () => skipOpeningPackReveal(),
+    };
+  }
+  return null;
+}
+
+function getPackPrimaryAction() {
+  if (openingPack && shouldShowOpeningPackPrimaryAction(openingPack) && !revealAllCardsEl.disabled) {
+    return {
+      id: "pack-primary",
+      button: revealAllCardsEl,
+      trigger: () => triggerOpeningPackPrimaryAction(),
     };
   }
   if (!openingPack && !openAnotherPackEl.hidden && !openAnotherPackEl.disabled) {
     return {
-      id: "open",
+      id: "open-pack",
       button: openAnotherPackEl,
       trigger: () => reopenCurrentPack(),
     };
@@ -8206,6 +9479,7 @@ function tickHoldAction(timestamp) {
   if (progress >= 1 && !activeHoldAction.fired) {
     activeHoldAction.fired = true;
     activeHoldAction.button.classList.add("hold-complete");
+    holdActionSuppressUntil = performance.now() + 420;
     activeHoldAction.trigger();
   }
   holdActionFrame = window.requestAnimationFrame(tickHoldAction);
@@ -8218,8 +9492,29 @@ function startHoldAction(action) {
     startedAt: performance.now(),
     fired: false,
   };
+  if (action.id === "skip") {
+    setHoldButtonLabel(action.button, "Skip Reveal");
+  }
   holdActionFrame = window.requestAnimationFrame(tickHoldAction);
 }
+
+function beginPackPrimaryButtonHold(event) {
+  if (!openingPack || !shouldAllowPackRevealSkip(openingPack)) return;
+  if (event.button !== undefined && event.button !== 0) return;
+  const holdAction = getSpacebarHoldAction();
+  if (!holdAction) return;
+  startHoldAction(holdAction);
+}
+
+function endPackPrimaryButtonHold() {
+  if (!activeHoldAction) return;
+  stopHoldAction(true);
+}
+
+revealAllCardsEl?.addEventListener("pointerdown", beginPackPrimaryButtonHold);
+revealAllCardsEl?.addEventListener("pointerup", endPackPrimaryButtonHold);
+revealAllCardsEl?.addEventListener("pointercancel", endPackPrimaryButtonHold);
+revealAllCardsEl?.addEventListener("pointerleave", endPackPrimaryButtonHold);
 
 document.addEventListener("pointermove", (event) => {
   if (event.pointerType === "touch") {

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hoops Card Club</title>
+  <meta name="description" content="Open NBA card packs, track sets, browse players, and build your basketball card club across packs, collections, profile milestones, and rewards.">
   <link rel="preconnect" href="https://cdn.nba.com" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -23,11 +24,11 @@
       </div>
 
       <nav class="nav-tabs" id="navTabs" aria-label="Primary">
-        <button class="tab-btn active" data-view="packs">Packs</button>
-        <button class="tab-btn" data-view="collections">Collections</button>
-        <button class="tab-btn" data-view="players">Players</button>
-        <button class="tab-btn" data-view="profile">Profile</button>
-        <button class="tab-btn" data-view="stats">Stats</button>
+        <button class="tab-btn active" data-view="packs" type="button">Packs</button>
+        <button class="tab-btn" data-view="collections" type="button">Collections</button>
+        <button class="tab-btn" data-view="players" type="button">Players</button>
+        <button class="tab-btn" data-view="profile" type="button">Profile</button>
+        <button class="tab-btn" data-view="stats" type="button">Stats</button>
       </nav>
 
       <div class="topbar-side">
@@ -35,7 +36,7 @@
           <button class="daily-trigger" id="dailyChallengeTrigger" type="button" aria-expanded="false" aria-controls="dailyChallengePanel">
             <span class="daily-trigger-copy">
               <span class="daily-trigger-label">Dailies</span>
-              <strong id="dailyChallengeProgress">0/3</strong>
+              <strong id="dailyChallengeProgress" aria-live="polite">0/3</strong>
             </span>
           </button>
           <div class="daily-popover panel" id="dailyChallengePanel" hidden>
@@ -175,7 +176,7 @@
   </div>
 
   <div class="modal-backdrop" id="packModal" hidden>
-    <div class="modal-shell panel" id="packModalShell">
+    <div class="modal-shell panel" id="packModalShell" role="dialog" aria-modal="true" aria-labelledby="revealTitle" aria-describedby="revealSubtitle">
       <button class="pack-modal-arrow prev" id="packModalPrev" type="button" aria-label="Previous pack">&lsaquo;</button>
       <button class="pack-modal-arrow next" id="packModalNext" type="button" aria-label="Next pack">&rsaquo;</button>
       <button class="icon-btn modal-close-icon pack-modal-close-icon" id="closePackModalIcon" type="button" aria-label="Close pack modal">&times;</button>
@@ -186,8 +187,8 @@
           <p class="pack-copy" id="revealSubtitle">Open a pack to begin.</p>
         </div>
         <div class="modal-actions">
-          <button class="secondary-btn" id="sellAllDuplicates" type="button">Sell All Duplicates</button>
-          <span class="reward-pill" id="revealProgress">0 / 0 Revealed</span>
+          <button class="secondary-btn pack-sell-all-btn" id="sellAllDuplicates" type="button">Sell All Duplicates</button>
+          <span class="reward-pill" id="revealProgress" role="status" aria-live="polite">0 / 0 Revealed</span>
           <button class="secondary-btn" id="closePackModal" type="button">Close</button>
         </div>
       </div>
@@ -201,25 +202,40 @@
           <button class="action-btn" id="openAnotherPack" type="button">Open New Pack</button>
           <div class="modal-pack-meta" id="modalPackMeta"></div>
         </div>
-        <button class="secondary-btn" id="revealAllCards" type="button">Skip Reveal</button>
+        <button class="action-btn hold-action-btn" id="revealAllCards" type="button">Skip Reveal</button>
       </div>
     </div>
   </div>
 
   <div class="card-preview-backdrop" id="cardPreviewModal" hidden>
-    <div class="card-preview-shell">
+    <div class="card-preview-shell" role="dialog" aria-modal="true" aria-labelledby="cardPreviewDialogTitle" aria-describedby="cardPreviewHint">
+      <h2 class="visually-hidden" id="cardPreviewDialogTitle">Card Preview</h2>
       <div class="card-preview-stage-shell" id="cardPreviewStageShell">
         <button class="card-preview-nav prev" id="cardPreviewPrev" type="button" aria-label="Previous set card" hidden>&lsaquo;</button>
         <div class="card-preview-stage" id="cardPreviewStage"></div>
         <button class="card-preview-nav next" id="cardPreviewNext" type="button" aria-label="Next set card" hidden>&rsaquo;</button>
       </div>
       <div class="card-preview-meta" id="cardPreviewMeta"></div>
-      <p class="card-preview-hint" id="cardPreviewHint">Click anywhere outside the card to close.</p>
+      <p class="card-preview-hint" id="cardPreviewHint" aria-live="polite">Click anywhere outside the card to close.</p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop pack-sellout-backdrop" id="packSelloutModal" hidden>
+    <div class="pack-sellout-shell panel" role="dialog" aria-modal="true" aria-labelledby="packSelloutTitle" aria-describedby="packSelloutSubtitle">
+      <div class="section-copy">
+        <span class="eyebrow accent">Pack Cleared</span>
+        <h3 id="packSelloutTitle">All duplicates sold</h3>
+        <p class="pack-copy" id="packSelloutSubtitle">There are no cards left in this pack. Choose what to do next.</p>
+      </div>
+      <div class="pack-sellout-actions">
+        <button class="secondary-btn" id="packSelloutGoToPacks" type="button">Go to Packs</button>
+        <button class="action-btn" id="packSelloutOpenNewPack" type="button">Open New Pack</button>
+      </div>
     </div>
   </div>
 
   <div class="modal-backdrop completion-backdrop" id="setCompletionModal" hidden>
-    <div class="completion-shell panel">
+    <div class="completion-shell panel" role="dialog" aria-modal="true" aria-labelledby="setCompletionTitle" aria-describedby="setCompletionSubtitle">
       <div class="completion-head">
         <div class="section-copy">
           <span class="eyebrow accent" id="setCompletionEyebrow">Set Complete</span>
@@ -236,7 +252,7 @@
   </div>
 
   <div class="modal-backdrop mobile-sheet-backdrop" id="dailyChallengeMobileModal" hidden>
-    <div class="mobile-sheet-shell panel">
+    <div class="mobile-sheet-shell panel" role="dialog" aria-modal="true" aria-labelledby="dailyChallengeMobileTitle">
       <div class="mobile-sheet-head">
         <div class="section-copy">
           <span class="eyebrow accent">Daily Challenges</span>
@@ -255,7 +271,7 @@
   </div>
 
   <div class="modal-backdrop mobile-sheet-backdrop" id="playerControlsModal" hidden>
-    <div class="mobile-sheet-shell panel player-controls-modal-shell">
+    <div class="mobile-sheet-shell panel player-controls-modal-shell" role="dialog" aria-modal="true" aria-labelledby="playerControlsModalTitle" aria-describedby="playerControlsModalSubtitle">
       <div class="mobile-sheet-head">
         <div class="section-copy">
           <span class="eyebrow accent" id="playerControlsModalEyebrow">Player Controls</span>
@@ -271,8 +287,29 @@
     </div>
   </div>
 
+  <div class="modal-backdrop team-picker-backdrop" id="playerTeamFilterModal" hidden>
+    <div class="team-picker-shell panel player-team-filter-shell" role="dialog" aria-modal="true" aria-labelledby="playerTeamFilterTitle" aria-describedby="playerTeamFilterDescription">
+      <div class="team-picker-head">
+        <div class="section-copy">
+          <span class="eyebrow accent">Team Filter</span>
+          <h3 id="playerTeamFilterTitle">Choose teams</h3>
+          <p class="pack-copy" id="playerTeamFilterDescription">Select one or more teams, then apply to return to player filters.</p>
+        </div>
+        <div class="modal-head-actions">
+          <span class="reward-pill" id="playerTeamFilterSummary">All Teams</span>
+          <button class="icon-btn modal-close-icon mobile-modal-close-icon" id="closePlayerTeamFilterModal" type="button" aria-label="Close team filter">&times;</button>
+        </div>
+      </div>
+      <div class="team-picker-grid" id="playerTeamFilterGrid"></div>
+      <div class="team-picker-actions">
+        <button class="secondary-btn" id="clearPlayerTeamFilter" type="button">Clear</button>
+        <button class="action-btn" id="applyPlayerTeamFilter" type="button">Apply Teams</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop daily-reward-backdrop" id="dailyRewardModal" hidden>
-    <div class="daily-reward-shell panel">
+    <div class="daily-reward-shell panel" role="dialog" aria-modal="true" aria-labelledby="dailyRewardTitle" aria-describedby="dailyRewardSubtitle">
       <div class="daily-reward-head">
         <div class="section-copy">
           <span class="eyebrow accent" id="dailyRewardEyebrow">Daily Complete</span>
@@ -289,7 +326,7 @@
   </div>
 
   <div class="modal-backdrop achievement-reward-backdrop" id="achievementRewardModal" hidden>
-    <div class="achievement-reward-shell panel">
+    <div class="achievement-reward-shell panel" role="dialog" aria-modal="true" aria-labelledby="achievementRewardTitle" aria-describedby="achievementRewardSubtitle">
       <div class="daily-reward-head">
         <div class="section-copy">
           <span class="eyebrow accent" id="achievementRewardEyebrow">Achievement Complete</span>
@@ -306,12 +343,12 @@
   </div>
 
   <div class="modal-backdrop team-picker-backdrop" id="favoriteTeamModal" hidden>
-    <div class="team-picker-shell panel">
+    <div class="team-picker-shell panel" role="dialog" aria-modal="true" aria-labelledby="favoriteTeamTitle" aria-describedby="favoriteTeamDescription">
       <div class="team-picker-head">
         <div class="section-copy">
           <span class="eyebrow accent">Favorite Team</span>
-          <h3>Pick your squad.</h3>
-          <p class="pack-copy">Set your favorite team for profile flair and team-specific achievements. You can change this later on your profile.</p>
+          <h3 id="favoriteTeamTitle">Pick your squad.</h3>
+          <p class="pack-copy" id="favoriteTeamDescription">Set your favorite team for profile flair and team-specific achievements. You can change this later on your profile.</p>
         </div>
         <div class="modal-head-actions">
           <button class="icon-btn modal-close-icon mobile-modal-close-icon" id="closeFavoriteTeamModalIcon" type="button" aria-label="Close favorite team picker">&times;</button>
@@ -326,7 +363,7 @@
   </div>
 
   <div class="modal-backdrop profile-editor-backdrop" id="profileShowcaseModal" hidden>
-    <div class="profile-editor-shell panel">
+    <div class="profile-editor-shell panel" role="dialog" aria-modal="true" aria-labelledby="profileShowcaseModalTitle" aria-describedby="profileShowcaseModalSubtitle">
       <div class="profile-editor-head">
         <div class="section-copy">
           <span class="eyebrow accent">Featured Cards</span>
@@ -344,12 +381,12 @@
   </div>
 
   <div class="modal-backdrop profile-editor-backdrop" id="profileBadgeModal" hidden>
-    <div class="profile-editor-shell panel badge-editor-shell">
+    <div class="profile-editor-shell panel badge-editor-shell" role="dialog" aria-modal="true" aria-labelledby="profileBadgeModalTitle" aria-describedby="profileBadgeModalSubtitle">
       <div class="profile-editor-head">
         <div class="section-copy">
           <span class="eyebrow accent">Badge Display</span>
-          <h3>Arrange highlighted badges</h3>
-          <p class="pack-copy">Choose a badge slot, then pick another earned badge to replace it. Used badges will swap positions.</p>
+          <h3 id="profileBadgeModalTitle">Arrange highlighted badges</h3>
+          <p class="pack-copy" id="profileBadgeModalSubtitle">Choose a badge slot, then pick another earned badge to replace it. Used badges will swap positions.</p>
         </div>
         <div class="modal-head-actions">
           <button class="secondary-btn profile-modal-close-btn" id="closeProfileBadgeModal" type="button">Close</button>
@@ -362,12 +399,12 @@
   </div>
 
   <div class="modal-backdrop profile-achievements-backdrop" id="profileAchievementsModal" hidden>
-    <div class="profile-achievements-shell panel">
+    <div class="profile-achievements-shell panel" role="dialog" aria-modal="true" aria-labelledby="profileAchievementsModalTitle" aria-describedby="profileAchievementsModalSubtitle">
       <div class="profile-editor-head">
         <div class="section-copy">
           <span class="eyebrow accent">Achievements</span>
-          <h3>Collection milestones</h3>
-          <p class="pack-copy">Track every milestone, reward tier, and unlock date.</p>
+          <h3 id="profileAchievementsModalTitle">Collection milestones</h3>
+          <p class="pack-copy" id="profileAchievementsModalSubtitle">Track every milestone, reward tier, and unlock date.</p>
         </div>
         <div class="modal-head-actions">
           <button class="secondary-btn profile-modal-close-btn" id="closeProfileAchievementsModal" type="button">Close</button>

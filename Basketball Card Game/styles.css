@@ -29,6 +29,7 @@
   --pack-card-width: calc(var(--game-card-width) + 18px);
   --game-card-height-ratio: 1.4;
   --game-card-art-ratio: 0.55;
+  --mobile-bottom-nav-safe-space: 0px;
   --shadow: 0 22px 58px rgba(0, 0, 0, 0.38);
   --shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.24);
   color-scheme: dark;
@@ -41,6 +42,18 @@
 
 [hidden] {
   display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 html,
@@ -112,6 +125,12 @@ button:disabled {
   opacity: 0.58;
 }
 
+:where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid rgba(122, 203, 255, 0.98);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(55, 164, 255, 0.18);
+}
+
 img {
   display: block;
   max-width: 100%;
@@ -122,7 +141,7 @@ img {
   min-height: 100vh;
   min-height: 100svh;
   margin: 0 auto;
-  padding: 0.85rem 0 1rem;
+  padding: 0.85rem 0 calc(1rem + var(--mobile-bottom-nav-safe-space));
   display: grid;
   gap: 0.85rem;
   grid-template-rows: auto 1fr;
@@ -606,6 +625,7 @@ img {
   height: 100%;
   overflow: auto;
   padding-right: 0.2rem;
+  padding-bottom: max(0.2rem, var(--mobile-bottom-nav-safe-space));
 }
 
 .view.active {
@@ -851,7 +871,8 @@ img {
     linear-gradient(180deg, rgba(17, 28, 49, 0.96), rgba(10, 17, 31, 0.98));
   color: var(--text);
   font: inherit;
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 
 .profile-inline-controls select:focus,
@@ -2339,7 +2360,8 @@ img {
 
 .collection-field input:focus,
 .collection-field select:focus {
-  outline: 0;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   border-color: rgba(55, 164, 255, 0.42);
   box-shadow:
     0 0 0 3px rgba(55, 164, 255, 0.14),
@@ -2478,6 +2500,56 @@ img {
   gap: 0.62rem;
 }
 
+.team-filter-disclosure {
+  display: grid;
+  gap: 0.58rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.team-filter-disclosure-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 0.92rem;
+  cursor: pointer;
+}
+
+.team-filter-disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+.team-filter-disclosure-summary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid rgba(219, 231, 249, 0.74);
+  border-bottom: 2px solid rgba(219, 231, 249, 0.74);
+  transform: rotate(45deg);
+  transition: transform 180ms ease;
+}
+
+.team-filter-disclosure[open] .team-filter-disclosure-summary::after {
+  transform: rotate(225deg);
+}
+
+.team-filter-disclosure-meta {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: rgba(211, 225, 255, 0.8);
+}
+
+.team-filter-disclosure-body {
+  display: grid;
+  gap: 0.58rem;
+  padding: 0 0.92rem 0.92rem;
+}
+
 .team-logo-filter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
@@ -2512,6 +2584,10 @@ img {
     0 0 0 1px rgba(55, 164, 255, 0.08);
 }
 
+.team-logo-filter-name {
+  display: none;
+}
+
 .team-logo-filter-mark {
   position: relative;
   width: 100%;
@@ -2526,6 +2602,32 @@ img {
   object-fit: contain;
   filter: grayscale(1) saturate(0.1) opacity(0.68);
   transition: filter 180ms ease, transform 180ms ease, opacity 180ms ease;
+}
+
+#playerTeamFilterGrid .favorite-team-option {
+  min-height: 66px;
+  padding: 0.26rem 0.12rem 0.22rem;
+  gap: 0.14rem;
+}
+
+#playerTeamFilterGrid .favorite-team-option-logo {
+  width: 36px;
+  height: 36px;
+  padding: 0.04rem;
+  border-radius: 12px;
+  background: transparent;
+  border-color: transparent;
+}
+
+#playerTeamFilterGrid .favorite-team-option-logo::after {
+  inset: 12%;
+}
+
+#playerTeamFilterGrid .favorite-team-option-name {
+  font-size: 0.48rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .team-logo-filter-btn.active .team-logo-filter-mark img {
@@ -2663,7 +2765,7 @@ img {
   gap: 0.85rem;
   display: grid;
   align-content: start;
-  min-height: 276px;
+  min-height: 294px;
   position: relative;
   overflow: hidden;
   border-color: color-mix(in srgb, var(--team-primary, #6e85b7) 34%, rgba(255, 255, 255, 0.1));
@@ -2721,7 +2823,7 @@ img {
   right: 1rem;
   bottom: 1rem;
   width: auto;
-  min-height: 126px;
+  min-height: 134px;
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 0.48rem 0.38rem;
@@ -2736,19 +2838,25 @@ img {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 12px 24px rgba(4, 8, 14, 0.16);
+  overflow: hidden;
 }
 
 .collection-group-logo {
+  min-width: 0;
+  max-width: 100%;
   width: 100%;
   aspect-ratio: 1;
   display: grid;
   place-items: center;
   position: relative;
+  overflow: hidden;
 }
 
 .collection-group-logo img {
-  width: 76%;
-  height: 76%;
+  width: min(76%, 56px);
+  height: min(76%, 56px);
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   filter:
     drop-shadow(0 6px 12px rgba(5, 12, 24, 0.22))
@@ -2767,7 +2875,7 @@ img {
   display: grid;
   gap: 0.22rem;
   max-width: none;
-  padding-bottom: 8.6rem;
+  padding-bottom: 9.7rem;
 }
 
 .collection-group-card h3 {
@@ -3487,15 +3595,19 @@ img {
 
 .card-rarity-frame {
   position: absolute;
-  inset: 0;
+  inset: var(--card-rarity-frame-inset, 0.02rem);
   border-radius: inherit;
   pointer-events: none;
   z-index: 3;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .legend-card .card-rarity-frame,
-.blackmatter-card .card-rarity-frame {
-  inset: 0;
+.blackmatter-card .card-rarity-frame,
+.glass-showcase-card .card-rarity-frame,
+.curated-special-card .card-rarity-frame {
+  --card-rarity-frame-inset: 0.14rem;
   border-radius: inherit;
 }
 
@@ -3506,6 +3618,8 @@ img {
   overflow: visible;
   shape-rendering: geometricPrecision;
   text-rendering: geometricPrecision;
+  transform: translateZ(0);
+  contain: paint;
 }
 
 .card-rarity-border,
@@ -4122,13 +4236,14 @@ img {
   pointer-events: none;
   z-index: 2;
   background:
-    radial-gradient(circle at top center, rgba(255, 255, 255, 0.18) 0%, transparent 28%),
-    linear-gradient(120deg, transparent 18%, rgba(255, 255, 255, 0.08) 38%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.08) 62%, transparent 82%);
+    radial-gradient(circle at top center, rgba(255, 255, 255, 0.14) 0%, transparent 26%),
+    linear-gradient(120deg, transparent 18%, rgba(255, 255, 255, 0.05) 38%, rgba(255, 255, 255, 0.14) 50%, rgba(255, 255, 255, 0.05) 62%, transparent 82%);
   background-size: 100% 100%, 220% 100%;
   background-position: 50% 0%, -28% 50%;
   mix-blend-mode: screen;
-  opacity: 0.42;
+  opacity: 0.28;
   animation: mythic-surface-drift 15.5s ease-in-out infinite;
+  transition: opacity 420ms ease, transform 420ms ease, filter 420ms ease;
 }
 
 .curated-special-card .card-body {
@@ -4145,7 +4260,7 @@ img {
   box-shadow: none;
   backdrop-filter: none;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(245, 249, 255, 0.04) 20%, color-mix(in srgb, var(--team-primary, #6e85b7) 10%, rgba(20, 34, 58, 0.18)) 44%, color-mix(in srgb, var(--team-primary, #6e85b7) 12%, rgba(9, 16, 29, 0.56)) 72%, color-mix(in srgb, var(--team-primary, #6e85b7) 16%, rgba(6, 11, 20, 0.82)) 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(245, 249, 255, 0.03) 22%, color-mix(in srgb, var(--team-primary, #6e85b7) 8%, rgba(20, 34, 58, 0.12)) 46%, color-mix(in srgb, var(--team-primary, #6e85b7) 10%, rgba(9, 16, 29, 0.42)) 74%, color-mix(in srgb, var(--team-primary, #6e85b7) 14%, rgba(6, 11, 20, 0.7)) 100%);
 }
 
 .curated-special-card .player-name,
@@ -4195,7 +4310,7 @@ img {
 .curated-special-card .player-art-bg {
   background:
     linear-gradient(140deg, color-mix(in srgb, var(--team-primary, #6e85b7) 74%, rgba(248, 252, 255, 0.22)) 0%, color-mix(in srgb, var(--team-secondary, #9ab8ff) 22%, rgba(255, 255, 255, 0.06)) 46%, color-mix(in srgb, var(--team-art-end, #0f1d32) 88%, rgba(255, 255, 255, 0.04)) 100%);
-  opacity: 0.96;
+  opacity: 0.82;
 }
 
 .curated-special-card .player-art-bg::before {
@@ -4217,18 +4332,195 @@ img {
   z-index: 3;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 12%, rgba(245, 250, 255, 0.18) 0%, transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(248, 252, 255, 0.04) 20%, rgba(10, 18, 32, 0.12) 48%, rgba(8, 14, 24, 0.44) 72%, rgba(6, 10, 18, 0.82) 100%),
-    linear-gradient(124deg, transparent 16%, rgba(255, 255, 255, 0.06) 38%, rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0.04) 62%, transparent 84%);
+    radial-gradient(circle at 50% 12%, rgba(245, 250, 255, 0.1) 0%, transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(248, 252, 255, 0.01) 18%, rgba(10, 18, 32, 0.04) 46%, rgba(8, 14, 24, 0.14) 70%, rgba(6, 10, 18, 0.34) 100%),
+    linear-gradient(124deg, transparent 18%, rgba(255, 255, 255, 0.03) 38%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.02) 62%, transparent 82%);
   background-size: 100% 100%, 100% 100%, 220% 100%;
   background-position: 50% 0%, 50% 0%, -24% 50%;
   mix-blend-mode: normal, normal, screen;
-  opacity: 0.92;
+  opacity: 0.42;
   animation: mythic-card-flow 15.8s ease-in-out infinite;
 }
 
 .curated-special-card .player-art img {
-  filter: saturate(1.04) contrast(1.04);
+  filter: saturate(1.03) contrast(1.03) brightness(1.02);
+}
+
+.collection-card.sharpshooter-card,
+.reveal-card.sharpshooter-card {
+  --legend-frame-inset: 0.54rem;
+  display: block;
+  grid-template-rows: none;
+  padding: var(--legend-frame-inset);
+  min-height: var(--card-face-height);
+  height: var(--card-face-height);
+  position: relative;
+  overflow: hidden;
+}
+
+.sharpshooter-card {
+  position: relative;
+  display: block;
+  padding: var(--legend-frame-inset, 0.54rem);
+  border-radius: 24px;
+  overflow: hidden;
+  contain: paint;
+  border: 1px solid color-mix(in srgb, var(--rarity-line, #8fc8ff) 48%, rgba(255, 255, 255, 0.24));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--team-primary, #6e85b7) 18%, rgba(246, 250, 255, 0.68)) 0%, color-mix(in srgb, var(--team-secondary, #9ab8ff) 16%, rgba(16, 28, 48, 0.24)) 52%, color-mix(in srgb, var(--team-primary, #6e85b7) 14%, rgba(6, 10, 18, 0.48)) 100%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--rarity-line, #8fc8ff) 20%, rgba(255, 255, 255, 0.18)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 16px 34px rgba(7, 12, 22, 0.22),
+    0 0 28px color-mix(in srgb, var(--rarity-glow, rgba(143, 200, 255, 0.24)) 32%, transparent);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.card-shell:has(> .sharpshooter-card)::before {
+  display: none;
+}
+
+.sharpshooter-card::before {
+  display: none;
+}
+
+.sharpshooter-card .card-rarity-frame {
+  --card-rarity-frame-inset: 0.14rem;
+  border-radius: inherit;
+}
+
+.collection-card.sharpshooter-card .player-art,
+.reveal-card.sharpshooter-card .player-art {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  aspect-ratio: auto;
+}
+
+.sharpshooter-card .player-art {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(12, 18, 30, 0.98) 0%, rgba(4, 7, 13, 0.99) 100%);
+  isolation: isolate;
+  z-index: 10;
+}
+
+.sharpshooter-card .player-art-core {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+}
+
+.sharpshooter-card .player-art-bg,
+.sharpshooter-card .player-art-bg::before,
+.sharpshooter-card .player-art-bg::after,
+.sharpshooter-card .player-art-backdrop,
+.sharpshooter-card .player-art::before,
+.sharpshooter-card .player-art::after {
+  display: none !important;
+}
+
+.sharpshooter-card .player-art-fallback {
+  display: none !important;
+}
+
+.sharpshooter-card .player-art img {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: block;
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal;
+  image-rendering: auto;
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+.sharpshooter-card .player-art.image-ready img,
+.sharpshooter-card .player-art.image-fallback img {
+  opacity: 1 !important;
+}
+
+.sharpshooter-card .player-art-overlay {
+  z-index: 13;
+}
+
+.sharpshooter-card .card-body {
+  position: absolute;
+  inset: var(--legend-frame-inset, 0.54rem);
+  z-index: 14;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.16rem;
+  padding: 1.14rem 0.92rem 0.9rem;
+  border-radius: 16px;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  background:
+    linear-gradient(180deg, rgba(6, 10, 18, 0) 0%, rgba(6, 10, 18, 0) 52%, rgba(7, 12, 20, 0.14) 68%, rgba(6, 10, 18, 0.62) 82%, rgba(5, 8, 14, 0.92) 100%);
+}
+
+.sharpshooter-card .rating-badge,
+.sharpshooter-card .card-rarity-frame {
+  z-index: 15;
+}
+
+.sharpshooter-card .player-name,
+.sharpshooter-card .card-team-name,
+.sharpshooter-card .card-detail-row,
+.sharpshooter-card .detail-pill-label {
+  color: var(--card-text, #f4f8ff);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+.sharpshooter-card .card-team-name {
+  opacity: 0.88;
+  font-weight: 800;
+  font-size: clamp(0.58rem, 0.5rem + 0.24vw, 0.78rem);
+  line-height: 1.04;
+}
+
+.sharpshooter-card .card-detail-row {
+  font-weight: 800;
+  margin-top: 0.08rem;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.3rem;
+}
+
+.sharpshooter-card .card-team-line {
+  gap: 0.34rem;
+  margin-bottom: 0;
+  min-height: 18px;
+}
+
+.sharpshooter-card .player-name {
+  min-height: 0;
+  font-size: clamp(0.82rem, 0.7rem + 0.4vw, 1.06rem);
+  line-height: 1.02;
+  margin-bottom: 0;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.sharpshooter-card .detail-pill-label {
+  font-size: clamp(0.34rem, 0.3rem + 0.12vw, 0.44rem);
+  color: color-mix(in srgb, var(--card-subtext, rgba(228, 237, 249, 0.78)) 88%, rgba(255, 255, 255, 0.2));
+}
+
+.sharpshooter-card .position-pill,
+.sharpshooter-card .jersey-pill,
+.sharpshooter-card .value-pill {
+  font-size: clamp(0.52rem, 0.48rem + 0.1vw, 0.62rem);
 }
 
 .curated-special-card .detail-pill-label {
@@ -4466,6 +4758,7 @@ img {
   mix-blend-mode: screen;
   opacity: 0.44;
   animation: mythic-surface-drift 15.5s ease-in-out infinite;
+  transition: opacity 420ms ease, transform 420ms ease, filter 420ms ease;
 }
 
 .glass-showcase-card .card-body {
@@ -4580,7 +4873,10 @@ img {
 }
 
 .legend-card .player-art-overlay .status-pill.copy-count,
-.blackmatter-card .player-art-overlay .status-pill.copy-count {
+.blackmatter-card .player-art-overlay .status-pill.copy-count,
+.glass-showcase-card .player-art-overlay .status-pill.copy-count,
+.curated-special-card .player-art-overlay .status-pill.copy-count,
+.sharpshooter-card .player-art-overlay .status-pill.copy-count {
   transition:
     opacity 520ms cubic-bezier(0.28, 0.08, 0.18, 1),
     transform 600ms cubic-bezier(0.22, 0.04, 0.16, 1),
@@ -4588,7 +4884,10 @@ img {
 }
 
 .card-shell.premium-hovering .legend-card,
-.card-shell.premium-hovering .blackmatter-card {
+.card-shell.premium-hovering .blackmatter-card,
+.card-shell.premium-hovering .glass-showcase-card,
+.card-shell.premium-hovering .curated-special-card,
+.card-shell.premium-hovering .sharpshooter-card {
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--rarity-line, #ffffff) 52%, rgba(255, 255, 255, 0.48)),
     0 26px 48px rgba(7, 10, 18, 0.28),
@@ -4596,19 +4895,29 @@ img {
 }
 
 .card-shell.premium-hovering .legend-card::after,
-.card-shell.premium-hovering .blackmatter-card::after {
+.card-shell.premium-hovering .blackmatter-card::after,
+.card-shell.premium-hovering .glass-showcase-card::before,
+.card-shell.premium-hovering .curated-special-card::before {
   opacity: 0.64;
   transform: scale(1.018);
   animation: premium-cinematic-sweep 4.8s linear infinite;
 }
 
+.card-shell.premium-hovering .sharpshooter-card .player-art img {
+  filter: saturate(1.04) contrast(1.04) brightness(1.03);
+}
+
 .card-shell.premium-hovering .legend-card .player-art::after,
-.card-shell.premium-hovering .blackmatter-card .player-art::after {
+.card-shell.premium-hovering .blackmatter-card .player-art::after,
+.card-shell.premium-hovering .glass-showcase-card .player-art::after,
+.card-shell.premium-hovering .curated-special-card .player-art::after {
   filter: saturate(1.08) brightness(1.04);
 }
 
 .card-shell.premium-cinematic .legend-card::after,
-.card-shell.premium-cinematic .blackmatter-card::after {
+.card-shell.premium-cinematic .blackmatter-card::after,
+.card-shell.premium-cinematic .glass-showcase-card::before,
+.card-shell.premium-cinematic .curated-special-card::before {
   opacity: 0.9;
   transform: scale(1.026);
 }
@@ -4616,7 +4925,13 @@ img {
 .card-shell.premium-cinematic .legend-card .card-team-line,
 .card-shell.premium-cinematic .legend-card .card-detail-row,
 .card-shell.premium-cinematic .blackmatter-card .card-team-line,
-.card-shell.premium-cinematic .blackmatter-card .card-detail-row {
+.card-shell.premium-cinematic .blackmatter-card .card-detail-row,
+.card-shell.premium-cinematic .glass-showcase-card .card-team-line,
+.card-shell.premium-cinematic .glass-showcase-card .card-detail-row,
+.card-shell.premium-cinematic .curated-special-card .card-team-line,
+.card-shell.premium-cinematic .curated-special-card .card-detail-row,
+.card-shell.premium-cinematic .sharpshooter-card .card-team-line,
+.card-shell.premium-cinematic .sharpshooter-card .card-detail-row {
   opacity: 0;
   transform: translateY(10px);
   max-height: 0;
@@ -4626,7 +4941,10 @@ img {
 }
 
 .card-shell.premium-cinematic .legend-card .player-art-overlay .status-pill.copy-count,
-.card-shell.premium-cinematic .blackmatter-card .player-art-overlay .status-pill.copy-count {
+.card-shell.premium-cinematic .blackmatter-card .player-art-overlay .status-pill.copy-count,
+.card-shell.premium-cinematic .glass-showcase-card .player-art-overlay .status-pill.copy-count,
+.card-shell.premium-cinematic .curated-special-card .player-art-overlay .status-pill.copy-count,
+.card-shell.premium-cinematic .sharpshooter-card .player-art-overlay .status-pill.copy-count {
   opacity: 0;
   transform: scale(0.82);
   filter: blur(3px);
@@ -4788,6 +5106,18 @@ img {
   flex-wrap: wrap;
   padding: 0 0.12rem 0.12rem;
   min-width: 0;
+}
+
+.pack-overview-card-shell .card-action-row,
+.pack-reveal-card-shell .card-action-row,
+.mobile-pack-overview-card-shell .card-action-row {
+  min-height: 2.45rem;
+  align-items: center;
+}
+
+.pack-reveal-action-row {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .card-action-meta {
@@ -5137,6 +5467,8 @@ img {
   max-height: calc(100svh - 1rem);
   padding: 1rem;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: start;
   gap: 0.9rem;
   overflow: hidden;
   background:
@@ -5191,6 +5523,13 @@ img {
   grid-template-columns: 1fr;
 }
 
+.team-filter-modal-toggle-btn {
+  width: 100%;
+  justify-content: center;
+  min-height: 46px;
+  border-radius: 18px;
+}
+
 #packModalShell {
   --pack-modal-nav-gutter: 4.7rem;
   grid-template-columns: minmax(0, 1fr);
@@ -5223,6 +5562,29 @@ img {
   min-height: 0;
   overflow: hidden;
   overscroll-behavior: contain;
+}
+
+#packModalShell.desktop-pack-overview-grid-mode > .reveal-stage {
+  overflow: hidden;
+  padding-bottom: 0.2rem;
+}
+
+#packModalShell.desktop-pack-overview-grid-mode > .reveal-stage > .pack-result-grid {
+  --game-card-width: 184px;
+  gap: 1.18rem;
+  padding-bottom: 0.16rem;
+}
+
+#packModalShell.desktop-pack-opening-grid-mode > .reveal-stage {
+  padding-top: 0.72rem;
+  padding-bottom: 0.08rem;
+}
+
+#packModalShell.desktop-pack-opening-grid-mode > .reveal-stage > .pack-result-grid {
+  --game-card-width: 184px;
+  gap: 1.08rem;
+  justify-content: center;
+  padding-bottom: 0;
 }
 
 #packModalShell > .modal-bottom-actions {
@@ -5415,7 +5777,7 @@ img {
   grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 0.8rem;
   padding: 0.15rem 0.1rem 0.25rem;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .favorite-team-option {
@@ -5510,6 +5872,14 @@ img {
   justify-content: space-between;
   align-items: center;
   gap: 0.6rem;
+}
+
+.player-team-filter-shell {
+  width: min(980px, calc(100vw - 1rem));
+}
+
+#playerTeamFilterModal {
+  z-index: 235;
 }
 
 .completion-head {
@@ -5757,6 +6127,20 @@ img {
   min-width: min(360px, 100%);
 }
 
+.modal-bottom-actions.opening-pack-primary-mode {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: start;
+  gap: 0.55rem;
+}
+
+.modal-bottom-actions.opening-pack-primary-mode .modal-repeat-stack {
+  min-width: 0;
+  width: min(360px, 100%);
+  justify-items: center;
+}
+
 .modal-bottom-actions.preview-open-mode #openAnotherPack {
   min-width: min(360px, 100%);
 }
@@ -5773,6 +6157,11 @@ img {
   opacity: 0;
   pointer-events: none;
   transition: opacity 160ms ease, width 70ms linear;
+}
+
+.hold-action-btn {
+  position: relative;
+  overflow: hidden;
 }
 
 .hold-action-btn.hold-active::before,
@@ -5829,8 +6218,84 @@ img {
   box-shadow: 0 14px 28px rgba(12, 24, 46, 0.18);
 }
 
+#sellAllDuplicates.pack-sell-all-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-width: 220px;
+  padding-inline: 1.18rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #fff2e6;
+  background: linear-gradient(135deg, rgba(255, 150, 86, 0.24), rgba(191, 68, 104, 0.2));
+  border-color: rgba(255, 184, 132, 0.34);
+  box-shadow:
+    0 16px 32px rgba(46, 18, 28, 0.24),
+    0 0 0 1px rgba(255, 214, 176, 0.06);
+}
+
+#sellAllDuplicates.pack-sell-all-btn .sell-all-duplicates-total {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.18rem 0.46rem;
+  border-radius: 999px;
+  background: rgba(16, 24, 40, 0.28);
+  border: 1px solid rgba(255, 238, 223, 0.16);
+  color: #fffaf4;
+  font-size: 0.78em;
+  line-height: 1;
+}
+
+#revealAllCards {
+  background: linear-gradient(135deg, rgba(64, 138, 255, 0.24), rgba(36, 94, 210, 0.18));
+  border-color: rgba(93, 156, 255, 0.32);
+  box-shadow: 0 14px 28px rgba(12, 24, 46, 0.18);
+  min-width: min(360px, 100%);
+}
+
 #openAnotherPack:hover:not(:disabled) {
   background: linear-gradient(135deg, rgba(74, 150, 255, 0.3), rgba(43, 106, 225, 0.24));
+}
+
+#sellAllDuplicates.pack-sell-all-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(255, 159, 98, 0.3), rgba(205, 75, 113, 0.24));
+}
+
+#revealAllCards:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(74, 150, 255, 0.3), rgba(43, 106, 225, 0.24));
+}
+
+.modal-bottom-actions.opening-pack-primary-mode #revealAllCards {
+  width: min(360px, 100%);
+  justify-self: center;
+}
+
+.pack-sellout-backdrop {
+  z-index: 190;
+}
+
+.pack-sellout-shell {
+  width: min(460px, calc(100vw - 1.4rem));
+  padding: 1.15rem;
+  display: grid;
+  gap: 0.95rem;
+  background:
+    radial-gradient(circle at top center, rgba(255, 163, 100, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(16, 24, 40, 0.98), rgba(9, 15, 28, 0.98));
+  border-color: rgba(255, 198, 151, 0.2);
+  box-shadow:
+    0 26px 80px rgba(2, 4, 10, 0.54),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.pack-sellout-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
 }
 
 .pack-modal-arrow {
@@ -5953,6 +6418,44 @@ img {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 18px 44px color-mix(in srgb, var(--team-primary) 18%, transparent);
+}
+
+.reveal-set-progress-row.compact-mobile {
+  gap: 0.34rem;
+}
+
+.reveal-set-progress-row.compact-mobile .reveal-set-progress-chip {
+  min-width: 136px;
+  max-width: 168px;
+}
+
+.reveal-set-progress-chip.summary,
+.reveal-daily-progress-chip.summary {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+}
+
+.reveal-set-progress-chip.summary {
+  max-width: 118px;
+  padding: 0.5rem 0.56rem;
+  border-style: dashed;
+}
+
+.reveal-progress-summary {
+  display: grid;
+  gap: 0.16rem;
+}
+
+.reveal-progress-summary strong {
+  font-size: 0.94rem;
+  line-height: 1;
+}
+
+.reveal-progress-summary span:last-child {
+  color: rgba(229, 237, 248, 0.76);
+  font-size: 0.68rem;
+  line-height: 1.18;
 }
 
 .reveal-set-progress-head {
@@ -6132,6 +6635,10 @@ img {
   color: color-mix(in srgb, var(--gold) 84%, #fff6dc 16%);
 }
 
+.reveal-daily-progress-row.compact-mobile .reveal-daily-progress-chip.summary {
+  max-width: min(100%, 248px);
+}
+
 .reveal-daily-progress-name {
   font-size: 0.76rem;
   font-weight: 700;
@@ -6159,6 +6666,7 @@ img {
   width: min(100%, 760px);
   padding: 0;
   display: grid;
+  gap: 0.2rem;
   place-items: center;
   background: none;
   border: 0;
@@ -6171,6 +6679,7 @@ img {
   display: grid;
   place-items: center;
   width: 100%;
+  margin-bottom: 0.45rem;
 }
 
 .card-preview-stage-shell.swipe-enabled {
@@ -6214,7 +6723,7 @@ img {
   justify-items: center;
   min-height: 0;
   width: 100%;
-  padding: 4.2rem 5rem 1rem;
+  padding: 4.2rem 5rem 1.5rem;
   overflow: visible;
   transition: transform 180ms cubic-bezier(0.2, 0.84, 0.2, 1), opacity 160ms ease;
   transform: translate3d(var(--card-preview-swipe-x, 0), var(--card-preview-swipe-y, 0), 0) rotate(var(--card-preview-swipe-rotate, 0deg));
@@ -6228,7 +6737,7 @@ img {
 .card-preview-meta {
   display: grid;
   gap: 0.28rem;
-  margin-top: clamp(0.75rem, 0.48rem + 0.9vw, 1.08rem);
+  margin-top: clamp(1.18rem, 0.78rem + 1.08vw, 1.62rem);
   justify-items: center;
   text-align: center;
   max-width: min(100%, 28rem);
@@ -6241,7 +6750,8 @@ img {
 }
 
 .card-preview-hint {
-  margin-top: clamp(0.42rem, 0.16rem + 0.8vw, 0.92rem);
+  margin-top: clamp(0.86rem, 0.38rem + 1vw, 1.28rem);
+  padding-bottom: 0.4rem;
   font-size: clamp(0.76rem, 0.72rem + 0.14vw, 0.84rem);
   line-height: 1.35;
   text-align: center;
@@ -6278,18 +6788,25 @@ img {
   justify-self: start;
 }
 
+.flip-card.keyboard-active {
+  box-shadow:
+    0 0 0 2px rgba(122, 203, 255, 0.94),
+    0 0 0 6px rgba(122, 203, 255, 0.14),
+    var(--shadow-soft);
+}
+
 .pack-result-grid.loading-assets .flip-card.assets-pending {
   pointer-events: none;
   filter: saturate(0.94);
 }
 
 .pack-result-grid.mobile-pack-flow {
-  --mobile-pack-reveal-card-width: min(72vw, 220px);
+  --mobile-pack-reveal-card-width: min(76vw, 232px);
   grid-template-columns: minmax(0, 1fr);
   justify-content: center;
   align-items: center;
   align-content: center;
-  min-height: calc((var(--mobile-pack-reveal-card-width) * var(--game-card-height-ratio)) + 4.8rem);
+  min-height: calc((var(--mobile-pack-reveal-card-width) * var(--game-card-height-ratio)) + 3.95rem);
   gap: 0;
 }
 
@@ -6383,15 +6900,15 @@ img {
 .mobile-pack-stage {
   --mobile-pack-next-card-opacity: 0;
   position: relative;
-  width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 2rem));
-  min-height: calc((var(--mobile-pack-reveal-card-width) * var(--game-card-height-ratio)) + 4.15rem);
+  width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 0.75rem));
+  min-height: calc((var(--mobile-pack-reveal-card-width) * var(--game-card-height-ratio)) + 3.3rem);
   margin: 0 auto;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   align-items: stretch;
   justify-items: center;
-  gap: 0.82rem;
-  padding: 0.28rem 0 0.44rem;
+  gap: 0.48rem;
+  padding: 0;
 }
 
 .mobile-pack-stack {
@@ -6539,7 +7056,14 @@ img {
 .mobile-pack-stage .blackmatter-card .card-rarity-frame,
 .mobile-pack-stage .glass-showcase-card .card-rarity-frame,
 .mobile-pack-stage .curated-special-card .card-rarity-frame {
-  inset: 0.04rem;
+  --card-rarity-frame-inset: 0.04rem;
+}
+
+.mobile-pack-stage .legend-card .card-rarity-frame,
+.mobile-pack-stage .blackmatter-card .card-rarity-frame,
+.mobile-pack-stage .glass-showcase-card .card-rarity-frame,
+.mobile-pack-stage .curated-special-card .card-rarity-frame {
+  --card-rarity-frame-inset: 0.09rem;
 }
 
 .mobile-pack-stage .card-rarity-text {
@@ -6667,13 +7191,13 @@ img {
 .mobile-pack-stage-footer {
   grid-row: 2;
   position: relative;
-  width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 0.4rem));
+  width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 0.1rem));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex-wrap: nowrap;
-  gap: 0.54rem;
+  gap: 0.34rem;
   z-index: 3;
   pointer-events: none;
 }
@@ -6683,9 +7207,9 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.38rem 0.72rem;
+  padding: 0.34rem 0.66rem;
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   line-height: 1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -7751,6 +8275,7 @@ img {
 
 @media (max-width: 820px) {
   :root {
+    --mobile-bottom-nav-safe-space: calc(5.9rem + env(safe-area-inset-bottom, 0px));
     --game-card-width: 178px;
   }
 
@@ -7762,7 +8287,6 @@ img {
     width: min(100% - 0.75rem, 1440px);
     min-height: auto;
     grid-template-rows: auto auto;
-    padding-bottom: calc(6.35rem + env(safe-area-inset-bottom, 0px));
   }
 
   .workspace,
@@ -7773,6 +8297,7 @@ img {
   .workspace {
     overflow: visible;
     min-height: auto;
+    padding-bottom: calc(0.9rem + var(--mobile-bottom-nav-safe-space));
   }
 
   .view,
@@ -7780,6 +8305,11 @@ img {
     height: auto;
     overflow: visible;
     padding-right: 0;
+  }
+
+  #profileView {
+    overflow-x: clip;
+    overflow-y: visible;
   }
 
   .topbar-side {
@@ -7890,6 +8420,66 @@ img {
     width: min(380px, calc(100vw - 1.6rem));
   }
 
+  .mobile-sheet-body .team-logo-filter-group.compact-mobile-picker {
+    gap: 0.45rem;
+  }
+
+  .mobile-sheet-body .team-logo-filter-group.compact-mobile-picker .team-logo-filter-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.38rem;
+  }
+
+  .mobile-sheet-body .team-logo-filter-btn.compact-mobile-picker-option {
+    aspect-ratio: auto;
+    min-height: 58px;
+    padding: 0.34rem 0.18rem;
+    border-radius: 16px;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 0.18rem;
+    border-color: color-mix(in srgb, var(--team-primary, #6e85b7) 28%, rgba(255, 255, 255, 0.12));
+    background:
+      radial-gradient(circle at top center, color-mix(in srgb, var(--team-secondary, #9ab8ff) 18%, rgba(255, 255, 255, 0.08)), transparent 42%),
+      linear-gradient(165deg, color-mix(in srgb, var(--team-primary, #6e85b7) 18%, rgba(13, 20, 34, 0.98)) 0%, rgba(9, 15, 27, 0.98) 100%);
+  }
+
+  .mobile-sheet-body .team-logo-filter-btn.compact-mobile-picker-option .team-logo-filter-mark {
+    width: 100%;
+    height: auto;
+  }
+
+  .mobile-sheet-body .team-logo-filter-btn.compact-mobile-picker-option .team-logo-filter-mark img {
+    width: 30px;
+    height: 30px;
+    filter: grayscale(1) saturate(0.1) opacity(0.72);
+  }
+
+  .mobile-sheet-body .team-logo-filter-btn.compact-mobile-picker-option .team-logo-filter-mark.fallback-only::before {
+    font-size: 0.52rem;
+    letter-spacing: 0.05em;
+  }
+
+  .mobile-sheet-body .team-logo-filter-btn.compact-mobile-picker-option.active .team-logo-filter-mark img {
+    filter: none;
+    opacity: 1;
+    transform: scale(1.03);
+  }
+
+  .mobile-sheet-body .team-logo-filter-btn.compact-mobile-picker-option .team-logo-filter-name {
+    display: block;
+    font-size: 0.44rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: rgba(238, 244, 255, 0.82);
+  }
+
+  .mobile-sheet-body .team-logo-filter-btn.compact-mobile-picker-option.active .team-logo-filter-name {
+    color: #f5f8ff;
+  }
+
   .clicker-stage {
     min-height: 0;
     padding: 1rem;
@@ -7983,11 +8573,12 @@ img {
 
   .collection-group-preview {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    min-height: 136px;
+    min-height: 146px;
+    padding: 0.74rem 0.72rem;
   }
 
   .collection-group-copy {
-    padding-bottom: 9.2rem;
+    padding-bottom: 10.35rem;
   }
 
   .profile-panel {
@@ -8004,7 +8595,7 @@ img {
   }
 
   .card-preview-stage {
-    padding: 3rem 2.2rem 0.8rem;
+    padding: 3rem 2.2rem 1.35rem;
   }
 
   .preview-card-shell {
@@ -8082,6 +8673,15 @@ img {
     padding-bottom: 0;
   }
 
+  .reveal-set-progress-row.compact-mobile .reveal-set-progress-chip {
+    min-width: 126px;
+    max-width: 152px;
+  }
+
+  .reveal-set-progress-row.compact-mobile .reveal-set-progress-chip.summary {
+    max-width: 104px;
+  }
+
   #packModalShell {
     height: calc(100vh - 0.7rem);
     height: calc(100svh - 0.7rem);
@@ -8130,6 +8730,14 @@ img {
     padding: 0.3rem 0.52rem;
     border-radius: 11px;
     font-size: 0.64rem;
+  }
+
+  #packModalShell.mobile-pack-modal-compact #revealAllCards {
+    min-height: 42px;
+    padding: 0.68rem 1rem;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    font-weight: 800;
   }
 
   #packModalShell .modal-head {
@@ -8232,7 +8840,7 @@ img {
   }
 
   .pack-result-grid.mobile-pack-flow {
-    --mobile-pack-reveal-card-width: min(67vw, 204px);
+    --mobile-pack-reveal-card-width: min(69vw, 214px);
     min-height: 0;
     height: 100%;
     align-self: stretch;
@@ -8240,12 +8848,12 @@ img {
   }
 
   .mobile-pack-stage {
-    width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 1.3rem));
+    width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 0.72rem));
     height: 100%;
     min-height: 0;
     max-height: 100%;
-    gap: 0.74rem;
-    padding: 0.12rem 0 0.3rem;
+    gap: 0.46rem;
+    padding: 0.04rem 0 0.14rem;
   }
 
   .mobile-pack-current-slot {
@@ -8373,7 +8981,7 @@ img {
   }
 
   .team-picker-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .profile-inline-controls select,
@@ -8398,7 +9006,7 @@ img {
 
   .card-preview-stage {
     grid-area: stage;
-    padding: 1.7rem 0.24rem 0.16rem;
+    padding: 1.7rem 0.24rem 0.82rem;
   }
 
   .card-preview-nav {
@@ -8434,7 +9042,14 @@ img {
   .blackmatter-card .card-rarity-frame,
   .glass-showcase-card .card-rarity-frame,
   .curated-special-card .card-rarity-frame {
-    inset: 0.12rem;
+    --card-rarity-frame-inset: 0.08rem;
+  }
+
+  .legend-card .card-rarity-frame,
+  .blackmatter-card .card-rarity-frame,
+  .glass-showcase-card .card-rarity-frame,
+  .curated-special-card .card-rarity-frame {
+    --card-rarity-frame-inset: 0.18rem;
   }
 
   .card-rarity-text {
@@ -8814,6 +9429,7 @@ img {
   .profile-editor-shell,
   .profile-achievements-shell {
     overflow-y: auto;
+    overflow-x: hidden;
     overscroll-behavior: contain;
     align-content: start;
   }
@@ -8841,6 +9457,55 @@ img {
     padding-right: 0;
   }
 
+  .team-picker-shell {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .team-picker-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.32rem;
+    padding: 0.02rem 0 0.14rem;
+  }
+
+  .favorite-team-option {
+    min-height: 58px;
+    padding: 0.34rem 0.18rem;
+    border-radius: 16px;
+    gap: 0.18rem;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 10px 20px rgba(0, 0, 0, 0.16);
+  }
+
+  .favorite-team-option-logo {
+    width: 30px;
+    height: 30px;
+    padding: 0.14rem;
+    border-radius: 10px;
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .favorite-team-option-logo::after {
+    inset: 16%;
+    filter: blur(5px);
+  }
+
+  .favorite-team-option-name {
+    font-size: 0.46rem;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  .favorite-team-option-logo.fallback-only::before {
+    font-size: 0.54rem;
+    letter-spacing: 0.05em;
+  }
+
   #packModalShell {
     --pack-modal-nav-gutter: 0.2rem;
     height: calc(100vh - 0.5rem);
@@ -8852,6 +9517,15 @@ img {
   .reveal-set-progress-row,
   .reveal-daily-progress-row {
     padding-inline: 0.1rem;
+  }
+
+  .reveal-set-progress-row.compact-mobile .reveal-set-progress-chip {
+    min-width: 118px;
+    max-width: 140px;
+  }
+
+  .reveal-set-progress-row.compact-mobile .reveal-set-progress-chip.summary {
+    max-width: 94px;
   }
 
   .reveal-stage {
@@ -8881,6 +9555,12 @@ img {
     font-size: 0.58rem;
   }
 
+  #packModalShell.mobile-pack-modal-compact #revealAllCards {
+    min-height: 40px;
+    padding: 0.62rem 0.92rem;
+    font-size: 0.76rem;
+  }
+
   .reveal-set-progress-chip {
     padding: 0.32rem 0.4rem;
     border-radius: 11px;
@@ -8902,7 +9582,7 @@ img {
   }
 
   .pack-result-grid.mobile-pack-flow {
-    --mobile-pack-reveal-card-width: min(64vw, 188px);
+    --mobile-pack-reveal-card-width: min(69vw, 208px);
     min-height: 0;
     height: 100%;
   }
@@ -8955,12 +9635,12 @@ img {
   }
 
   .mobile-pack-stage {
-    width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 1rem));
+    width: min(100%, calc(var(--mobile-pack-reveal-card-width) + 0.42rem));
     height: 100%;
     min-height: 0;
     max-height: 100%;
-    gap: 0.62rem;
-    padding: 0.08rem 0 0.24rem;
+    gap: 0.34rem;
+    padding: 0.02rem 0 0.08rem;
   }
 
   .mobile-pack-stage .card-rarity-frame,
@@ -8968,7 +9648,14 @@ img {
   .mobile-pack-stage .blackmatter-card .card-rarity-frame,
   .mobile-pack-stage .glass-showcase-card .card-rarity-frame,
   .mobile-pack-stage .curated-special-card .card-rarity-frame {
-    inset: 0.03rem;
+    --card-rarity-frame-inset: 0.03rem;
+  }
+
+  .mobile-pack-stage .legend-card .card-rarity-frame,
+  .mobile-pack-stage .blackmatter-card .card-rarity-frame,
+  .mobile-pack-stage .glass-showcase-card .card-rarity-frame,
+  .mobile-pack-stage .curated-special-card .card-rarity-frame {
+    --card-rarity-frame-inset: 0.08rem;
   }
 
   .mobile-pack-stage .card-rarity-text {
@@ -9026,13 +9713,13 @@ img {
   }
 
   .mobile-pack-stage-footer {
-    gap: 0.34rem;
+    gap: 0.26rem;
   }
 
   .mobile-pack-stage-chip,
   .mobile-pack-stage-hint {
-    font-size: 0.64rem;
-    padding: 0.28rem 0.52rem;
+    font-size: 0.61rem;
+    padding: 0.24rem 0.46rem;
   }
 
   #packModalShell.mobile-pack-overview-compact .modal-head {
@@ -9093,7 +9780,7 @@ img {
   }
 
   .card-preview-stage {
-    padding: 0.9rem 0.16rem 0.08rem;
+    padding: 0.9rem 0.16rem 0.7rem;
   }
 
   .card-preview-shell {
@@ -9129,7 +9816,14 @@ img {
   .blackmatter-card .card-rarity-frame,
   .glass-showcase-card .card-rarity-frame,
   .curated-special-card .card-rarity-frame {
-    inset: 0rem;
+    --card-rarity-frame-inset: 0.04rem;
+  }
+
+  .legend-card .card-rarity-frame,
+  .blackmatter-card .card-rarity-frame,
+  .glass-showcase-card .card-rarity-frame,
+  .curated-special-card .card-rarity-frame {
+    --card-rarity-frame-inset: 0.15rem;
   }
 
   .card-rarity-text {
@@ -9255,7 +9949,8 @@ img {
 
 #profileView {
   position: relative;
-  overflow: auto;
+  overflow-x: clip;
+  overflow-y: auto;
   isolation: isolate;
   border-radius: 28px;
 }
@@ -9283,18 +9978,21 @@ img {
 
 #profileView::after {
   z-index: 0;
-  inset: -18%;
-  opacity: 0.075;
+  inset: 0;
+  opacity: 0.058;
   background-image: var(--profile-logo-url), var(--profile-logo-url);
-  background-size: 180px 180px;
-  background-position: 0 0, 90px 90px;
+  background-size: 156px 156px;
+  background-position: 0 0, 78px 78px;
   background-repeat: repeat;
-  transform: rotate(45deg) scale(1.08);
+  transform: none;
 }
 
 .profile-workspace {
   position: relative;
   z-index: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .profile-page {
@@ -9302,12 +10000,16 @@ img {
   grid-template-columns: minmax(0, 1fr) 330px;
   gap: 0.9rem;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .profile-main-column,
 .profile-sidebar {
   display: grid;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .profile-surface {
@@ -9317,6 +10019,7 @@ img {
     linear-gradient(180deg, rgba(16, 24, 40, 0.72), rgba(9, 15, 28, 0.62));
   box-shadow: 0 20px 44px rgba(4, 8, 16, 0.28);
   backdrop-filter: blur(10px);
+  min-width: 0;
 }
 
 .profile-surface-head {
@@ -9467,9 +10170,10 @@ img {
 .profile-showcase-grid-steam {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--game-card-width), var(--game-card-width)));
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.82rem;
   width: 100%;
+  min-width: 0;
 }
 
 .profile-showcase-slot-card {
@@ -9638,6 +10342,7 @@ img {
   gap: 0.95rem;
   overflow: auto;
   padding-right: 0.15rem;
+  overflow-x: hidden;
 }
 
 .profile-editor-tool-grid {
@@ -9741,6 +10446,7 @@ img {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 0.58rem;
   overflow: auto;
+  overflow-x: hidden;
 }
 
 .profile-badge-picker-item {
@@ -9770,6 +10476,7 @@ img {
   overflow: auto;
   padding-right: 0.2rem;
   align-content: start;
+  overflow-x: hidden;
 }
 
 .profile-achievements-grid .achievement-row {
@@ -9804,6 +10511,15 @@ img {
 
 .profile-achievements-grid .achievement-meta-row {
   align-items: center;
+}
+
+.team-grid.players-mode > *,
+.team-detail-shell .team-cards > *,
+.profile-editor-grid > *,
+.profile-badge-picker-grid > *,
+.profile-showcase-grid-steam > * {
+  content-visibility: auto;
+  contain-intrinsic-size: 296px 212px;
 }
 
 @media (max-width: 1120px) {
