@@ -277,6 +277,7 @@ const CURATED_SPECIAL_CARD_SET_DEFINITIONS = [
       {
         slug: "isaiah-joe",
         ability: 94,
+        image: "https://substackcdn.com/image/fetch/$s_!ZHK6!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Ff450bbd9-8f86-42ab-acd7-095b83877581_960x640.jpeg",
         imagePosition: "50% 8%",
         imageScale: 1.08,
       },
@@ -3670,6 +3671,7 @@ function renderActiveCardPreview() {
     shellClass: "preview-card-shell",
   });
   scheduleRenderedPlayerImageStateSync(cardPreviewStageEl);
+  scheduleCardRarityFrameSync(cardPreviewStageEl);
 
   const totalPulls = Number(state.pullCounts?.[activeCardPreview.cardId] || 0);
   const firstUnboxedAt = Number(state.firstPullAt?.[activeCardPreview.cardId] || 0);
@@ -5681,32 +5683,73 @@ function buildTeamBrand(card, options = {}) {
 }
 
 let rarityFrameSequence = 0;
+let rarityFrameLayoutHandle = 0;
+const pendingRarityFrameSyncRoots = new Set();
 const RARITY_FRAME_LOOP_LENGTH = 446;
-const RARITY_FRAME_PATH_LENGTH = RARITY_FRAME_LOOP_LENGTH * 2;
-const RARITY_FRAME_TAG_CHAR_WIDTH = 2.05;
-const RARITY_FRAME_TAG_GAP = 16;
-const RARITY_FRAME_LOOP_SECONDS = 20;
+const RARITY_FRAME_REFERENCE_WIDTH = 100;
+const RARITY_FRAME_REFERENCE_HEIGHT = 140;
+const RARITY_FRAME_TAG_CHAR_WIDTH = 2.32;
+const RARITY_FRAME_TAG_GAP = 18;
+const RARITY_FRAME_LOOP_SECONDS = 34;
 const RARITY_FRAME_MAX_FPS = 30;
 const RARITY_FRAME_FRAME_INTERVAL_MS = 1000 / RARITY_FRAME_MAX_FPS;
-const RARITY_FRAME_VIEWBOX_WIDTH = 100;
-const RARITY_FRAME_VIEWBOX_HEIGHT = 140;
-const RARITY_FRAME_INSET = 2.08;
-const RARITY_FRAME_RADIUS = 13.72;
-const RARITY_FRAME_PATH_D = [
-  `M${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)} ${RARITY_FRAME_INSET.toFixed(2)}`,
-  `H${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,
-  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET).toFixed(2)} ${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)}`,
-  `V${(RARITY_FRAME_VIEWBOX_HEIGHT - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,
-  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${(RARITY_FRAME_VIEWBOX_WIDTH - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)} ${(RARITY_FRAME_VIEWBOX_HEIGHT - RARITY_FRAME_INSET).toFixed(2)}`,
-  `H${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)}`,
-  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${RARITY_FRAME_INSET.toFixed(2)} ${(RARITY_FRAME_VIEWBOX_HEIGHT - RARITY_FRAME_INSET - RARITY_FRAME_RADIUS).toFixed(2)}`,
-  `V${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)}`,
-  `A${RARITY_FRAME_RADIUS.toFixed(2)} ${RARITY_FRAME_RADIUS.toFixed(2)} 0 0 1 ${(RARITY_FRAME_INSET + RARITY_FRAME_RADIUS).toFixed(2)} ${RARITY_FRAME_INSET.toFixed(2)}`,
-  "Z",
-].join(" ");
-const RARITY_FRAME_DOUBLE_PATH_D = `${RARITY_FRAME_PATH_D} ${RARITY_FRAME_PATH_D}`;
+const RARITY_FRAME_DEFAULT_TRACK_GAP_PX = 3;
 
-function getRarityFrameSlotCount(label) {
+function parseCssLengthPx(value, contextElement = document.documentElement) {
+  const raw = String(value ?? "").trim();
+  if (!raw || raw === "auto") return 0;
+  const normalized = raw.split(/\s+/)[0];
+  const numeric = Number.parseFloat(normalized);
+  if (!Number.isFinite(numeric)) return 0;
+  if (normalized.endsWith("rem")) {
+    return numeric * parseCssLengthPx(window.getComputedStyle(document.documentElement).fontSize);
+  }
+  if (normalized.endsWith("em")) {
+    return numeric * parseCssLengthPx(window.getComputedStyle(contextElement || document.documentElement).fontSize);
+  }
+  return numeric;
+}
+
+function buildRoundedRectPathData(width, height, inset, radius) {
+  const safeWidth = Math.max(0, width);
+  const safeHeight = Math.max(0, height);
+  const safeInset = Math.max(0, Math.min(inset, safeWidth / 2, safeHeight / 2));
+  const maxRadius = Math.max(
+    0,
+    Math.min(radius, (safeWidth - (safeInset * 2)) / 2, (safeHeight - (safeInset * 2)) / 2),
+  );
+
+  if (!(maxRadius > 0)) {
+    return [
+      `M${safeInset.toFixed(3)} ${safeInset.toFixed(3)}`,
+      `H${(safeWidth - safeInset).toFixed(3)}`,
+      `V${(safeHeight - safeInset).toFixed(3)}`,
+      `H${safeInset.toFixed(3)}`,
+      "Z",
+    ].join(" ");
+  }
+
+  return [
+    `M${(safeInset + maxRadius).toFixed(3)} ${safeInset.toFixed(3)}`,
+    `H${(safeWidth - safeInset - maxRadius).toFixed(3)}`,
+    `A${maxRadius.toFixed(3)} ${maxRadius.toFixed(3)} 0 0 1 ${(safeWidth - safeInset).toFixed(3)} ${(safeInset + maxRadius).toFixed(3)}`,
+    `V${(safeHeight - safeInset - maxRadius).toFixed(3)}`,
+    `A${maxRadius.toFixed(3)} ${maxRadius.toFixed(3)} 0 0 1 ${(safeWidth - safeInset - maxRadius).toFixed(3)} ${(safeHeight - safeInset).toFixed(3)}`,
+    `H${(safeInset + maxRadius).toFixed(3)}`,
+    `A${maxRadius.toFixed(3)} ${maxRadius.toFixed(3)} 0 0 1 ${safeInset.toFixed(3)} ${(safeHeight - safeInset - maxRadius).toFixed(3)}`,
+    `V${(safeInset + maxRadius).toFixed(3)}`,
+    `A${maxRadius.toFixed(3)} ${maxRadius.toFixed(3)} 0 0 1 ${(safeInset + maxRadius).toFixed(3)} ${safeInset.toFixed(3)}`,
+    "Z",
+  ].join(" ");
+}
+
+function getRarityFrameScale(width, height) {
+  const widthScale = width / RARITY_FRAME_REFERENCE_WIDTH;
+  const heightScale = height / RARITY_FRAME_REFERENCE_HEIGHT;
+  return Math.max(0.0001, Math.min(widthScale, heightScale));
+}
+
+function getRarityFrameSlotCount(label, normalizedLoopLength = RARITY_FRAME_LOOP_LENGTH) {
   const compactViewport = typeof window !== "undefined" && window.matchMedia("(max-width: 620px)").matches;
   const ultraCompactViewport = typeof window !== "undefined" && window.matchMedia("(max-width: 430px)").matches;
   const slotScale = ultraCompactViewport ? 1.78 : compactViewport ? 1.58 : 1;
@@ -5714,38 +5757,130 @@ function getRarityFrameSlotCount(label) {
     24,
     ((label.length * RARITY_FRAME_TAG_CHAR_WIDTH) + RARITY_FRAME_TAG_GAP) * slotScale,
   );
-  return Math.max(10, Math.floor(RARITY_FRAME_LOOP_LENGTH / slotWidth));
+  return Math.max(10, Math.floor(normalizedLoopLength / slotWidth));
 }
 
 function buildRarityFrame(label) {
-  const text = label.toUpperCase();
-  const slotCount = getRarityFrameSlotCount(text);
-  const slotSize = RARITY_FRAME_LOOP_LENGTH / slotCount;
+  const text = String(label || "Card").toUpperCase();
   const frameId = `rarity-frame-${++rarityFrameSequence}`;
-  const labels = Array.from({ length: slotCount }, (_, index) => {
+  return `
+    <div class="card-rarity-frame" data-rarity-frame-label="${escapeHtml(text)}" data-rarity-path-id="${frameId}" aria-hidden="true">
+      <svg class="card-rarity-svg" viewBox="0 0 ${RARITY_FRAME_REFERENCE_WIDTH} ${RARITY_FRAME_REFERENCE_HEIGHT}" preserveAspectRatio="none" focusable="false">
+        <path class="card-rarity-border"></path>
+        <path id="${frameId}" class="card-rarity-path"></path>
+        <g class="card-rarity-labels"></g>
+      </svg>
+    </div>
+  `;
+}
+
+function applyCardRarityFrameOffset(card, offset = Number(card?.dataset?.rarityFrameOffset || 0)) {
+  const textPaths = getCardRarityTextPaths(card);
+  if (!textPaths.length) return;
+  textPaths.forEach((textPath) => {
+    const baseOffset = Number(textPath.dataset.baseOffset || 0);
+    textPath.setAttribute("startOffset", (baseOffset + offset).toFixed(3));
+  });
+}
+
+function syncCardRarityFrameLayout(frame) {
+  if (!(frame instanceof Element)) return;
+  const card = frame.closest(".collection-card, .reveal-card");
+  if (!card) return;
+  const svg = frame.querySelector(".card-rarity-svg");
+  const path = frame.querySelector(".card-rarity-path");
+  const border = frame.querySelector(".card-rarity-border");
+  const labelGroup = frame.querySelector(".card-rarity-labels");
+  if (!(svg instanceof SVGElement) || !(path instanceof SVGPathElement) || !(labelGroup instanceof SVGGElement)) return;
+
+  const frameStyles = window.getComputedStyle(frame);
+  const cardStyles = window.getComputedStyle(card);
+  const width = parseCssLengthPx(frameStyles.width, frame);
+  const height = parseCssLengthPx(frameStyles.height, frame);
+  if (!(width > 0) || !(height > 0)) return;
+
+  const frameInsets = [
+    parseCssLengthPx(frameStyles.top, frame),
+    parseCssLengthPx(frameStyles.right, frame),
+    parseCssLengthPx(frameStyles.bottom, frame),
+    parseCssLengthPx(frameStyles.left, frame),
+  ].filter((value) => Number.isFinite(value) && value >= 0);
+  const frameInset = frameInsets.length
+    ? frameInsets.reduce((sum, value) => sum + value, 0) / frameInsets.length
+    : 0;
+  const trackGap = parseCssLengthPx(frameStyles.getPropertyValue("--card-rarity-track-gap"), frame) || RARITY_FRAME_DEFAULT_TRACK_GAP_PX;
+  const outerRadius = parseCssLengthPx(cardStyles.borderTopLeftRadius, card);
+  const radius = Math.max(0, outerRadius - frameInset - trackGap);
+  const loopPathData = buildRoundedRectPathData(width, height, trackGap, radius);
+  const doublePathData = `${loopPathData} ${loopPathData}`;
+  const pathId = frame.dataset.rarityPathId || `rarity-frame-${++rarityFrameSequence}`;
+
+  frame.dataset.rarityPathId = pathId;
+  svg.setAttribute("viewBox", `0 0 ${width.toFixed(3)} ${height.toFixed(3)}`);
+  if (border instanceof SVGPathElement) {
+    border.setAttribute("d", doublePathData);
+  }
+  path.id = pathId;
+  path.setAttribute("d", doublePathData);
+
+  const loopLength = path.getTotalLength() / 2;
+  if (!(loopLength > 0)) return;
+
+  const scale = getRarityFrameScale(width, height);
+  const normalizedLoopLength = loopLength / scale;
+  const labelText = String(frame.dataset.rarityFrameLabel || "").trim().toUpperCase() || "CARD";
+  const slotCount = getRarityFrameSlotCount(labelText, normalizedLoopLength);
+  const slotSize = loopLength / slotCount;
+
+  labelGroup.innerHTML = Array.from({ length: slotCount }, (_, index) => {
     const baseOffset = ((index + 0.5) * slotSize).toFixed(3);
     return `
       <text class="card-rarity-text" text-anchor="middle">
         <textPath
           class="card-rarity-text-path"
-          href="#${frameId}"
+          href="#${pathId}"
           method="align"
           spacing="auto"
           startOffset="${baseOffset}"
           data-base-offset="${baseOffset}"
-        >${escapeHtml(text)}</textPath>
+        >${escapeHtml(labelText)}</textPath>
       </text>
     `;
   }).join("");
-  return `
-    <div class="card-rarity-frame" data-rarity-frame-cycle="${RARITY_FRAME_LOOP_LENGTH.toFixed(3)}" aria-hidden="true">
-      <svg class="card-rarity-svg" viewBox="0 0 100 140" preserveAspectRatio="none" focusable="false">
-        <path class="card-rarity-border" pathLength="${RARITY_FRAME_PATH_LENGTH}" d="${RARITY_FRAME_DOUBLE_PATH_D}"></path>
-        <path id="${frameId}" class="card-rarity-path" pathLength="${RARITY_FRAME_PATH_LENGTH}" d="${RARITY_FRAME_DOUBLE_PATH_D}"></path>
-        ${labels}
-      </svg>
-    </div>
-  `;
+
+  frame.dataset.rarityFrameCycle = loopLength.toFixed(3);
+  frame.dataset.rarityFrameReady = "true";
+  applyCardRarityFrameOffset(card);
+}
+
+function syncCardRarityFrameLayoutForCard(card) {
+  const frame = card?.querySelector?.(".card-rarity-frame");
+  if (frame) syncCardRarityFrameLayout(frame);
+}
+
+function collectCardRarityFrames(scope, frames) {
+  if (!scope || !(frames instanceof Set)) return;
+  if (scope instanceof Element) {
+    if (scope.matches(".card-rarity-frame")) frames.add(scope);
+    scope.querySelectorAll(".card-rarity-frame").forEach((frame) => frames.add(frame));
+    return;
+  }
+  if (typeof scope.querySelectorAll === "function") {
+    scope.querySelectorAll(".card-rarity-frame").forEach((frame) => frames.add(frame));
+  }
+}
+
+function scheduleCardRarityFrameSync(root = document) {
+  if (typeof window === "undefined") return;
+  pendingRarityFrameSyncRoots.add(root || document);
+  if (rarityFrameLayoutHandle) return;
+  rarityFrameLayoutHandle = window.requestAnimationFrame(() => {
+    rarityFrameLayoutHandle = 0;
+    const frames = new Set();
+    pendingRarityFrameSyncRoots.forEach((scope) => collectCardRarityFrames(scope, frames));
+    pendingRarityFrameSyncRoots.clear();
+    frames.forEach((frame) => syncCardRarityFrameLayout(frame));
+  });
 }
 
 function buildCollectionSummaryStrip(items) {
@@ -6298,6 +6433,7 @@ function renderPackArea() {
     }
     renderRevealSetProgress();
     renderRevealDailyProgress();
+    scheduleCardRarityFrameSync(packRevealGridEl);
     scheduleAccessibilityUiSync();
     return;
   }
@@ -6314,6 +6450,7 @@ function renderPackArea() {
     packRevealGridEl.innerHTML = buildPackPreviewStage(previewContext.pack, previewContext.sourceType, previewContext.index);
     renderRevealSetProgress();
     renderRevealDailyProgress();
+    scheduleCardRarityFrameSync(packRevealGridEl);
     scheduleAccessibilityUiSync();
     return;
   }
@@ -6347,6 +6484,7 @@ function renderPackArea() {
   }
   renderRevealSetProgress();
   renderRevealDailyProgress();
+  scheduleCardRarityFrameSync(packRevealGridEl);
   scheduleAccessibilityUiSync();
 }
 
@@ -7154,9 +7292,10 @@ function renderCollection() {
           <h3>No players match that search.</h3>
           <p>Try clearing one of the filters or turning on locked cards.</p>
         </div>
-      `;
+    `;
     scheduleRenderedPlayerImageStateSync(teamGridEl);
     scheduleCardBrowseAssetWarmup(filteredCards.filter((card) => hasOwnedCard(card.id)));
+    scheduleCardRarityFrameSync(teamGridEl);
     scheduleAccessibilityUiSync();
     return;
   }
@@ -7213,6 +7352,7 @@ function renderCollection() {
       button.addEventListener("click", () => openCollectionGroup(button.dataset.collectionOpen));
     });
     scheduleRenderedPlayerImageStateSync(teamGridEl);
+    scheduleCardRarityFrameSync(teamGridEl);
     scheduleAccessibilityUiSync();
     return;
   }
@@ -7276,6 +7416,7 @@ function renderCollection() {
       button.addEventListener("click", () => openCollectionTeam(button.dataset.teamOpen));
     });
     scheduleRenderedPlayerImageStateSync(teamGridEl);
+    scheduleCardRarityFrameSync(teamGridEl);
     scheduleAccessibilityUiSync();
     return;
   }
@@ -7372,6 +7513,7 @@ function renderCollection() {
 
   scheduleCardBrowseAssetWarmup(teamCards.filter((card) => hasOwnedCard(card.id)));
   scheduleRenderedPlayerImageStateSync(teamGridEl);
+  scheduleCardRarityFrameSync(teamGridEl);
 
   document.getElementById("collectionBack")?.addEventListener("click", closeCollectionTeam);
   document.getElementById("toggleSetBulkSell")?.addEventListener("click", toggleSetBulkSellMenu);
@@ -8294,6 +8436,7 @@ function renderProfile() {
   renderProfileShowcaseModal();
   renderProfileBadgeModal();
   renderProfileAchievementsModal();
+  scheduleCardRarityFrameSync(document);
   scheduleAccessibilityUiSync();
 }
 
@@ -8477,6 +8620,8 @@ function handleWindowResize() {
   if (isPackModalOpen && packRevealGridEl?.classList.contains("mobile-pack-overview-carousel")) {
     scheduleMobilePackOverviewCenter(true);
   }
+  stopRarityFrameMotion(false);
+  scheduleCardRarityFrameSync();
 }
 
 document.addEventListener("error", (event) => {
@@ -9237,12 +9382,9 @@ function getCardRarityFrameCycle(card) {
 }
 
 function resetCardRarityFrame(card) {
-  const textPaths = getCardRarityTextPaths(card);
-  if (!textPaths.length) return;
-  textPaths.forEach((textPath) => {
-    textPath.setAttribute("startOffset", textPath.dataset.baseOffset || "0");
-  });
+  if (!card) return;
   card.dataset.rarityFrameOffset = "0";
+  applyCardRarityFrameOffset(card, 0);
 }
 
 function stopRarityFrameMotion(reset = false) {
@@ -9283,20 +9425,19 @@ function animateRarityFrame(timestamp) {
   const step = cycleLength / RARITY_FRAME_LOOP_SECONDS;
   const nextOffset = (currentOffset + deltaSeconds * step) % cycleLength;
   activeRarityFrameCard.dataset.rarityFrameOffset = String(nextOffset);
-  textPaths.forEach((textPath) => {
-    const baseOffset = Number(textPath.dataset.baseOffset || 0);
-    textPath.setAttribute("startOffset", (baseOffset + nextOffset).toFixed(3));
-  });
+  applyCardRarityFrameOffset(activeRarityFrameCard, nextOffset);
   rarityFrameAnimationHandle = window.requestAnimationFrame(animateRarityFrame);
 }
 
 function startRarityFrameMotion(card) {
   if (activeRarityFrameCard === card) return;
   stopRarityFrameMotion(false);
+  syncCardRarityFrameLayoutForCard(card);
   const textPaths = getCardRarityTextPaths(card);
   if (!textPaths.length) return;
   activeRarityFrameCard = card;
   activeRarityFrameCard.dataset.rarityFrameOffset = activeRarityFrameCard.dataset.rarityFrameOffset || "0";
+  applyCardRarityFrameOffset(activeRarityFrameCard);
   rarityFrameLastTimestamp = 0;
   rarityFrameAnimationHandle = window.requestAnimationFrame(animateRarityFrame);
 }

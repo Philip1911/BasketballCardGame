@@ -3481,6 +3481,9 @@ img {
 .card-shell {
   --card-face-height: calc(var(--game-card-width) * var(--game-card-height-ratio));
   --card-art-height: calc(var(--card-face-height) * var(--game-card-art-ratio));
+  --card-shell-glow-spread-x: calc(var(--game-card-width) * 0.04);
+  --card-shell-glow-spread-top: calc(var(--card-face-height) * 0.06);
+  --card-shell-glow-spread-bottom: calc(var(--card-face-height) * 0.04);
   display: flex;
   flex-direction: column;
   gap: 0.32rem;
@@ -3498,8 +3501,15 @@ img {
 .card-shell::before {
   content: "";
   position: absolute;
-  inset: -6% -4% calc(0.32rem - 4%) -4%;
-  border-radius: 28px;
+  top: calc(-1 * var(--card-shell-glow-spread-top));
+  left: calc(-1 * var(--card-shell-glow-spread-x));
+  right: calc(-1 * var(--card-shell-glow-spread-x));
+  height: calc(
+    var(--card-face-height) +
+    var(--card-shell-glow-spread-top) +
+    var(--card-shell-glow-spread-bottom)
+  );
+  border-radius: calc(24px + var(--card-shell-glow-spread-x));
   pointer-events: none;
   z-index: 0;
   opacity: var(--card-shell-glow-opacity, 0.16);
@@ -3596,9 +3606,10 @@ img {
 .card-rarity-frame {
   position: absolute;
   inset: var(--card-rarity-frame-inset, 0.02rem);
+  --card-rarity-track-gap: 0.16rem;
   border-radius: inherit;
   pointer-events: none;
-  z-index: 3;
+  z-index: 6;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
@@ -3608,6 +3619,7 @@ img {
 .glass-showcase-card .card-rarity-frame,
 .curated-special-card .card-rarity-frame {
   --card-rarity-frame-inset: 0.14rem;
+  --card-rarity-track-gap: 0.2rem;
   border-radius: inherit;
 }
 
@@ -3625,20 +3637,35 @@ img {
 .card-rarity-border,
 .card-rarity-path {
   fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .card-rarity-border {
-  stroke: none;
+  stroke: color-mix(in srgb, var(--card-pattern-bg, rgba(9, 14, 24, 0.7)) 90%, rgba(7, 12, 20, 0.92));
+  stroke-width: 6px;
+  opacity: 0.88;
+}
+
+.card-rarity-path {
+  stroke: color-mix(in srgb, var(--card-pattern-line, rgba(255, 255, 255, 0.2)) 72%, rgba(255, 255, 255, 0.16));
+  stroke-width: 1px;
+  opacity: 0.9;
 }
 
 .card-rarity-text {
-  fill: var(--card-pattern-text, rgba(255, 255, 255, 0.78));
-  font-size: clamp(2.24px, 0.36vw, 3.3px);
-  font-weight: 800;
-  letter-spacing: clamp(0.16px, 0.1vw, 0.72px);
+  fill: color-mix(in srgb, var(--card-pattern-text, rgba(255, 255, 255, 0.96)) 98%, #ffffff);
+  stroke: color-mix(in srgb, var(--card-pattern-bg, rgba(7, 12, 20, 0.94)) 90%, rgba(4, 8, 14, 1));
+  stroke-width: 0.5px;
+  paint-order: stroke fill;
+  font-size: clamp(2.96px, 0.48vw, 4.28px);
+  font-weight: 900;
+  letter-spacing: clamp(0.16px, 0.1vw, 0.62px);
   text-transform: uppercase;
   dominant-baseline: middle;
   alignment-baseline: middle;
+  filter: drop-shadow(0 0 1.05px rgba(0, 0, 0, 0.42));
 }
 
 .card-rarity-text textPath {
@@ -3648,6 +3675,28 @@ img {
 .card-rarity-text-path {
   dominant-baseline: middle;
   text-rendering: geometricPrecision;
+}
+
+.legend-card .card-rarity-border {
+  stroke: color-mix(in srgb, rgba(255, 241, 196, 0.94) 86%, rgba(173, 121, 31, 0.72));
+  stroke-width: 6.2px;
+  opacity: 0.96;
+}
+
+.legend-card .card-rarity-path {
+  stroke: color-mix(in srgb, rgba(193, 133, 24, 0.82) 78%, rgba(255, 240, 188, 0.4));
+  stroke-width: 1.12px;
+  opacity: 0.98;
+}
+
+.legend-card .card-rarity-text {
+  fill: #6f4310;
+  stroke: rgba(255, 247, 219, 0.96);
+  stroke-width: 0.42px;
+  paint-order: stroke fill;
+  filter:
+    drop-shadow(0 0 1.2px rgba(255, 231, 162, 0.34))
+    drop-shadow(0 0 0.9px rgba(255, 255, 255, 0.2));
 }
 
 .collection-card.missing .card-rarity-frame,
@@ -3714,7 +3763,7 @@ img {
   aspect-ratio: auto;
   height: 100%;
   min-height: 0;
-  border-radius: 16px;
+  border-radius: inherit;
   background:
     radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.84) 0%, transparent 24%),
     linear-gradient(180deg, rgba(255, 244, 212, 0.2) 0%, transparent 26%),
@@ -3732,7 +3781,7 @@ img {
   --legend-frame-inset: 0.54rem;
   display: block;
   grid-template-rows: none;
-  padding: var(--legend-frame-inset);
+  padding: 0;
   min-height: var(--card-face-height);
   height: var(--card-face-height);
   position: relative;
@@ -3741,6 +3790,11 @@ img {
 
 .collection-card .player-art,
 .reveal-card .player-art {
+  --player-art-overlay-base-offset: 0.42rem;
+  --player-art-overlay-frame-offset: 0rem;
+  --player-art-overlay-bottom-frame-offset: var(--player-art-overlay-frame-offset);
+  --player-art-overlay-offset: calc(var(--player-art-overlay-base-offset) + var(--player-art-overlay-frame-offset));
+  --player-art-overlay-bottom-offset: calc(var(--player-art-overlay-base-offset) + var(--player-art-overlay-bottom-frame-offset));
   width: 100%;
   height: var(--card-art-height);
   min-height: 0;
@@ -3760,6 +3814,14 @@ img {
   height: 100%;
   min-height: 100%;
   aspect-ratio: auto;
+}
+
+.legend-card .player-art,
+.blackmatter-card .player-art,
+.glass-showcase-card .player-art,
+.curated-special-card .player-art,
+.sharpshooter-card .player-art {
+  --player-art-overlay-frame-offset: var(--legend-frame-inset, 0.54rem);
 }
 
 .player-art-bg {
@@ -3817,21 +3879,21 @@ img {
 
 .player-art-overlay {
   position: absolute;
-  top: 0.42rem;
-  z-index: 5;
+  top: var(--player-art-overlay-offset, 0.42rem);
+  z-index: 7;
 }
 
 .player-art-overlay.start {
-  left: 0.42rem;
+  left: var(--player-art-overlay-offset, 0.42rem);
 }
 
 .player-art-overlay.end {
-  right: 0.42rem;
+  right: var(--player-art-overlay-offset, 0.42rem);
 }
 
 .player-art-overlay.bottom-end {
-  right: 0.42rem;
-  bottom: 0.42rem;
+  right: var(--player-art-overlay-offset, 0.42rem);
+  bottom: var(--player-art-overlay-bottom-offset, 0.42rem);
   top: auto;
 }
 
@@ -4046,18 +4108,20 @@ img {
 .legend-card {
   position: relative;
   display: block;
-  padding: var(--legend-frame-inset, 0.54rem);
+  padding: 0;
   border-radius: 24px;
-  border: 1px solid rgba(246, 210, 116, 0.92);
+  border: 1px solid rgba(255, 228, 143, 0.96);
   overflow: hidden;
   contain: paint;
   background:
     linear-gradient(145deg, rgba(255, 248, 225, 0.98) 0%, rgba(245, 211, 123, 0.94) 52%, rgba(206, 155, 53, 0.98) 100%);
   box-shadow:
-    0 0 0 1px rgba(255, 244, 206, 0.52),
+    0 0 0 1px rgba(255, 248, 218, 0.72),
+    0 0 14px rgba(255, 223, 124, 0.34),
+    0 0 38px rgba(245, 203, 87, 0.26),
     inset 0 1px 0 rgba(255, 255, 255, 0.42),
     0 16px 34px rgba(7, 10, 18, 0.22),
-    0 0 32px rgba(241, 201, 108, 0.2);
+    0 0 54px rgba(241, 201, 108, 0.28);
   transition:
     box-shadow 620ms cubic-bezier(0.22, 0.04, 0.16, 1),
     border-color 560ms cubic-bezier(0.28, 0.08, 0.18, 1);
@@ -4179,8 +4243,10 @@ img {
 
 .legend-card.card-tilting {
   box-shadow:
-    0 0 0 1px rgba(247, 216, 132, 0.6),
-    0 22px 40px rgba(7, 10, 18, 0.24);
+    0 0 0 1px rgba(255, 234, 164, 0.82),
+    0 0 18px rgba(255, 220, 109, 0.34),
+    0 22px 40px rgba(7, 10, 18, 0.24),
+    0 0 44px rgba(247, 208, 92, 0.26);
 }
 
 .legend-card::after {
@@ -4208,7 +4274,7 @@ img {
 .curated-special-card {
   position: relative;
   display: block;
-  padding: var(--legend-frame-inset, 0.54rem);
+  padding: 0;
   border-radius: 24px;
   overflow: hidden;
   contain: paint;
@@ -4351,7 +4417,7 @@ img {
   --legend-frame-inset: 0.54rem;
   display: block;
   grid-template-rows: none;
-  padding: var(--legend-frame-inset);
+  padding: 0;
   min-height: var(--card-face-height);
   height: var(--card-face-height);
   position: relative;
@@ -4361,7 +4427,7 @@ img {
 .sharpshooter-card {
   position: relative;
   display: block;
-  padding: var(--legend-frame-inset, 0.54rem);
+  padding: 0;
   border-radius: 24px;
   overflow: hidden;
   contain: paint;
@@ -4387,6 +4453,7 @@ img {
 
 .sharpshooter-card .card-rarity-frame {
   --card-rarity-frame-inset: 0.14rem;
+  --card-rarity-track-gap: 0.2rem;
   border-radius: inherit;
 }
 
@@ -4403,7 +4470,7 @@ img {
   height: 100%;
   min-height: 0;
   position: relative;
-  border-radius: 16px;
+  border-radius: inherit;
   background:
     linear-gradient(180deg, rgba(12, 18, 30, 0.98) 0%, rgba(4, 7, 13, 0.99) 100%);
   isolation: isolate;
@@ -4537,7 +4604,7 @@ img {
 .blackmatter-card {
   position: relative;
   display: block;
-  padding: var(--legend-frame-inset, 0.54rem);
+  padding: 0;
   border-radius: 24px;
   border: 1px solid rgba(2, 4, 8, 0.98);
   overflow: hidden;
@@ -4723,7 +4790,7 @@ img {
 .glass-showcase-card {
   position: relative;
   display: block;
-  padding: var(--legend-frame-inset, 0.54rem);
+  padding: 0;
   border-radius: 24px;
   overflow: hidden;
   contain: paint;
@@ -4872,6 +4939,39 @@ img {
   font-size: clamp(0.52rem, 0.48rem + 0.1vw, 0.62rem);
 }
 
+.legend-card:not(.missing),
+.blackmatter-card:not(.missing),
+.glass-showcase-card:not(.missing),
+.curated-special-card:not(.missing),
+.sharpshooter-card:not(.missing) {
+  border-color: color-mix(in srgb, var(--rarity-line, #ffffff) 46%, transparent);
+}
+
+.legend-card:not(.missing) {
+  border-color: rgba(255, 228, 143, 0.82);
+}
+
+.blackmatter-card:not(.missing) {
+  border-color: rgba(5, 8, 13, 0.68);
+}
+
+.legend-card .player-art::after,
+.blackmatter-card .player-art::after,
+.glass-showcase-card .player-art::after,
+.curated-special-card .player-art::after {
+  clip-path: inset(0 round 24px);
+}
+
+.legend-card::before,
+.legend-card::after,
+.blackmatter-card::before,
+.blackmatter-card::after,
+.glass-showcase-card:not(.missing)::before,
+.curated-special-card:not(.missing)::before {
+  border-radius: calc(24px - var(--legend-frame-inset, 0.54rem));
+  clip-path: inset(0 round calc(24px - var(--legend-frame-inset, 0.54rem)));
+}
+
 .legend-card .player-art-overlay .status-pill.copy-count,
 .blackmatter-card .player-art-overlay .status-pill.copy-count,
 .glass-showcase-card .player-art-overlay .status-pill.copy-count,
@@ -4892,6 +4992,56 @@ img {
     0 0 0 1px color-mix(in srgb, var(--rarity-line, #ffffff) 52%, rgba(255, 255, 255, 0.48)),
     0 26px 48px rgba(7, 10, 18, 0.28),
     0 0 36px color-mix(in srgb, var(--rarity-glow, rgba(255, 255, 255, 0.24)) 62%, transparent);
+}
+
+.card-shell.premium-hovering .card-rarity-frame {
+  filter: saturate(1.08) contrast(1.16);
+}
+
+.card-shell.premium-hovering .card-rarity-border {
+  opacity: 0.98;
+  stroke-width: 6.6px;
+}
+
+.card-shell.premium-hovering .card-rarity-path {
+  opacity: 1;
+  stroke-width: 1.16px;
+}
+
+.card-shell.premium-hovering .card-rarity-text {
+  fill: color-mix(in srgb, var(--card-pattern-text, rgba(255, 255, 255, 0.98)) 98%, #ffffff);
+  stroke: color-mix(in srgb, var(--card-pattern-bg, rgba(5, 8, 14, 0.98)) 94%, rgba(3, 6, 12, 1));
+  stroke-width: 0.62px;
+  filter:
+    drop-shadow(0 0 1.4px rgba(0, 0, 0, 0.54))
+    drop-shadow(0 0 0.9px rgba(255, 255, 255, 0.18));
+}
+
+.card-shell.premium-hovering .legend-card {
+  box-shadow:
+    0 0 0 1px rgba(255, 241, 188, 0.92),
+    0 0 20px rgba(255, 227, 132, 0.42),
+    0 26px 48px rgba(7, 10, 18, 0.28),
+    0 0 58px rgba(246, 208, 93, 0.36);
+}
+
+.card-shell.premium-hovering .legend-card .card-rarity-border {
+  stroke: color-mix(in srgb, rgba(255, 244, 205, 0.98) 90%, rgba(174, 120, 24, 0.8));
+  stroke-width: 6.9px;
+}
+
+.card-shell.premium-hovering .legend-card .card-rarity-path {
+  stroke: color-mix(in srgb, rgba(176, 114, 12, 0.92) 84%, rgba(255, 235, 176, 0.48));
+  stroke-width: 1.22px;
+}
+
+.card-shell.premium-hovering .legend-card .card-rarity-text {
+  fill: #5c3303;
+  stroke: rgba(255, 250, 228, 0.98);
+  stroke-width: 0.56px;
+  filter:
+    drop-shadow(0 0 1.5px rgba(255, 229, 150, 0.42))
+    drop-shadow(0 0 1.1px rgba(0, 0, 0, 0.36));
 }
 
 .card-shell.premium-hovering .legend-card::after,
@@ -4963,8 +5113,8 @@ img {
   content: "";
   position: absolute;
   inset: var(--legend-frame-inset, 0.54rem);
-  border-radius: 16px;
-  clip-path: inset(0 round 16px);
+  border-radius: calc(24px - var(--legend-frame-inset, 0.54rem));
+  clip-path: inset(0 round calc(24px - var(--legend-frame-inset, 0.54rem)));
   pointer-events: none;
   z-index: 2;
   opacity: 0;
@@ -5391,7 +5541,7 @@ img {
 .player-art-overlay.bottom-end {
   display: flex;
   justify-content: flex-end;
-  max-width: calc(100% - 0.84rem);
+  max-width: calc(100% - (var(--player-art-overlay-offset, 0.42rem) * 2));
 }
 
 .modal-backdrop[hidden] {
@@ -7067,7 +7217,7 @@ img {
 }
 
 .mobile-pack-stage .card-rarity-text {
-  font-size: 2.08px;
+  font-size: 2.68px;
   letter-spacing: 0.12px;
 }
 
@@ -7129,21 +7279,8 @@ img {
   font-size: 0.32rem;
 }
 
-.mobile-pack-stage .player-art-overlay {
-  top: 0.34rem;
-}
-
-.mobile-pack-stage .player-art-overlay.start {
-  left: 0.34rem;
-}
-
-.mobile-pack-stage .player-art-overlay.end {
-  right: 0.34rem;
-}
-
-.mobile-pack-stage .player-art-overlay.bottom-end {
-  right: 0.34rem;
-  bottom: 0.34rem;
+.mobile-pack-stage .player-art {
+  --player-art-overlay-base-offset: 0.34rem;
 }
 
 .mobile-pack-stage .player-art-overlay .status-pill {
@@ -7649,7 +7786,6 @@ img {
       color-mix(in srgb, var(--team-primary, #6e85b7) 12%, rgba(10, 18, 30, 0.2)) 46%,
       color-mix(in srgb, var(--team-primary, #6e85b7) 16%, rgba(8, 14, 24, 0.5)) 100%
     );
-  backdrop-filter: blur(14px) saturate(1.08);
 }
 
 .collection-card.rarity-card-diamond:not(.missing):not(.glass-showcase-card) .player-art-bg,
@@ -9053,9 +9189,9 @@ img {
   }
 
   .card-rarity-text {
-    font-size: 2.5px;
-    font-weight: 700;
-    letter-spacing: 0.24px;
+    font-size: 3.28px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
   }
 
   .player-name,
@@ -9146,21 +9282,8 @@ img {
     font-size: 0.38rem;
   }
 
-  .player-art-overlay {
-    top: 0.26rem;
-  }
-
-  .player-art-overlay.start {
-    left: 0.26rem;
-  }
-
-  .player-art-overlay.end {
-    right: 0.26rem;
-  }
-
-  .player-art-overlay.bottom-end {
-    right: 0.26rem;
-    bottom: 0.26rem;
+  .player-art {
+    --player-art-overlay-base-offset: 0.26rem;
   }
 
   .player-art-overlay .status-pill {
@@ -9659,7 +9782,7 @@ img {
   }
 
   .mobile-pack-stage .card-rarity-text {
-    font-size: 1.98px;
+    font-size: 2.12px;
     letter-spacing: 0.1px;
   }
 
@@ -9683,21 +9806,8 @@ img {
     font-size: 0.31rem;
   }
 
-  .mobile-pack-stage .player-art-overlay {
-    top: 0.3rem;
-  }
-
-  .mobile-pack-stage .player-art-overlay.start {
-    left: 0.3rem;
-  }
-
-  .mobile-pack-stage .player-art-overlay.end {
-    right: 0.3rem;
-  }
-
-  .mobile-pack-stage .player-art-overlay.bottom-end {
-    right: 0.3rem;
-    bottom: 0.3rem;
+  .mobile-pack-stage .player-art {
+    --player-art-overlay-base-offset: 0.3rem;
   }
 
   .mobile-pack-stage .player-art-overlay .status-pill {
@@ -9827,9 +9937,9 @@ img {
   }
 
   .card-rarity-text {
-    font-size: 3px;
-    font-weight: 700;
-    letter-spacing: 0.16px;
+    font-size: 3.72px;
+    font-weight: 900;
+    letter-spacing: 0.14px;
   }
 
   .player-name,
@@ -9917,21 +10027,8 @@ img {
     font-size: 0.34rem;
   }
 
-  .player-art-overlay {
-    top: 0.22rem;
-  }
-
-  .player-art-overlay.start {
-    left: 0.22rem;
-  }
-
-  .player-art-overlay.end {
-    right: 0.22rem;
-  }
-
-  .player-art-overlay.bottom-end {
-    right: 0.22rem;
-    bottom: 0.22rem;
+  .player-art {
+    --player-art-overlay-base-offset: 0.22rem;
   }
 
   .player-art-overlay .status-pill {
