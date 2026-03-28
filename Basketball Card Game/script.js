@@ -9656,6 +9656,24 @@ revealAllCardsEl?.addEventListener("pointerdown", beginPackPrimaryButtonHold);
 revealAllCardsEl?.addEventListener("pointerup", endPackPrimaryButtonHold);
 revealAllCardsEl?.addEventListener("pointercancel", endPackPrimaryButtonHold);
 revealAllCardsEl?.addEventListener("pointerleave", endPackPrimaryButtonHold);
+revealAllCardsEl?.addEventListener("selectstart", (event) => {
+  event.preventDefault();
+});
+revealAllCardsEl?.addEventListener("dragstart", (event) => {
+  event.preventDefault();
+});
+
+document.addEventListener("selectstart", (event) => {
+  if (event.target instanceof Element && event.target.closest("button")) {
+    event.preventDefault();
+  }
+});
+
+document.addEventListener("dragstart", (event) => {
+  if (event.target instanceof Element && event.target.closest("button")) {
+    event.preventDefault();
+  }
+});
 
 document.addEventListener("pointermove", (event) => {
   if (event.pointerType === "touch") {

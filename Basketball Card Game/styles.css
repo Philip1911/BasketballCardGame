@@ -113,7 +113,23 @@ button {
   border: 0;
   cursor: pointer;
   color: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+button * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button::selection,
+button *::selection {
+  background: transparent;
+  color: inherit;
 }
 
 button:hover:not(:disabled) {
@@ -6278,14 +6294,15 @@ img {
 }
 
 .modal-bottom-actions.opening-pack-primary-mode {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
   gap: 0.55rem;
 }
 
 .modal-bottom-actions.opening-pack-primary-mode .modal-repeat-stack {
+  order: 1;
   min-width: 0;
   width: min(360px, 100%);
   justify-items: center;
@@ -6312,6 +6329,10 @@ img {
 .hold-action-btn {
   position: relative;
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 .hold-action-btn.hold-active::before,
@@ -6330,6 +6351,14 @@ img {
   gap: 0.48rem;
   min-width: min(320px, 100%);
   max-width: 100%;
+}
+
+.modal-repeat-stack .modal-pack-meta {
+  order: 1;
+}
+
+.modal-repeat-stack #openAnotherPack {
+  order: 2;
 }
 
 .modal-pack-meta[hidden] {
@@ -6420,8 +6449,9 @@ img {
 }
 
 .modal-bottom-actions.opening-pack-primary-mode #revealAllCards {
+  order: 2;
   width: min(360px, 100%);
-  justify-self: center;
+  align-self: center;
 }
 
 .pack-sellout-backdrop {
@@ -7199,6 +7229,12 @@ img {
 .mobile-pack-stage .flip-card::before,
 .mobile-pack-stage .flip-card::after {
   display: none;
+}
+
+.mobile-pack-stage .pack-reveal-card-shell .card-action-row {
+  display: none;
+  min-height: 0;
+  padding: 0;
 }
 
 .mobile-pack-stage .card-rarity-frame,
@@ -8874,6 +8910,7 @@ img {
     border-radius: 16px;
     font-size: 0.82rem;
     font-weight: 800;
+    margin-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
   }
 
   #packModalShell .modal-head {
@@ -9682,6 +9719,7 @@ img {
     min-height: 40px;
     padding: 0.62rem 0.92rem;
     font-size: 0.76rem;
+    margin-bottom: calc(0.48rem + env(safe-area-inset-bottom, 0px));
   }
 
   .reveal-set-progress-chip {
